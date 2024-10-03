@@ -1,9 +1,12 @@
 public enum NodeType
 {
-    Battle,
-    Shop,
-    Upgrade,
-    Rest,
-    Treasure,
+    None,
+    Inicio,
+    Combate,
+    GAMBLING,
+    Mana_Tamaño,
+    Revivir,
+    Random,
+    CoinFlip,
     Boss
 }

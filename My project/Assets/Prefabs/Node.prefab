@@ -118,3 +118,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efd3d5ad87b328a4282ec20e45755860, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inicioMaterial: {fileID: 2100000, guid: ed00bc62a2b6a354cbae5e387dc6ded2, type: 2}
+  combateMaterial: {fileID: 2100000, guid: 199d63e42916aef44a42ce73ee15fa12, type: 2}
+  gamblingMaterial: {fileID: 2100000, guid: 737c3945b1dde27459191339e0348913, type: 2}
+  "manaTama\xF1oMaterial": {fileID: 2100000, guid: 1d837e5e184277f42a8a79cff3c0023b, type: 2}
+  revivirMaterial: {fileID: 2100000, guid: c09b0bf247f4f7248bf8218df1d0d221, type: 2}
+  randomMaterial: {fileID: 2100000, guid: 7c30a4f30384de144822178904db794c, type: 2}
+  coinFlipMaterial: {fileID: 2100000, guid: 57595d583e98fa141b330a9e21262e56, type: 2}
+  bossMaterial: {fileID: 2100000, guid: 7997e6e964d8ee8439a71382eab301b1, type: 2}
+  visitedMaterial: {fileID: 0}
+  availableMaterial: {fileID: 0}
+  currentMaterial: {fileID: 0}

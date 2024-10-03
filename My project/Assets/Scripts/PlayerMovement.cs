@@ -1,116 +1,48 @@
+// PlayerMovement.cs
 using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
 
 public class PlayerMovement : MonoBehaviour
 {
     public MapNode currentNode;
-    public float moveSpeed = 5f;  // Velocidad de movimiento del jugador
+    public float moveSpeed = 5f;
 
-    private HashSet<MapNode> visitedNodes = new HashSet<MapNode>();
-
-    private void Start()
-    {
-        // El jugador será inicializado desde el MapGenerator
-    }
+    private bool isMoving = false;
+    private Vector3 targetPosition;
 
     public void InitializePlayer()
     {
-        if (currentNode != null)
+        // Colocar al jugador en la posición del nodo actual
+        transform.position = currentNode.position;
+    }
+
+    public void MoveToNode(MapNode targetNode)
+    {
+        if (currentNode.connectedNodes.Contains(targetNode))
         {
-            transform.position = currentNode.position;
-            MarkNodeAsVisited(currentNode);
-            UpdateNodeColors();
+            isMoving = true;
+            targetPosition = targetNode.position;
+            currentNode = targetNode;
+            Debug.Log($"Moviendo al jugador al nodo en posición {targetNode.position}");
         }
         else
         {
-            Debug.LogError("currentNode no está asignado en PlayerMovement.");
+            Debug.LogWarning("El nodo seleccionado no está conectado al nodo actual.");
         }
     }
 
-    public void MoveToNode(MapNode nextNode)
+    void Update()
     {
-        if (currentNode.connectedNodes.Contains(nextNode) && !visitedNodes.Contains(nextNode))
+        if (isMoving)
         {
-            // Verificar que el nodo está hacia adelante y no hacia atrás
-            if (nextNode.position.z >= currentNode.position.z)
+            // Mover al jugador hacia la posición objetivo
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+
+            if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
             {
-                currentNode = nextNode;
-                // Iniciar corrutina para mover al jugador suavemente
-                StopAllCoroutines();
-                StartCoroutine(MoveToPosition(currentNode.position));
-                MarkNodeAsVisited(currentNode);
-                UpdateNodeColors();
+                isMoving = false;
+                transform.position = targetPosition;
+                Debug.Log("El jugador ha llegado al nodo.");
             }
-            else
-            {
-                Debug.Log("No puedes moverte hacia atrás.");
-            }
-        }
-        else
-        {
-            Debug.Log("Movimiento no permitido.");
-        }
-    }
-
-    private IEnumerator MoveToPosition(Vector3 target)
-    {
-        while (Vector3.Distance(transform.position, target) > 0.01f)
-        {
-            transform.position = Vector3.Lerp(transform.position, target, moveSpeed * Time.deltaTime);
-            yield return null;
-        }
-        transform.position = target;
-    }
-
-    private void MarkNodeAsVisited(MapNode node)
-    {
-        visitedNodes.Add(node);
-        // Reducir la opacidad del nodo
-        NodeInteraction interaction = node.nodeObject.GetComponent<NodeInteraction>();
-        if (interaction != null)
-        {
-            interaction.SetVisited();
-        }
-    }
-
-    private void UpdateNodeColors()
-    {
-        // Restablecer el color de todos los nodos no visitados
-        MapGenerator mapGenerator = FindObjectOfType<MapGenerator>();
-        if (mapGenerator != null)
-        {
-            foreach (MapNode node in mapGenerator.allNodes)
-            {
-                if (!visitedNodes.Contains(node))
-                {
-                    NodeInteraction interaction = node.nodeObject.GetComponent<NodeInteraction>();
-                    if (interaction != null)
-                    {
-                        interaction.ResetColor();
-                    }
-                }
-            }
-        }
-
-        // Iluminar los nodos disponibles en verde
-        foreach (MapNode node in currentNode.connectedNodes)
-        {
-            if (!visitedNodes.Contains(node))
-            {
-                NodeInteraction interaction = node.nodeObject.GetComponent<NodeInteraction>();
-                if (interaction != null)
-                {
-                    interaction.SetAvailable();
-                }
-            }
-        }
-
-        // Iluminar el nodo actual en azul
-        NodeInteraction currentInteraction = currentNode.nodeObject.GetComponent<NodeInteraction>();
-        if (currentInteraction != null)
-        {
-            currentInteraction.SetCurrent();
         }
     }
 }
