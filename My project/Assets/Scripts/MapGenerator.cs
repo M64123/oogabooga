@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class MapGenerator : MonoBehaviour
 {
-    public int totalLevels = 10;             // Niveles totales del mapa
+    public int totalLevels = 17;             // Niveles totales del mapa
     public float nodeSpacingX = 2f;          // Espaciado horizontal base entre nodos
     public float nodeSpacingZ = 2f;          // Espaciado en el eje Z entre niveles
     public float xVariation = 0.5f;          // Variación máxima en X para los nodos
@@ -14,23 +14,30 @@ public class MapGenerator : MonoBehaviour
     [HideInInspector]
     public List<MapNode> allNodes = new List<MapNode>();  // Lista de todos los nodos generados
 
-    // Niveles de bifurcación y número de opciones en cada uno
-    private Dictionary<int, int> branchingLevels = new Dictionary<int, int>
+    // Lista de nodos por nivel según la estructura deseada
+    private List<int> nodesPerLevel = new List<int>
     {
-        { 2, 3 },  // En el nivel 2, hay 3 opciones
-        { 5, 4 },  // En el nivel 5, hay 4 opciones
-        { 8, 3 }   // En el nivel 8, hay 3 opciones
+        1, 1, 3, 3, 3, 1, 1, 3, 4, 4, 3, 1, 1, 3, 3, 3, 1
     };
 
-    // Niveles donde las bifurcaciones convergen
-    private HashSet<int> convergingLevels = new HashSet<int> { 4, 7 };
+    // Listas de niveles específicos para Boss y GAMBLING
+    private HashSet<int> bossLevels = new HashSet<int> { 6, 12, 17 };
+    private HashSet<int> gamblingLevels = new HashSet<int> { 2, 7, 13 };
 
-    // Mover levels fuera de GenerateMap() para que sea accesible en toda la clase
+    // Almacena los niveles generados
     private List<List<MapNode>> levels = new List<List<MapNode>>();
 
-    // Variables para controlar la generación de tipos de nodos según las reglas
-    private bool lastNodeWasGood = false;
-    private bool secondLastNodeWasGood = false;
+    // Diccionario para almacenar los nodos padres de cada nodo
+    private Dictionary<MapNode, List<MapNode>> parentNodes = new Dictionary<MapNode, List<MapNode>>();
+
+    // Listas de tipos de nodos
+    private List<NodeType> goodNodes = new List<NodeType> { NodeType.Revivir, NodeType.Mana_Tamaño };
+    private List<NodeType> badNodes = new List<NodeType> { NodeType.Combate, NodeType.CoinFlip };
+    private List<NodeType> neutralNodes = new List<NodeType> { NodeType.Random };
+
+    // Conteo de nodos buenos generados
+    private int manaNodeCount = 0;
+    private int revivirNodeCount = 0;
 
     void Start()
     {
@@ -42,12 +49,15 @@ public class MapGenerator : MonoBehaviour
         // Limpiar las listas por si se llama más de una vez
         levels.Clear();
         allNodes.Clear();
+        manaNodeCount = 0;
+        revivirNodeCount = 0;
+        parentNodes.Clear();
 
-        // Verificar que totalLevels es al menos 2
-        if (totalLevels < 2)
+        // Verificar que totalLevels coincide con nodesPerLevel
+        if (totalLevels != nodesPerLevel.Count)
         {
-            totalLevels = 2;
-            Debug.LogWarning("El total de niveles es menor que 2. Se ha ajustado a 2.");
+            totalLevels = nodesPerLevel.Count;
+            Debug.LogWarning("El total de niveles se ha ajustado para coincidir con nodesPerLevel.");
         }
 
         Debug.Log($"Generando mapa con {totalLevels} niveles.");
@@ -56,50 +66,16 @@ public class MapGenerator : MonoBehaviour
         for (int level = 0; level < totalLevels; level++)
         {
             List<MapNode> currentLevelNodes = new List<MapNode>();
-            int nodesAtLevel = 1;
+            int nodesAtLevel = nodesPerLevel[level];
 
-            // Verificar si es el último nivel
-            if (level == totalLevels - 1)
-            {
-                nodesAtLevel = 1;  // Último nivel siempre con un solo nodo (Boss)
-            }
-            // Verificar si es un nivel de bifurcación
-            else if (branchingLevels.ContainsKey(level))
-            {
-                nodesAtLevel = branchingLevels[level];
-            }
-            // Verificar si es un nivel de convergencia
-            else if (convergingLevels.Contains(level))
-            {
-                nodesAtLevel = 1;  // Convergencia a un solo camino
-            }
-            // Si no, mantener el número de nodos del nivel anterior
-            else if (level > 0)
-            {
-                if (levels.Count > 0)
-                {
-                    nodesAtLevel = levels[level - 1].Count;
-                    if (nodesAtLevel == 0)
-                    {
-                        nodesAtLevel = 1;
-                        Debug.LogWarning($"El nivel anterior ({level - 1}) no tiene nodos. Estableciendo nodesAtLevel a 1 en nivel {level}.");
-                    }
-                }
-                else
-                {
-                    nodesAtLevel = 1;
-                    Debug.LogWarning($"El nivel anterior no existe. Estableciendo nodesAtLevel a 1 en nivel {level}.");
-                }
-            }
-
-            Debug.Log($"Nivel {level}: Generando {nodesAtLevel} nodos.");
+            Debug.Log($"Nivel {level + 1}: Generando {nodesAtLevel} nodos.");
 
             List<float> nodePositionsX = new List<float>();
 
             // Generar posiciones X para los nodos
-            if (level == 0)
+            if (nodesAtLevel == 1)
             {
-                // Nodo inicial en X = 0
+                // Nodo único en X = 0
                 nodePositionsX.Add(0f);
             }
             else
@@ -127,10 +103,7 @@ public class MapGenerator : MonoBehaviour
                 float zPos = level * nodeSpacingZ;
                 Vector3 nodePos = new Vector3(xPos, 0, zPos);
 
-                // Asignar un tipo de evento al nodo
-                NodeType nodeType = GetNodeType(level, i);
-
-                MapNode newNode = CreateNode(nodePos, level, nodeType);
+                MapNode newNode = CreateNode(nodePos, level);
                 allNodes.Add(newNode);
                 currentLevelNodes.Add(newNode);
             }
@@ -138,41 +111,272 @@ public class MapGenerator : MonoBehaviour
             levels.Add(currentLevelNodes);
         }
 
-        // Después de generar todos los niveles
-        Debug.Log($"Total de nodos generados: {allNodes.Count}");
-
         // Conectar los nodos entre niveles adyacentes
-        for (int level = 0; level < totalLevels - 1; level++)
-        {
-            List<MapNode> currentLevelNodes = levels[level];
-            List<MapNode> nextLevelNodes = levels[level + 1];
+        ConnectNodes();
 
-            foreach (MapNode currentNode in currentLevelNodes)
-            {
-                // Determinar el número de conexiones (1 o 2)
-                int connections = Random.Range(1, 3); // 1 o 2 conexiones
-                List<MapNode> possibleConnections = GetPossibleConnections(currentNode, nextLevelNodes, connections);
+        // Asignar tipos a los nodos considerando los caminos
+        AssignNodeTypes();
 
-                if (possibleConnections.Count == 0)
-                {
-                    Debug.LogWarning($"El nodo en nivel {level} no tiene conexiones posibles.");
-                }
-
-                foreach (MapNode nextNode in possibleConnections)
-                {
-                    if (!currentNode.connectedNodes.Contains(nextNode))
-                    {
-                        currentNode.connectedNodes.Add(nextNode);
-                    }
-                }
-            }
-        }
+        // Asegurar que ambos tipos de nodos buenos estén presentes
+        EnsureGoodNodesPresence();
 
         // Visualizar el mapa
         DrawMap();
 
         // Instanciar al jugador en el nodo inicial
         InstantiatePlayerAtStartNode();
+    }
+
+    private void AssignNodeTypes()
+    {
+        // Inicializar los nodos del nivel inicial
+        foreach (MapNode node in levels[0])
+        {
+            node.nodeTypesInPaths = new HashSet<NodeType>();
+            node.nodeType = NodeType.Inicio;
+            node.isTypeAssigned = true;
+        }
+
+        // Procesar los niveles restantes
+        for (int level = 1; level < levels.Count; level++)
+        {
+            foreach (MapNode node in levels[level])
+            {
+                // Si el tipo ya ha sido asignado, continuar
+                if (node.isTypeAssigned)
+                    continue;
+
+                // Obtener los nodos padres
+                List<MapNode> parents;
+                if (parentNodes.TryGetValue(node, out parents))
+                {
+                    // Combinar los conjuntos de tipos de los caminos que llegan a este nodo
+                    HashSet<NodeType> typesInPath = new HashSet<NodeType>();
+                    foreach (MapNode parent in parents)
+                    {
+                        typesInPath.UnionWith(parent.nodeTypesInPaths);
+                        typesInPath.Add(parent.nodeType);
+                    }
+
+                    node.nodeTypesInPaths = typesInPath;
+                }
+                else
+                {
+                    // Si el nodo no tiene padres, iniciar nodeTypesInPaths vacío
+                    node.nodeTypesInPaths = new HashSet<NodeType>();
+                }
+
+                // Asignar un tipo de nodo que no esté en typesInPath
+                NodeType nodeType = GetNodeTypeForNode(node);
+
+                // Si no se puede asignar un tipo sin repetir, permitir repeticiones
+                if (nodeType == NodeType.None)
+                {
+                    nodeType = GetNodeTypeAllowingRepetition(node);
+                }
+
+                node.nodeType = nodeType;
+                node.isTypeAssigned = true;
+
+                // Actualizar conteo de nodos buenos
+                if (nodeType == NodeType.Mana_Tamaño)
+                {
+                    manaNodeCount++;
+                }
+                else if (nodeType == NodeType.Revivir)
+                {
+                    revivirNodeCount++;
+                }
+            }
+        }
+    }
+
+    private NodeType GetNodeTypeForNode(MapNode node)
+    {
+        // Niveles específicos
+        int userLevel = node.depthLevel + 1;
+
+        if (bossLevels.Contains(userLevel))
+        {
+            return NodeType.Boss;
+        }
+        else if (gamblingLevels.Contains(userLevel))
+        {
+            return NodeType.GAMBLING;
+        }
+
+        // Obtener los tipos disponibles
+        List<NodeType> availableTypes = new List<NodeType>();
+
+        // Agregar todos los tipos posibles
+        availableTypes.AddRange(goodNodes);
+        availableTypes.AddRange(neutralNodes);
+        availableTypes.AddRange(badNodes);
+
+        // Remover los tipos que ya están en el camino
+        foreach (NodeType type in node.nodeTypesInPaths)
+        {
+            availableTypes.Remove(type);
+        }
+
+        // Si no quedan tipos disponibles, retornar None
+        if (availableTypes.Count == 0)
+        {
+            return NodeType.None;
+        }
+
+        // Seleccionar un tipo basado en probabilidades
+        NodeType selectedType = SelectNodeTypeBasedOnProbability(availableTypes);
+
+        return selectedType;
+    }
+
+    private NodeType GetNodeTypeAllowingRepetition(MapNode node)
+    {
+        // Niveles específicos
+        int userLevel = node.depthLevel + 1;
+
+        if (bossLevels.Contains(userLevel))
+        {
+            return NodeType.Boss;
+        }
+        else if (gamblingLevels.Contains(userLevel))
+        {
+            return NodeType.GAMBLING;
+        }
+
+        // Si no se pudo asignar sin repetir, permitir repeticiones
+        List<NodeType> allTypes = new List<NodeType>();
+        allTypes.AddRange(goodNodes);
+        allTypes.AddRange(neutralNodes);
+        allTypes.AddRange(badNodes);
+
+        // Seleccionar un tipo basado en probabilidades
+        NodeType selectedType = SelectNodeTypeBasedOnProbability(allTypes);
+
+        return selectedType;
+    }
+
+    private NodeType SelectNodeTypeBasedOnProbability(List<NodeType> availableTypes)
+    {
+        // Definir las probabilidades
+        float goodProbability = 0.3f;
+        float neutralProbability = 0.4f;
+        float badProbability = 0.3f;
+
+        // Filtrar los tipos disponibles por categoría
+        List<NodeType> goodAvailable = availableTypes.FindAll(t => goodNodes.Contains(t));
+        List<NodeType> neutralAvailable = availableTypes.FindAll(t => neutralNodes.Contains(t));
+        List<NodeType> badAvailable = availableTypes.FindAll(t => badNodes.Contains(t));
+
+        float totalProbability = 0f;
+        if (goodAvailable.Count > 0) totalProbability += goodProbability;
+        if (neutralAvailable.Count > 0) totalProbability += neutralProbability;
+        if (badAvailable.Count > 0) totalProbability += badProbability;
+
+        float randomValue = Random.value * totalProbability;
+
+        if (randomValue < goodProbability && goodAvailable.Count > 0)
+        {
+            return goodAvailable[Random.Range(0, goodAvailable.Count)];
+        }
+        else if (randomValue < goodProbability + neutralProbability && neutralAvailable.Count > 0)
+        {
+            return neutralAvailable[Random.Range(0, neutralAvailable.Count)];
+        }
+        else if (badAvailable.Count > 0)
+        {
+            return badAvailable[Random.Range(0, badAvailable.Count)];
+        }
+        else
+        {
+            // Si no se pudo seleccionar según las probabilidades, elegir cualquiera disponible
+            return availableTypes[Random.Range(0, availableTypes.Count)];
+        }
+    }
+
+    private void EnsureGoodNodesPresence()
+    {
+        // Si falta algún tipo de nodo bueno, reemplazar nodos existentes
+        if (manaNodeCount == 0 || revivirNodeCount == 0)
+        {
+            foreach (MapNode node in allNodes)
+            {
+                if (manaNodeCount == 0 && goodNodes.Contains(node.nodeType))
+                {
+                    node.nodeType = NodeType.Mana_Tamaño;
+                    manaNodeCount++;
+                }
+                else if (revivirNodeCount == 0 && goodNodes.Contains(node.nodeType))
+                {
+                    node.nodeType = NodeType.Revivir;
+                    revivirNodeCount++;
+                }
+
+                if (manaNodeCount > 0 && revivirNodeCount > 0)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    private void ConnectNodes()
+    {
+        parentNodes = new Dictionary<MapNode, List<MapNode>>();
+
+        for (int level = 0; level < levels.Count - 1; level++)
+        {
+            List<MapNode> currentLevelNodes = levels[level];
+            List<MapNode> nextLevelNodes = levels[level + 1];
+
+            // Mantener un registro de los nodos del siguiente nivel que ya han sido conectados
+            HashSet<MapNode> connectedNextNodes = new HashSet<MapNode>();
+
+            foreach (MapNode currentNode in currentLevelNodes)
+            {
+                // Determinar el número de conexiones según la probabilidad deseada
+                int connections = (Random.value < 0.18f) ? 2 : 1; // 18% para 2 conexiones, 82% para 1 conexión
+
+                // Obtener posibles conexiones
+                List<MapNode> possibleConnections = GetPossibleConnections(currentNode, nextLevelNodes, connections);
+
+                foreach (MapNode nextNode in possibleConnections)
+                {
+                    if (!currentNode.connectedNodes.Contains(nextNode))
+                    {
+                        currentNode.connectedNodes.Add(nextNode);
+                        connectedNextNodes.Add(nextNode);
+
+                        // Agregar al diccionario de nodos padres
+                        if (!parentNodes.ContainsKey(nextNode))
+                        {
+                            parentNodes[nextNode] = new List<MapNode>();
+                        }
+                        parentNodes[nextNode].Add(currentNode);
+                    }
+                }
+            }
+
+            // Conectar nodos del siguiente nivel que no hayan sido conectados
+            foreach (MapNode nextNode in nextLevelNodes)
+            {
+                if (!connectedNextNodes.Contains(nextNode))
+                {
+                    // Conectar con el nodo del nivel actual más cercano en X
+                    MapNode closestNode = FindClosestNode(nextNode, currentLevelNodes);
+                    closestNode.connectedNodes.Add(nextNode);
+                    connectedNextNodes.Add(nextNode);
+
+                    // Agregar al diccionario de nodos padres
+                    if (!parentNodes.ContainsKey(nextNode))
+                    {
+                        parentNodes[nextNode] = new List<MapNode>();
+                    }
+                    parentNodes[nextNode].Add(closestNode);
+                }
+            }
+        }
     }
 
     private List<MapNode> GetPossibleConnections(MapNode currentNode, List<MapNode> nextLevelNodes, int maxConnections)
@@ -197,121 +401,27 @@ public class MapGenerator : MonoBehaviour
         return possibleConnections;
     }
 
-    private NodeType GetNodeType(int level, int nodeIndex)
+    private MapNode FindClosestNode(MapNode targetNode, List<MapNode> nodes)
     {
-        // Nivel 0: Nodo Inicio
-        if (level == 0)
+        MapNode closestNode = null;
+        float minDistance = float.MaxValue;
+
+        foreach (MapNode node in nodes)
         {
-            return NodeType.Inicio;
-        }
-
-        // Después de un Boss, el siguiente nodo es siempre GAMBLING, excepto después del último Boss
-        if (level > 0 && levels[level - 1][0].nodeType == NodeType.Boss && level != totalLevels - 1)
-        {
-            return NodeType.GAMBLING;
-        }
-
-        // Nivel 1: Nodo GAMBLING
-        if (level == 1)
-        {
-            return NodeType.GAMBLING;
-        }
-
-        // Último nivel: Nodo Boss
-        if (level == totalLevels - 1)
-        {
-            return NodeType.Boss;
-        }
-
-        // Obtener el tipo de nodo anterior
-        NodeType previousNodeType = NodeType.None;
-        if (level > 0)
-        {
-            previousNodeType = levels[level - 1][0].nodeType;
-        }
-
-        // Determinar si el nodo anterior era bueno o malo
-        bool previousNodeWasGood = IsGoodNode(previousNodeType);
-
-        // Aplicar las reglas de generación
-        NodeType nodeType = NodeType.None;
-
-        if (previousNodeWasGood)
-        {
-            // Si el nodo anterior era bueno, 70% de probabilidad de que este sea malo
-            if (Random.value < 0.7f)
+            float distance = Mathf.Abs(node.position.x - targetNode.position.x);
+            if (distance < minDistance)
             {
-                nodeType = GetRandomBadNode();
-            }
-            else
-            {
-                nodeType = GetRandomGoodNode();
-            }
-        }
-        else
-        {
-            // Si el nodo anterior era malo, 50% de probabilidad de bueno o malo
-            if (Random.value < 0.5f)
-            {
-                nodeType = GetRandomGoodNode();
-            }
-            else
-            {
-                nodeType = GetRandomBadNode();
+                minDistance = distance;
+                closestNode = node;
             }
         }
 
-        // Si los dos nodos anteriores eran buenos, 95% de probabilidad de que este sea malo
-        if (lastNodeWasGood && secondLastNodeWasGood)
-        {
-            if (Random.value < 0.95f)
-            {
-                nodeType = GetRandomBadNode();
-            }
-            else
-            {
-                nodeType = GetRandomGoodNode();
-            }
-        }
-
-        // Después de una casilla de combate, 40% de probabilidad de que la siguiente sea Revivir
-        if (previousNodeType == NodeType.Combate)
-        {
-            if (Random.value < 0.4f)
-            {
-                nodeType = NodeType.Revivir;
-            }
-        }
-
-        // Actualizar el estado de los últimos nodos
-        secondLastNodeWasGood = lastNodeWasGood;
-        lastNodeWasGood = IsGoodNode(nodeType);
-
-        return nodeType;
+        return closestNode;
     }
 
-    private bool IsGoodNode(NodeType nodeType)
+    private MapNode CreateNode(Vector3 position, int depth)
     {
-        return nodeType == NodeType.GAMBLING || nodeType == NodeType.Mana_Tamaño || nodeType == NodeType.Revivir;
-    }
-
-    private NodeType GetRandomGoodNode()
-    {
-        NodeType[] goodNodes = { NodeType.GAMBLING, NodeType.Mana_Tamaño, NodeType.Revivir };
-        int index = Random.Range(0, goodNodes.Length);
-        return goodNodes[index];
-    }
-
-    private NodeType GetRandomBadNode()
-    {
-        NodeType[] badNodes = { NodeType.Combate, NodeType.Random, NodeType.CoinFlip };
-        int index = Random.Range(0, badNodes.Length);
-        return badNodes[index];
-    }
-
-    private MapNode CreateNode(Vector3 position, int depth, NodeType type)
-    {
-        MapNode node = new MapNode(position, depth, type);
+        MapNode node = new MapNode(position, depth);
         return node;
     }
 
@@ -337,14 +447,9 @@ public class MapGenerator : MonoBehaviour
             }
 
             // Configurar el nombre del nodo
-            nodeObj.name = $"Node_Level{node.depthLevel}_{node.nodeType}";
+            nodeObj.name = $"Node_Level{node.depthLevel + 1}_{node.nodeType}";
 
             // Dibujar las conexiones
-            if (node.connectedNodes.Count == 0)
-            {
-                Debug.LogWarning($"El nodo en posición {node.position} no tiene conexiones.");
-            }
-
             foreach (MapNode connectedNode in node.connectedNodes)
             {
                 DrawLine(node.position, connectedNode.position, Color.white);

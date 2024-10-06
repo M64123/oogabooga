@@ -1,19 +1,22 @@
-using System.Collections.Generic;
+// MapNode.cs
 using UnityEngine;
+using System.Collections.Generic;
 
 public class MapNode
 {
-    public Vector3 position;                 // Posición del nodo en el mapa
-    public List<MapNode> connectedNodes;     // Lista de nodos conectados
-    public int depthLevel;                   // Nivel del nodo en el mapa
-    public GameObject nodeObject;            // Referencia al objeto del nodo en la escena
-    public NodeType nodeType;                // Tipo de evento del nodo
+    public Vector3 position;
+    public int depthLevel;
+    public NodeType nodeType;
+    public GameObject nodeObject;
+    public List<MapNode> connectedNodes = new List<MapNode>();
 
-    public MapNode(Vector3 pos, int depth, NodeType type)
+    // Nuevas propiedades para evitar repeticiones de tipos en los caminos
+    public HashSet<NodeType> nodeTypesInPaths = new HashSet<NodeType>();
+    public bool isTypeAssigned = false;
+
+    public MapNode(Vector3 pos, int depth)
     {
         position = pos;
         depthLevel = depth;
-        connectedNodes = new List<MapNode>();
-        nodeType = type;
     }
 }
