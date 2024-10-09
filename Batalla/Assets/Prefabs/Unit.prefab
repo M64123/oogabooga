@@ -143,10 +143,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 7914152865130506495}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72c039b2ea1bfb444b5e3b2450fbf2f1, type: 3}
+  m_Script: {fileID: 11500000, guid: 143cd874e5901db418e871d40f1d31f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
+  moveDistance: 2
+  moveSpeed: 1
+  minWaitTime: 1
+  maxWaitTime: 3
+  boundaryX: 3
+  boundaryZ: 1
 --- !u!114 &4072159978180841312
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -159,6 +164,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22b540a1c3d36fe41901fdcf854294d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 2
+  target: {fileID: 0}
 --- !u!114 &1853309091579579545
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,10 +18,10 @@ public class BattleManager : MonoBehaviour
             unit.GetComponent<CombatUnit>().enabled = true;
         }
 
-        // Desactivar el movimiento de las unidades en el plano frontal
+        // Detener el movimiento de las unidades en el plano frontal
         foreach (Transform unit in GameObject.Find("UnitPlane").transform)
         {
-            unit.GetComponent<UnitMovement>().enabled = false;
+            unit.GetComponent<UnitIdleMovement>().enabled = false;
         }
 
         // Desactivar el botón para evitar múltiples clics

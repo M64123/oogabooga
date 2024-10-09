@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class DraggableUnit : MonoBehaviour
+public class DraggableUnit : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     private Vector3 startPosition;
     private Transform originalParent;
@@ -19,7 +17,7 @@ public class DraggableUnit : MonoBehaviour
         startPosition = transform.position;
         originalParent = transform.parent;
         transform.SetParent(canvas.transform, true);
-        GetComponent<UnitMovement>().enabled = false; // Detener movimiento
+        GetComponent<UnitIdleMovement>().enabled = false; // Detener movimiento
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -46,14 +44,16 @@ public class DraggableUnit : MonoBehaviour
                 transform.position = new Vector3(hit.point.x, transform.position.y, hit.point.z);
                 transform.SetParent(hit.collider.transform);
                 UnitManager.instance.AddUnit();
+
                 // Mantenerla congelada hasta que comience la pelea
+                GetComponent<UnitIdleMovement>().enabled = false;
             }
             else
             {
                 // Devolver la unidad a su posición inicial
                 transform.position = startPosition;
                 transform.SetParent(originalParent);
-                GetComponent<UnitMovement>().enabled = true; // Reanudar movimiento
+                GetComponent<UnitIdleMovement>().enabled = true; // Reanudar movimiento
             }
         }
         else
@@ -61,7 +61,7 @@ public class DraggableUnit : MonoBehaviour
             // Devolver la unidad a su posición inicial
             transform.position = startPosition;
             transform.SetParent(originalParent);
-            GetComponent<UnitMovement>().enabled = true; // Reanudar movimiento
+            GetComponent<UnitIdleMovement>().enabled = true; // Reanudar movimiento
         }
     }
 }
