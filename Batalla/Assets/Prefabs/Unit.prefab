@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: -8113815881047384923}
   m_Layer: 0
   m_Name: Unit
-  m_TagString: Untagged
+  m_TagString: Ally
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -149,7 +149,7 @@ MonoBehaviour:
   moveDistance: 2
   moveSpeed: 1
   minWaitTime: 1
-  maxWaitTime: 3
+  maxWaitTime: 4
   boundaryX: 3
   boundaryZ: 1
 --- !u!114 &4072159978180841312
