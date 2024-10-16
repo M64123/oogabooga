@@ -226,7 +226,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1330673185}
   - component: {fileID: 1330673184}
-  - component: {fileID: 1330673186}
   m_Layer: 0
   m_Name: GeneradorMapa
   m_TagString: Untagged
@@ -246,6 +245,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7503c343230a419438dcf632135dfbdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  totalLevels: 17
+  nodeSpacingX: 5
+  nodeSpacingZ: 5
+  xVariation: 1.5
+  nodePrefab: {fileID: 45032249186673849, guid: a4ba1e3e1300e2442ac6226fcdcdfaac, type: 3}
+  playerPrefab: {fileID: 5442698315759687718, guid: 2d37e26e4ac902042aedded83916cd78, type: 3}
 --- !u!4 &1330673185
 Transform:
   m_ObjectHideFlags: 0
@@ -261,24 +266,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1330673186
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1330673183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c47dcf3357b1c324ab7104f95b3d36d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  totalLevels: 17
-  nodeSpacingX: 5
-  nodeSpacingZ: 5
-  xVariation: 2
-  nodePrefab: {fileID: 45032249186673849, guid: a4ba1e3e1300e2442ac6226fcdcdfaac, type: 3}
-  playerPrefab: {fileID: 5442698315759687718, guid: 2d37e26e4ac902042aedded83916cd78, type: 3}
 --- !u!1 &1917632552
 GameObject:
   m_ObjectHideFlags: 0
@@ -307,7 +294,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1917632552}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b03a0a68fc7eb449b032e0d2260889f, type: 3}
+  m_Script: {fileID: 11500000, guid: bbb25578553ee2e48a0862af865bcec9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 1223717415051393507, guid: 2d37e26e4ac902042aedded83916cd78, type: 3}
