@@ -3,33 +3,28 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     public float transitionDuration = 1f; // Duración de la transición
-    public Vector3 initialPosition; // Posición inicial de la cámara
-    public Vector3 targetPosition; // Posición objetivo de la cámara
-    public Vector3 initialRotation; // Rotación inicial de la cámara
-    public Vector3 targetRotation; // Rotación objetivo de la cámara
+    public Vector3 boxPosition = new Vector3(0f, 3f, -6f);
+    public Vector3 arenaPosition = new Vector3(0f, 4f, -6f);
+    public Vector3 boxRotation = new Vector3(30f, 0f, 0f);
+    public Vector3 arenaRotation = new Vector3(45f, 0f, 0f);
 
+    private Vector3 targetPosition;
+    private Vector3 targetRotation;
     private bool isTransitioning = false;
     private float transitionProgress = 0f;
+    private Vector3 startPosition;
+    private Vector3 startRotation;
 
     void Start()
     {
-        // Configurar la posición y rotación inicial
-        initialPosition = new Vector3(transform.position.x, 3f, transform.position.z);
-        targetPosition = new Vector3(transform.position.x, 4f, transform.position.z);
-
-        initialRotation = new Vector3(30f, transform.eulerAngles.y, transform.eulerAngles.z);
-        targetRotation = new Vector3(45f, transform.eulerAngles.y, transform.eulerAngles.z);
-
-        // Aplicar la posición y rotación inicial
-        transform.position = initialPosition;
-        transform.eulerAngles = initialRotation;
-
-        // Comenzar la transición
-        StartTransition();
+        // Inicialmente, la cámara está en la posición del "Box"
+        transform.position = boxPosition;
+        transform.eulerAngles = boxRotation;
     }
 
     void Update()
     {
+        // Verificar si se está en transición
         if (isTransitioning)
         {
             // Actualizar el progreso de la transición
@@ -41,35 +36,31 @@ public class CameraController : MonoBehaviour
             }
 
             // Interpolar posición y rotación
-            transform.position = Vector3.Lerp(initialPosition, targetPosition, transitionProgress);
-            Vector3 currentRotation = Vector3.Lerp(initialRotation, targetRotation, transitionProgress);
+            transform.position = Vector3.Lerp(startPosition, targetPosition, transitionProgress);
+            Vector3 currentRotation = Vector3.Lerp(startRotation, targetRotation, transitionProgress);
             transform.eulerAngles = currentRotation;
         }
-
-        // Hacer que la cámara siga al cursor
-        FollowCursor();
     }
 
-    void StartTransition()
+    public void TransitionToArena()
     {
-        isTransitioning = true;
+        // Iniciar transición a la posición del "Arena"
+        startPosition = transform.position;
+        startRotation = transform.eulerAngles;
+        targetPosition = arenaPosition;
+        targetRotation = arenaRotation;
         transitionProgress = 0f;
+        isTransitioning = true;
     }
 
-    void FollowCursor()
+    public void TransitionToBox()
     {
-        // Obtener la posición del cursor en el mundo
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
-        float rayDistance;
-
-        if (groundPlane.Raycast(ray, out rayDistance))
-        {
-            Vector3 point = ray.GetPoint(rayDistance);
-            Vector3 targetPosition = new Vector3(point.x, transform.position.y, point.z);
-
-            // Suavizar el seguimiento con Lerp
-            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * 2f);
-        }
+        // Iniciar transición a la posición del "Box"
+        startPosition = transform.position;
+        startRotation = transform.eulerAngles;
+        targetPosition = boxPosition;
+        targetRotation = boxRotation;
+        transitionProgress = 0f;
+        isTransitioning = true;
     }
 }
