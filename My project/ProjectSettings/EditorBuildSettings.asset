@@ -6,12 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Tablero.unity
+    path: Assets/Scenes/Map/Tablero.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
-    path: Assets/Scenes/Settings.unity
+    path: Assets/Scenes/MainMenu/Settings.unity
     guid: 72bc715a802982b4589991650c5f3890
   - enabled: 1
-    path: Assets/Scenes/Titulo.unity
+    path: Assets/Scenes/MainMenu/Titulo.unity
     guid: e7b2e50d24523294ea0766b2de1303ae
   m_configObjects: {}
