@@ -2,29 +2,44 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public float transitionDuration = 1f; // Duración de la transición
-    public Vector3 boxPosition = new Vector3(0f, 3f, -6f);
-    public Vector3 arenaPosition = new Vector3(0f, 4f, -6f);
-    public Vector3 boxRotation = new Vector3(30f, 0f, 0f);
-    public Vector3 arenaRotation = new Vector3(45f, 0f, 0f);
+    public float transitionDuration = 1f; // Duración de las transiciones
 
+    // Posiciones y Rotaciones
+    [Header("Camera Positions and Rotations")]
+    public Vector3 position1 = new Vector3(0f, 5f, -10f);
+    public Vector3 rotation1 = new Vector3(20f, 0f, 0f);
+
+    public Vector3 position2 = new Vector3(0f, 5f, 0f);
+    public Vector3 rotation2 = new Vector3(20f, 0f, 0f);
+
+    // Variables de transición
     private Vector3 targetPosition;
     private Vector3 targetRotation;
-    private bool isTransitioning = false;
-    private float transitionProgress = 0f;
+
     private Vector3 startPosition;
     private Vector3 startRotation;
 
+    private float transitionProgress = 0f;
+    private bool isTransitioning = false;
+
+    private bool isInPosition1 = true;
+
+    // Parámetros para detección de zonas
+    [Range(0f, 1f)]
+    public float upperZoneThreshold = 0.6f; // Porcentaje de altura para la zona superior
+    [Range(0f, 1f)]
+    public float lowerZoneThreshold = 0.4f; // Porcentaje de altura para la zona inferior
+
     void Start()
     {
-        // Inicialmente, la cámara está en la posición del "Box"
-        transform.position = boxPosition;
-        transform.eulerAngles = boxRotation;
+        // Establecer la posición inicial
+        transform.position = position1;
+        transform.eulerAngles = rotation1;
+        isInPosition1 = true;
     }
 
     void Update()
     {
-        // Verificar si se está en transición
         if (isTransitioning)
         {
             // Actualizar el progreso de la transición
@@ -33,6 +48,7 @@ public class CameraController : MonoBehaviour
             {
                 transitionProgress = 1f;
                 isTransitioning = false;
+                isInPosition1 = !isInPosition1; // Actualizar el estado de la posición
             }
 
             // Interpolar posición y rotación
@@ -40,26 +56,49 @@ public class CameraController : MonoBehaviour
             Vector3 currentRotation = Vector3.Lerp(startRotation, targetRotation, transitionProgress);
             transform.eulerAngles = currentRotation;
         }
+        else
+        {
+            // Detectar si el cursor está en la zona superior o inferior
+            DetectScreenZones();
+        }
     }
 
-    public void TransitionToArena()
+    void DetectScreenZones()
     {
-        // Iniciar transición a la posición del "Arena"
-        startPosition = transform.position;
-        startRotation = transform.eulerAngles;
-        targetPosition = arenaPosition;
-        targetRotation = arenaRotation;
-        transitionProgress = 0f;
-        isTransitioning = true;
+        Vector3 mousePos = Input.mousePosition;
+
+        // Zona superior
+        if (mousePos.y >= Screen.height * upperZoneThreshold && isInPosition1)
+        {
+            TransitionToPosition2();
+        }
+        // Zona inferior
+        else if (mousePos.y <= Screen.height * lowerZoneThreshold && !isInPosition1)
+        {
+            TransitionToPosition1();
+        }
     }
 
-    public void TransitionToBox()
+    public void TransitionToPosition1()
     {
-        // Iniciar transición a la posición del "Box"
+        StartTransition(position1, rotation1);
+        // isInPosition1 = true; // Eliminar esta línea
+    }
+
+    public void TransitionToPosition2()
+    {
+        StartTransition(position2, rotation2);
+        // isInPosition1 = false; // Eliminar esta línea
+    }
+
+    void StartTransition(Vector3 newPosition, Vector3 newRotation)
+    {
         startPosition = transform.position;
         startRotation = transform.eulerAngles;
-        targetPosition = boxPosition;
-        targetRotation = boxRotation;
+
+        targetPosition = newPosition;
+        targetRotation = newRotation;
+
         transitionProgress = 0f;
         isTransitioning = true;
     }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UnitSelectionManager : MonoBehaviour
 {
@@ -23,7 +24,7 @@ public class UnitSelectionManager : MonoBehaviour
         {
             if (Input.GetMouseButtonDown(0))
             {
-                // Intentar colocar la unidad en el "Arena"
+                // Intentar colocar o remover la unidad
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit))
@@ -37,8 +38,19 @@ public class UnitSelectionManager : MonoBehaviour
                         selectedUnit.GetComponent<UnitIdleMovement>().enabled = false;
                         selectedUnit = null;
 
-                        // Regresar la cámara al "Box"
-                        cameraController.TransitionToBox();
+                        // Regresar la cámara a la Posición 1 (BoxArea)
+                        cameraController.TransitionToPosition1();
+                    }
+                    else if (hit.collider.gameObject.name == "BoxArea")
+                    {
+                        // Quitar la unidad del Arena y regresarla al BoxArea
+                        selectedUnit.transform.SetParent(hit.collider.transform);
+                        selectedUnit.GetComponent<UnitIdleMovement>().enabled = true;
+                        UnitManager.instance.RemoveUnit();
+                        selectedUnit = null;
+
+                        // Regresar la cámara a la Posición 1 (BoxArea)
+                        cameraController.TransitionToPosition1();
                     }
                 }
             }
@@ -50,9 +62,10 @@ public class UnitSelectionManager : MonoBehaviour
         if (selectedUnit == null)
         {
             selectedUnit = unit;
-            // Opcional: Cambiar apariencia de la unidad para indicar que está seleccionada
-            // Iniciar transición de la cámara al "Arena"
-            cameraController.TransitionToArena();
+            // Detener el movimiento de la unidad
+            unit.GetComponent<UnitIdleMovement>().enabled = false;
+            // Transición a la Posición 2 (Arena)
+            cameraController.TransitionToPosition2();
         }
     }
 
@@ -60,9 +73,11 @@ public class UnitSelectionManager : MonoBehaviour
     {
         if (selectedUnit != null)
         {
-            // Opcional: Revertir cambios de apariencia
+            // Reanudar el movimiento de la unidad
+            selectedUnit.GetComponent<UnitIdleMovement>().enabled = true;
             selectedUnit = null;
-            cameraController.TransitionToBox();
+            // Regresar la cámara a la Posición 1 (BoxArea)
+            cameraController.TransitionToPosition1();
         }
     }
 }
