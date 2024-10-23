@@ -512,8 +512,8 @@ Transform:
   m_GameObject: {fileID: 1116417797}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 3}
-  m_LocalScale: {x: 1, y: 1, z: 0.6}
+  m_LocalPosition: {x: 0, y: 10, z: 16}
+  m_LocalScale: {x: 1.5, y: 1, z: 0.75}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -605,7 +605,7 @@ Transform:
   m_GameObject: {fileID: 1393452453}
   serializedVersion: 2
   m_LocalRotation: {x: 0.17364816, y: 0, z: 0, w: 0.9848078}
-  m_LocalPosition: {x: 0, y: 3, z: -4}
+  m_LocalPosition: {x: 0, y: 14, z: 6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -623,11 +623,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 208441c585eccaf43a564f09063a06d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  transitionDuration: 1
+  transitionDuration: 2
   position1: {x: 0, y: 3, z: -12}
-  rotation1: {x: 30, y: 0, z: 0}
-  position2: {x: 0, y: 3, z: -4}
-  rotation2: {x: 20, y: 0, z: 0}
+  rotation1: {x: 20, y: 0, z: 0}
+  position2: {x: 0, y: 9, z: 1}
+  rotation2: {x: 30, y: 0, z: 0}
+  logisticK: 10
+  logisticT0: 0.5
   upperZoneThreshold: 0.85
   lowerZoneThreshold: 0.15
 --- !u!1660057539 &9223372036854775807
