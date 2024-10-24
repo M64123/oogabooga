@@ -1,112 +1,113 @@
+// UnitIdleMovement.cs
+
 using UnityEngine;
-using System.Collections;
 
 public class UnitIdleMovement : MonoBehaviour
 {
-    public float moveDistance = 0.5f; // Distancia máxima por movimiento
-    public float moveSpeed = 1f; // Velocidad de movimiento
-    public float minWaitTime = 1f; // Tiempo mínimo de espera entre movimientos
-    public float maxWaitTime = 3f; // Tiempo máximo de espera entre movimientos
-    public float boundaryX = 3f; // Límite en el eje X
-    public float boundaryZ = 1f; // Límite en el eje Z
+    public float moveSpeed = 1f;
 
-    private Vector3 startPosition;
+    public float minIdleTime = 1f; // Tiempo mínimo de espera
+    public float maxIdleTime = 3f; // Tiempo máximo de espera
+
+    public float minMoveTime = 1f; // Tiempo mínimo de movimiento
+    public float maxMoveTime = 2f; // Tiempo máximo de movimiento
+
+    private float idleTimer = 0f;
+    private float moveTimer = 0f;
+
     private bool isMoving = false;
+
+    private Vector3 targetPosition;
+
+    private Animator animator;
+
+    // Referencia al Box Area para obtener sus límites
+    public Transform boxAreaTransform;
+    private Bounds boxAreaBounds;
 
     void Start()
     {
-        startPosition = transform.position;
-        StartCoroutine(MoveRoutine());
+        animator = GetComponent<Animator>();
+
+        // Obtener los límites del Box Area
+        if (boxAreaTransform != null)
+        {
+            Collider boxCollider = boxAreaTransform.GetComponent<Collider>();
+            if (boxCollider != null)
+            {
+                boxAreaBounds = boxCollider.bounds;
+            }
+            else
+            {
+                Debug.LogError("El Box Area no tiene un Collider para obtener sus límites.");
+            }
+        }
+        else
+        {
+            Debug.LogError("No se ha asignado el Box Area en UnitIdleMovement.");
+        }
+
+        // Iniciar en estado de espera
+        idleTimer = Random.Range(minIdleTime, maxIdleTime);
     }
 
-    IEnumerator MoveRoutine()
+    void Update()
     {
-        while (true)
+        if (isMoving)
         {
-            // Esperar un tiempo aleatorio antes del siguiente movimiento
-            float waitTime = Random.Range(minWaitTime, maxWaitTime);
-            yield return new WaitForSeconds(waitTime);
-
-            // Calcular una dirección aleatoria dentro de los límites
-            Vector3 targetPosition = GetRandomTargetPosition();
-
-            // Moverse hacia la posición objetivo
-            yield return StartCoroutine(MoveToPosition(targetPosition));
+            MoveTowardsTarget();
+        }
+        else
+        {
+            idleTimer -= Time.deltaTime;
+            if (idleTimer <= 0f)
+            {
+                StartMoving();
+            }
         }
     }
 
-    Vector3 GetRandomTargetPosition()
-    {
-        Vector3 currentPosition = transform.position;
-
-        // Determinar la dirección en X
-        float directionX = Random.Range(-moveDistance, moveDistance);
-        if (currentPosition.x <= -boundaryX)
-        {
-            // Si está en el borde izquierdo, moverse hacia la derecha
-            directionX = Mathf.Abs(directionX);
-        }
-        else if (currentPosition.x >= boundaryX)
-        {
-            // Si está en el borde derecho, moverse hacia la izquierda
-            directionX = -Mathf.Abs(directionX);
-        }
-
-        // Determinar la dirección en Z
-        float directionZ = Random.Range(-moveDistance, moveDistance);
-        if (currentPosition.z <= -boundaryZ)
-        {
-            // Si está en el borde inferior, moverse hacia arriba
-            directionZ = Mathf.Abs(directionZ);
-        }
-        else if (currentPosition.z >= boundaryZ)
-        {
-            // Si está en el borde superior, moverse hacia abajo
-            directionZ = -Mathf.Abs(directionZ);
-        }
-
-        // Calcular la posición objetivo
-        Vector3 targetPosition = new Vector3(
-            Mathf.Clamp(currentPosition.x + directionX, -boundaryX, boundaryX),
-            currentPosition.y,
-            Mathf.Clamp(currentPosition.z + directionZ, -boundaryZ, boundaryZ)
-        );
-
-        return targetPosition;
-    }
-
-    IEnumerator MoveToPosition(Vector3 targetPosition)
+    void StartMoving()
     {
         isMoving = true;
 
-        // Girar el sprite hacia la dirección del movimiento
-        FaceDirection(targetPosition - transform.position);
+        // Generar una duración aleatoria para el movimiento
+        moveTimer = Random.Range(minMoveTime, maxMoveTime);
 
-        while (Vector3.Distance(transform.position, targetPosition) > 0.01f)
+        // Generar una posición aleatoria dentro de los límites del Box Area
+        float xPos = Random.Range(boxAreaBounds.min.x, boxAreaBounds.max.x);
+        float zPos = Random.Range(boxAreaBounds.min.z, boxAreaBounds.max.z);
+        float yPos = transform.position.y; // Mantener la posición en Y constante
+
+        targetPosition = new Vector3(xPos, yPos, zPos);
+
+        // Iniciar animación de movimiento si es necesario
+        if (animator != null)
         {
-            // Moverse hacia la posición objetivo
-            transform.position = Vector3.MoveTowards(
-                transform.position,
-                targetPosition,
-                moveSpeed * Time.deltaTime
-            );
-
-            yield return null;
+            animator.SetBool("isMoving", true);
         }
-
-        // Alinear la posición exacta
-        transform.position = targetPosition;
-        isMoving = false;
     }
 
-    void FaceDirection(Vector3 direction)
+    void MoveTowardsTarget()
     {
-        // Orientar el sprite según la dirección del movimiento
-        if (direction.x != 0)
+        moveTimer -= Time.deltaTime;
+
+        // Moverse hacia la posición objetivo
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+
+        if (moveTimer <= 0f || Vector3.Distance(transform.position, targetPosition) <= 0.1f)
         {
-            Vector3 scale = transform.localScale;
-            scale.x = direction.x > 0 ? Mathf.Abs(scale.x) : -Mathf.Abs(scale.x);
-            transform.localScale = scale;
+            // Detener el movimiento
+            isMoving = false;
+
+            // Iniciar un nuevo tiempo de espera aleatorio
+            idleTimer = Random.Range(minIdleTime, maxIdleTime);
+
+            // Detener animación de movimiento si es necesario
+            if (animator != null)
+            {
+                animator.SetBool("isMoving", false);
+            }
         }
     }
 }

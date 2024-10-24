@@ -1,3 +1,5 @@
+// CameraController.cs
+
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
@@ -145,14 +147,11 @@ public class CameraController : MonoBehaviour
         // Calcular la posición en X (mantener constante en este caso)
         float xPos = Mathf.Lerp(startPosition.x, targetPosition.x, t);
 
-        // Calcular la posición en Y (puede ser lineal o usando t)
+        // Calcular la posición en Y
         float yPos = Mathf.Lerp(startPosition.y, targetPosition.y, t);
 
         // Calcular la posición en Z usando la función logística para crear la curva en S
-        float sCurveZ = Mathf.Lerp(startPosition.z, targetPosition.z, t);
-
-        // Aquí aplicamos la función logística al eje Z para crear la curva en S
-        sCurveZ = startPosition.z + (targetPosition.z - startPosition.z) * LogisticFunctionNormalized(t, logisticK, logisticT0);
+        float sCurveZ = startPosition.z + (targetPosition.z - startPosition.z) * LogisticFunctionNormalized(t, logisticK, logisticT0);
 
         return new Vector3(xPos, yPos, sCurveZ);
     }
