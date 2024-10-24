@@ -135,9 +135,9 @@ GameObject:
   - component: {fileID: 57391600}
   - component: {fileID: 57391599}
   - component: {fileID: 57391603}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: BoxArea
-  m_TagString: Untagged
+  m_TagString: BoxArea
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -157,11 +157,11 @@ MeshCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &57391600
@@ -424,9 +424,9 @@ GameObject:
   - component: {fileID: 1116417800}
   - component: {fileID: 1116417799}
   - component: {fileID: 1116417798}
-  m_Layer: 0
-  m_Name: Plane
-  m_TagString: Untagged
+  m_Layer: 7
+  m_Name: Arena
+  m_TagString: Arena
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -446,11 +446,11 @@ MeshCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &1116417799
@@ -630,8 +630,8 @@ MonoBehaviour:
   rotation2: {x: 45, y: 0, z: 0}
   logisticK: 10
   logisticT0: 0.5
-  upperZoneThreshold: 0.85
-  lowerZoneThreshold: 0.15
+  upperZoneThreshold: 0.9
+  lowerZoneThreshold: 0.1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
