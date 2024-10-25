@@ -560,6 +560,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a268b33c1e1697b45a959d21679de9ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraController: {fileID: 1393452457}
   arenaTag: Arena
   boxAreaTag: BoxArea
   allyTag: Ally
@@ -569,10 +570,15 @@ MonoBehaviour:
   boxAreaLayerMask:
     serializedVersion: 2
     m_Bits: 64
-  cameraController: {fileID: 1393452457}
-  dinoOffset: {x: 0, y: 0, z: 1}
-  boxAreaY: 0
   arenaY: 10
+  cameraDinoZOffset: 5
+  transitionDuration: 1
+  movementCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!114 &853920164
 MonoBehaviour:
   m_ObjectHideFlags: 0

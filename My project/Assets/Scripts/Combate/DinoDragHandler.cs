@@ -6,8 +6,11 @@ using System.Collections;
 public class DinoDragHandler : MonoBehaviour
 {
     private bool isDragging = false;
+    private bool isTransitioning = false;
+    private float transitionProgress = 0f;
 
     private Camera mainCamera;
+    public CameraController cameraController;
 
     // Referencia al Rigidbody y Animator (si es necesario)
     private Rigidbody rb;
@@ -28,18 +31,20 @@ public class DinoDragHandler : MonoBehaviour
     // Posición original del dinosaurio
     private Vector3 originalPosition;
 
-    // Variables para la rotación
-    private Coroutine rotationCoroutine;
-
-    // Referencia al controlador de cámara
-    public CameraController cameraController;
-
-    // Offset editable para el dinosaurio respecto a la cámara
-    public Vector3 dinoOffset = new Vector3(0f, 0f, 1f);
-
-    // Altura del suelo (Y) para el Box Area y la Arena
-    public float boxAreaY = 0f;
+    // Altura de la arena
     public float arenaY = 10f;
+
+    // Variables para el movimiento y rotación
+    public float cameraDinoZOffset = 1f; // Offset en Z entre la cámara y el dinosaurio durante el arrastre
+    public float transitionDuration = 1f; // Duración de la transición de elevación al iniciar el arrastre
+
+    // Curva para el movimiento en Z (para lograr la trayectoria curva)
+    public AnimationCurve movementCurve;
+
+    // Variables internas para el movimiento
+    private Vector3 startDragPosition;
+    private Vector3 targetDragPosition;
+    private Quaternion startRotation;
 
     void Start()
     {
@@ -60,13 +65,29 @@ public class DinoDragHandler : MonoBehaviour
 
     void Update()
     {
-        if (isDragging)
+        if (isTransitioning)
+        {
+            // Actualizar el progreso de la transición
+            transitionProgress += Time.deltaTime / transitionDuration;
+            if (transitionProgress >= 1f)
+            {
+                transitionProgress = 1f;
+                isTransitioning = false;
+            }
+
+            // Movimiento en curva usando la AnimationCurve
+            float curveValue = movementCurve.Evaluate(transitionProgress);
+            transform.position = Vector3.Lerp(startDragPosition, targetDragPosition, curveValue);
+
+            // Sincronizar la rotación con la cámara en el eje X
+            SyncRotationWithCamera();
+        }
+        else if (isDragging)
         {
             FollowCursor();
 
             // Sincronizar la rotación con la cámara en el eje X
-            float cameraRotationX = mainCamera.transform.eulerAngles.x;
-            transform.rotation = Quaternion.Euler(cameraRotationX, 0f, 0f);
+            SyncRotationWithCamera();
 
             // Detectar clic para intentar soltar el dinosaurio
             if (Input.GetMouseButtonDown(0))
@@ -82,7 +103,7 @@ public class DinoDragHandler : MonoBehaviour
         if (!CompareTag(allyTag))
             return;
 
-        if (!isDragging)
+        if (!isDragging && !isTransitioning)
         {
             StartDragging();
         }
@@ -113,35 +134,45 @@ public class DinoDragHandler : MonoBehaviour
             animator.SetBool("isMoving", false);
         }
 
-        // Iniciar rotación suave para alinearse con la cámara en el eje X
-        float cameraRotationX = mainCamera.transform.eulerAngles.x;
-        if (rotationCoroutine != null)
-            StopCoroutine(rotationCoroutine);
-        rotationCoroutine = StartCoroutine(SmoothRotateTo(cameraRotationX, 0.2f)); // Duración de 0.2 segundos
+        // Guardar la posición inicial
+        startDragPosition = transform.position;
+        startRotation = transform.rotation;
+
+        // Calcular la posición objetivo (elevada)
+        Vector3 cameraForward = mainCamera.transform.forward;
+        targetDragPosition = mainCamera.transform.position + cameraForward * cameraDinoZOffset;
+        targetDragPosition.y += cameraDinoZOffset; // Elevar en Y si es necesario
+
+        // Iniciar la transición
+        transitionProgress = 0f;
+        isTransitioning = true;
     }
 
     void FollowCursor()
     {
         // Obtener la posición del cursor en el mundo
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-
-        // Utilizar un plano a la altura del dinosaurio
-        Plane plane = new Plane(Vector3.up, transform.position);
-
+        Plane plane = new Plane(Vector3.forward, mainCamera.transform.position + mainCamera.transform.forward * cameraDinoZOffset);
         if (plane.Raycast(ray, out float distance))
         {
             Vector3 worldPosition = ray.GetPoint(distance);
 
-            // Aplicar offset respecto a la cámara
-            Vector3 offset = mainCamera.transform.rotation * dinoOffset;
-            worldPosition += offset;
-
-            // Restringir la posición para que no atraviese los planos del Box Area y la Arena
-            float minY = Mathf.Min(boxAreaY, arenaY);
-            float maxY = Mathf.Max(boxAreaY, arenaY);
-            worldPosition.y = Mathf.Clamp(worldPosition.y, minY, maxY);
+            // Aplicar offset en Z
+            worldPosition.z = mainCamera.transform.position.z + cameraDinoZOffset;
 
             transform.position = worldPosition;
+        }
+    }
+
+    void SyncRotationWithCamera()
+    {
+        if (cameraController != null)
+        {
+            // Obtener la rotación en X de la cámara
+            float cameraRotationX = mainCamera.transform.eulerAngles.x;
+
+            // Aplicar la rotación al dinosaurio
+            transform.rotation = Quaternion.Euler(cameraRotationX, 0f, 0f);
         }
     }
 
@@ -166,13 +197,11 @@ public class DinoDragHandler : MonoBehaviour
                 idleMovementScript.enabled = true;
             }
 
-            // Ajustar la posición en Y para que los pies toquen el suelo
-            AdjustPositionToGround(boxAreaY);
+            // Ajustar la posición en Y
+            AdjustPositionToGround();
 
             // Iniciar rotación suave a X=0
-            if (rotationCoroutine != null)
-                StopCoroutine(rotationCoroutine);
-            rotationCoroutine = StartCoroutine(SmoothRotateTo(0f, 0.5f)); // Duración de 0.5 segundos
+            StartCoroutine(SmoothRotateTo(0f));
 
             return;
         }
@@ -185,8 +214,8 @@ public class DinoDragHandler : MonoBehaviour
             {
                 isDragging = false;
 
-                // Ajustar la posición en Y para que los pies toquen el suelo
-                AdjustPositionToGround(arenaY);
+                // Ajustar la posición en Y
+                transform.position = new Vector3(transform.position.x, arenaY, transform.position.z);
 
                 // Reactivar Rigidbody y colisiones
                 if (rb != null)
@@ -203,9 +232,7 @@ public class DinoDragHandler : MonoBehaviour
                 }
 
                 // Iniciar rotación suave a X=0
-                if (rotationCoroutine != null)
-                    StopCoroutine(rotationCoroutine);
-                rotationCoroutine = StartCoroutine(SmoothRotateTo(0f, 0.5f)); // Duración de 0.5 segundos
+                StartCoroutine(SmoothRotateTo(0f));
 
                 return;
             }
@@ -252,26 +279,27 @@ public class DinoDragHandler : MonoBehaviour
         }
 
         // Iniciar rotación suave a X=0
-        if (rotationCoroutine != null)
-            StopCoroutine(rotationCoroutine);
-        rotationCoroutine = StartCoroutine(SmoothRotateTo(0f, 0.5f)); // Duración de 0.5 segundos
+        StartCoroutine(SmoothRotateTo(0f));
     }
 
-    void AdjustPositionToGround(float groundY)
+    void AdjustPositionToGround()
     {
-        // Ajustar la posición en Y para que los pies toquen el suelo
-        // Obtener el tamaño del dinosaurio en Y (altura)
-        float dinoHeight = GetComponent<Renderer>().bounds.size.y;
-
-        // Calcular la posición en Y donde los pies tocan el suelo
-        float footPositionY = groundY + (dinoHeight / 2f);
-
-        // Establecer la posición en Y del dinosaurio
-        transform.position = new Vector3(transform.position.x, footPositionY, transform.position.z);
+        // Hacer un Raycast hacia abajo para ajustar la posición en Y
+        Ray ray = new Ray(transform.position + Vector3.up * 1f, Vector3.down);
+        if (Physics.Raycast(ray, out RaycastHit hit, 2f))
+        {
+            transform.position = new Vector3(transform.position.x, hit.point.y, transform.position.z);
+        }
+        else
+        {
+            // Si no se detecta el suelo, establecer Y a arenaY
+            transform.position = new Vector3(transform.position.x, arenaY, transform.position.z);
+        }
     }
 
-    IEnumerator SmoothRotateTo(float targetXRotation, float duration)
+    IEnumerator SmoothRotateTo(float targetXRotation)
     {
+        float duration = 0.5f; // Duración de la rotación suave
         float elapsedTime = 0f;
 
         Quaternion startingRotation = transform.rotation;
