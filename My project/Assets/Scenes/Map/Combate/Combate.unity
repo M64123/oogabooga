@@ -570,15 +570,14 @@ MonoBehaviour:
   boxAreaLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  boxAreaY: 0
   arenaY: 10
-  cameraDinoZOffset: 5
-  transitionDuration: 1
-  movementCurve:
-    serializedVersion: 2
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  dinoYOffset: 2
+  planeYTransitionSpeed: 5
+  boxAreaCollider: {fileID: 57391599}
+  arenaCollider: {fileID: 1116417798}
+  cameraDinoOffset: {x: 0, y: 0, z: 4}
+  dinoTransitionDuration: 1
 --- !u!114 &853920164
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -609,6 +608,7 @@ GameObject:
   - component: {fileID: 1116417800}
   - component: {fileID: 1116417799}
   - component: {fileID: 1116417798}
+  - component: {fileID: 1116417802}
   m_Layer: 7
   m_Name: Arena
   m_TagString: Arena
@@ -703,6 +703,27 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1116417802
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1116417797}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 10, y: 2.220446e-16, z: 10}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1393452453
 GameObject:
   m_ObjectHideFlags: 0

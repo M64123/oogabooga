@@ -7,12 +7,12 @@ public class DinoDragHandler : MonoBehaviour
 {
     private bool isDragging = false;
     private bool isTransitioning = false;
-    private float transitionProgress = 0f;
+    private bool isMovingToCursor = false;
 
     private Camera mainCamera;
     public CameraController cameraController;
 
-    // Referencia al Rigidbody y Animator (si es necesario)
+    // Referencias
     private Rigidbody rb;
     private Animator animator;
 
@@ -31,20 +31,34 @@ public class DinoDragHandler : MonoBehaviour
     // Posición original del dinosaurio
     private Vector3 originalPosition;
 
-    // Altura de la arena
+    // Alturas de las áreas
+    public float boxAreaY = 0f;
     public float arenaY = 10f;
 
-    // Variables para el movimiento y rotación
-    public float cameraDinoZOffset = 1f; // Offset en Z entre la cámara y el dinosaurio durante el arrastre
-    public float transitionDuration = 1f; // Duración de la transición de elevación al iniciar el arrastre
+    // Offset en Y del dinosaurio sobre el cursor
+    public float dinoYOffset = 1f;
 
-    // Curva para el movimiento en Z (para lograr la trayectoria curva)
-    public AnimationCurve movementCurve;
+    // Variables para el smooth transition entre planos
+    private float currentPlaneY;
+    private float targetPlaneY;
+    public float planeYTransitionSpeed = 5f;
 
-    // Variables internas para el movimiento
-    private Vector3 startDragPosition;
-    private Vector3 targetDragPosition;
-    private Quaternion startRotation;
+    // Bounds de las áreas
+    public Collider boxAreaCollider;
+    public Collider arenaCollider;
+
+    // Offset respecto a la cámara durante la transición
+    public Vector3 cameraDinoOffset = new Vector3(0f, 0f, 2f);
+
+    // Duración de la transición del dinosaurio hacia el offset de la cámara
+    public float dinoTransitionDuration = 1f;
+
+    // Duración de la transición suave hacia el cursor
+    public float dinoToCursorTransitionDuration = 0.5f;
+
+    // Variables internas
+    private Vector3 transitionStartPosition;
+    private float transitionElapsedTime = 0f;
 
     void Start()
     {
@@ -61,39 +75,79 @@ public class DinoDragHandler : MonoBehaviour
         {
             cameraController = mainCamera.GetComponent<CameraController>();
         }
+
+        // Suscribirse a los eventos de transición de la cámara
+        cameraController.OnTransitionStart += OnCameraTransitionStart;
+        cameraController.OnTransitionEnd += OnCameraTransitionEnd;
+
+        // Inicializar currentPlaneY
+        currentPlaneY = transform.position.y - dinoYOffset;
+        targetPlaneY = currentPlaneY;
     }
 
     void Update()
     {
-        if (isTransitioning)
+        if (isDragging)
         {
-            // Actualizar el progreso de la transición
-            transitionProgress += Time.deltaTime / transitionDuration;
-            if (transitionProgress >= 1f)
+            if (isTransitioning)
             {
-                transitionProgress = 1f;
-                isTransitioning = false;
+                // Durante la transición, mover el dinosaurio hacia el offset de la cámara suavemente
+                transitionElapsedTime += Time.deltaTime;
+                float t = Mathf.Clamp01(transitionElapsedTime / dinoTransitionDuration);
+                Vector3 targetPosition = mainCamera.transform.position + mainCamera.transform.rotation * cameraDinoOffset;
+                transform.position = Vector3.Lerp(transitionStartPosition, targetPosition, t);
+
+                // Sincronizar la rotación con la cámara en el eje X
+                SyncRotationWithCamera();
             }
+            else if (isMovingToCursor)
+            {
+                // Transición suave hacia la posición bajo el cursor
+                transitionElapsedTime += Time.deltaTime;
+                float t = Mathf.Clamp01(transitionElapsedTime / dinoToCursorTransitionDuration);
 
-            // Movimiento en curva usando la AnimationCurve
-            float curveValue = movementCurve.Evaluate(transitionProgress);
-            transform.position = Vector3.Lerp(startDragPosition, targetDragPosition, curveValue);
+                // Obtener la posición objetivo bajo el cursor
+                Vector3 targetPosition = GetCursorPositionOnPlane() + new Vector3(0f, dinoYOffset, 0f);
 
-            // Sincronizar la rotación con la cámara en el eje X
-            SyncRotationWithCamera();
+                // Limitar la posición del dinosaurio dentro de los límites del área actual
+                targetPosition = ClampPositionToCurrentArea(targetPosition);
+
+                // Mover el dinosaurio suavemente hacia la posición objetivo
+                transform.position = Vector3.Lerp(transitionStartPosition, targetPosition, t);
+
+                // Sincronizar la rotación con la cámara en el eje X
+                SyncRotationWithCamera();
+
+                if (t >= 1f)
+                {
+                    isMovingToCursor = false;
+                }
+            }
+            else
+            {
+                UpdatePlaneY();
+
+                FollowCursor();
+
+                // Sincronizar la rotación con la cámara en el eje X
+                SyncRotationWithCamera();
+
+                // Detectar clic para intentar soltar el dinosaurio
+                if (Input.GetMouseButtonDown(0))
+                {
+                    TryDropDino();
+                }
+            }
         }
-        else if (isDragging)
+    }
+
+    void OnDestroy()
+    {
+        // Desuscribirse de los eventos
+        if (cameraController != null)
         {
-            FollowCursor();
-
-            // Sincronizar la rotación con la cámara en el eje X
-            SyncRotationWithCamera();
-
-            // Detectar clic para intentar soltar el dinosaurio
-            if (Input.GetMouseButtonDown(0))
-            {
-                TryDropDino();
-            }
+            cameraController.OnTransitionStart -= OnCameraTransitionStart;
+            cameraController.OnTransitionEnd -= OnCameraTransitionEnd;
         }
     }
 
@@ -103,7 +157,7 @@ public class DinoDragHandler : MonoBehaviour
         if (!CompareTag(allyTag))
             return;
 
-        if (!isDragging && !isTransitioning)
+        if (!isDragging && !isTransitioning && !isMovingToCursor)
         {
             StartDragging();
         }
@@ -133,47 +187,109 @@ public class DinoDragHandler : MonoBehaviour
         {
             animator.SetBool("isMoving", false);
         }
+    }
 
-        // Guardar la posición inicial
-        startDragPosition = transform.position;
-        startRotation = transform.rotation;
+    void UpdatePlaneY()
+    {
+        float detectedPlaneY = GetCurrentAreaY();
 
-        // Calcular la posición objetivo (elevada)
-        Vector3 cameraForward = mainCamera.transform.forward;
-        targetDragPosition = mainCamera.transform.position + cameraForward * cameraDinoZOffset;
-        targetDragPosition.y += cameraDinoZOffset; // Elevar en Y si es necesario
+        if (Mathf.Abs(detectedPlaneY - targetPlaneY) > 0.01f)
+        {
+            // Cambiar el targetPlaneY
+            targetPlaneY = detectedPlaneY;
+        }
 
-        // Iniciar la transición
-        transitionProgress = 0f;
-        isTransitioning = true;
+        // Suavizar la transición de currentPlaneY hacia targetPlaneY
+        currentPlaneY = Mathf.MoveTowards(currentPlaneY, targetPlaneY, planeYTransitionSpeed * Time.deltaTime);
     }
 
     void FollowCursor()
     {
-        // Obtener la posición del cursor en el mundo
+        Vector3 cursorPosition = GetCursorPositionOnPlane();
+
+        // Posicionar el dinosaurio con un offset en Y sobre el cursor
+        Vector3 dinoPosition = new Vector3(cursorPosition.x, currentPlaneY + dinoYOffset, cursorPosition.z);
+
+        // Limitar la posición del dinosaurio dentro de los límites del área actual
+        dinoPosition = ClampPositionToCurrentArea(dinoPosition);
+
+        transform.position = dinoPosition;
+    }
+
+    Vector3 GetCursorPositionOnPlane()
+    {
+        // Crear un plano horizontal en la altura currentPlaneY
+        Plane plane = new Plane(Vector3.up, new Vector3(0f, currentPlaneY, 0f));
+
+        // Hacer un Raycast desde la cámara al cursor
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        Plane plane = new Plane(Vector3.forward, mainCamera.transform.position + mainCamera.transform.forward * cameraDinoZOffset);
         if (plane.Raycast(ray, out float distance))
         {
-            Vector3 worldPosition = ray.GetPoint(distance);
+            return ray.GetPoint(distance);
+        }
 
-            // Aplicar offset en Z
-            worldPosition.z = mainCamera.transform.position.z + cameraDinoZOffset;
+        // Si no se puede obtener la posición, devolver la posición actual
+        return transform.position;
+    }
 
-            transform.position = worldPosition;
+    Vector3 ClampPositionToCurrentArea(Vector3 position)
+    {
+        Bounds currentBounds = GetCurrentAreaBounds();
+
+        // En la Arena, limitar a X negativa
+        if (IsInArena())
+        {
+            position.x = Mathf.Clamp(position.x, currentBounds.min.x, 0f);
+        }
+        else
+        {
+            position.x = Mathf.Clamp(position.x, currentBounds.min.x, currentBounds.max.x);
+        }
+
+        position.z = Mathf.Clamp(position.z, currentBounds.min.z, currentBounds.max.z);
+        return position;
+    }
+
+    Bounds GetCurrentAreaBounds()
+    {
+        if (Mathf.Abs(currentPlaneY - boxAreaY) < Mathf.Abs(currentPlaneY - arenaY))
+        {
+            // Estamos en el BoxArea
+            return boxAreaCollider.bounds;
+        }
+        else
+        {
+            // Estamos en la Arena
+            return arenaCollider.bounds;
+        }
+    }
+
+    float GetCurrentAreaY()
+    {
+        // Hacer un Raycast desde el cursor para detectar sobre qué área está
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, arenaLayerMask))
+        {
+            return arenaY;
+        }
+        else if (Physics.Raycast(ray, out hit, Mathf.Infinity, boxAreaLayerMask))
+        {
+            return boxAreaY;
+        }
+        else
+        {
+            // Si no está sobre ninguna área, mantener el targetPlaneY actual
+            return targetPlaneY;
         }
     }
 
     void SyncRotationWithCamera()
     {
-        if (cameraController != null)
-        {
-            // Obtener la rotación en X de la cámara
-            float cameraRotationX = mainCamera.transform.eulerAngles.x;
+        // Obtener la rotación en X de la cámara
+        float cameraRotationX = mainCamera.transform.eulerAngles.x;
 
-            // Aplicar la rotación al dinosaurio
-            transform.rotation = Quaternion.Euler(cameraRotationX, 0f, 0f);
-        }
+        // Aplicar la rotación al dinosaurio
+        transform.rotation = Quaternion.Euler(cameraRotationX, 0f, 0f);
     }
 
     void TryDropDino()
@@ -181,28 +297,7 @@ public class DinoDragHandler : MonoBehaviour
         // Intentar soltar en el Box Area
         if (IsPointerOverLayer(boxAreaLayerMask))
         {
-            isDragging = false;
-
-            // Reactivar Rigidbody y colisiones
-            if (rb != null)
-            {
-                rb.useGravity = true;
-                rb.isKinematic = false;
-                rb.detectCollisions = true;
-            }
-
-            // Reactivar el movimiento aleatorio
-            if (idleMovementScript != null)
-            {
-                idleMovementScript.enabled = true;
-            }
-
-            // Ajustar la posición en Y
-            AdjustPositionToGround();
-
-            // Iniciar rotación suave a X=0
-            StartCoroutine(SmoothRotateTo(0f));
-
+            StopDragging(true, boxAreaY);
             return;
         }
 
@@ -212,28 +307,7 @@ public class DinoDragHandler : MonoBehaviour
             // Verificar si la posición está en el lado del jugador (X negativa)
             if (transform.position.x <= 0)
             {
-                isDragging = false;
-
-                // Ajustar la posición en Y
-                transform.position = new Vector3(transform.position.x, arenaY, transform.position.z);
-
-                // Reactivar Rigidbody y colisiones
-                if (rb != null)
-                {
-                    rb.useGravity = true;
-                    rb.isKinematic = false;
-                    rb.detectCollisions = true;
-                }
-
-                // Desactivar el movimiento aleatorio
-                if (idleMovementScript != null)
-                {
-                    idleMovementScript.enabled = false;
-                }
-
-                // Iniciar rotación suave a X=0
-                StartCoroutine(SmoothRotateTo(0f));
-
+                StopDragging(false, arenaY);
                 return;
             }
             else
@@ -249,14 +323,46 @@ public class DinoDragHandler : MonoBehaviour
         // Opcionalmente, puedes mostrar feedback al usuario
     }
 
+    void StopDragging(bool inBoxArea, float groundY)
+    {
+        isDragging = false;
+
+        // Reactivar Rigidbody y colisiones
+        if (rb != null)
+        {
+            rb.useGravity = true;
+            rb.isKinematic = false;
+            rb.detectCollisions = true;
+        }
+
+        // Ajustar la posición en Y para que los pies toquen el suelo
+        AdjustPositionToGround(groundY);
+
+        if (inBoxArea)
+        {
+            // Reactivar el movimiento aleatorio
+            if (idleMovementScript != null)
+            {
+                idleMovementScript.enabled = true;
+            }
+        }
+        else
+        {
+            // Desactivar el movimiento aleatorio
+            if (idleMovementScript != null)
+            {
+                idleMovementScript.enabled = false;
+            }
+        }
+
+        // Iniciar rotación suave a X=0
+        StartCoroutine(SmoothRotateTo(0f));
+    }
+
     bool IsPointerOverLayer(LayerMask layerMask)
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, layerMask))
-        {
-            return true;
-        }
-        return false;
+        return Physics.Raycast(ray, Mathf.Infinity, layerMask);
     }
 
     void ReturnToOriginalPosition()
@@ -282,19 +388,17 @@ public class DinoDragHandler : MonoBehaviour
         StartCoroutine(SmoothRotateTo(0f));
     }
 
-    void AdjustPositionToGround()
+    void AdjustPositionToGround(float groundY)
     {
-        // Hacer un Raycast hacia abajo para ajustar la posición en Y
-        Ray ray = new Ray(transform.position + Vector3.up * 1f, Vector3.down);
-        if (Physics.Raycast(ray, out RaycastHit hit, 2f))
-        {
-            transform.position = new Vector3(transform.position.x, hit.point.y, transform.position.z);
-        }
-        else
-        {
-            // Si no se detecta el suelo, establecer Y a arenaY
-            transform.position = new Vector3(transform.position.x, arenaY, transform.position.z);
-        }
+        // Ajustar la posición en Y para que los pies toquen el suelo
+        // Obtener el tamaño del dinosaurio en Y (altura)
+        float dinoHeight = GetComponent<Renderer>().bounds.size.y;
+
+        // Calcular la posición en Y donde los pies tocan el suelo
+        float footPositionY = groundY + (dinoHeight / 2f);
+
+        // Establecer la posición en Y del dinosaurio
+        transform.position = new Vector3(transform.position.x, footPositionY, transform.position.z);
     }
 
     IEnumerator SmoothRotateTo(float targetXRotation)
@@ -313,5 +417,48 @@ public class DinoDragHandler : MonoBehaviour
         }
 
         transform.rotation = targetRotation;
+    }
+
+    void OnCameraTransitionStart()
+    {
+        if (isDragging)
+        {
+            isTransitioning = true;
+            transitionStartPosition = transform.position;
+            transitionElapsedTime = 0f;
+        }
+    }
+
+    void OnCameraTransitionEnd()
+    {
+        if (isDragging)
+        {
+            isTransitioning = false;
+            // Actualizar la referencia de la cámara principal
+            mainCamera = Camera.main;
+
+            // Determinar el área actual basado en la posición de la cámara
+            if (cameraController.IsInPosition1)
+            {
+                // Estamos en el BoxArea
+                targetPlaneY = boxAreaY;
+            }
+            else
+            {
+                // Estamos en la Arena
+                targetPlaneY = arenaY;
+            }
+            currentPlaneY = targetPlaneY;
+
+            // Iniciar transición suave hacia la posición bajo el cursor
+            isMovingToCursor = true;
+            transitionStartPosition = transform.position;
+            transitionElapsedTime = 0f;
+        }
+    }
+
+    bool IsInArena()
+    {
+        return Mathf.Abs(currentPlaneY - arenaY) < Mathf.Abs(currentPlaneY - boxAreaY);
     }
 }

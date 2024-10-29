@@ -1,6 +1,7 @@
 // CameraController.cs
 
 using UnityEngine;
+using System;
 
 public class CameraController : MonoBehaviour
 {
@@ -35,6 +36,13 @@ public class CameraController : MonoBehaviour
     [Range(0f, 1f)]
     public float lowerZoneThreshold = 0.4f; // Porcentaje de altura para la zona inferior
 
+    // Eventos de transición
+    public event Action OnTransitionStart;
+    public event Action OnTransitionEnd;
+
+    // Propiedad para acceder a la posición actual de la cámara
+    public bool IsInPosition1 { get { return isInPosition1; } }
+
     void Start()
     {
         // Establecer la posición inicial
@@ -58,6 +66,9 @@ public class CameraController : MonoBehaviour
                 // Establecer la posición y rotación finales exactas
                 transform.position = targetPosition;
                 transform.eulerAngles = targetRotation;
+
+                // Disparar evento de fin de transición
+                OnTransitionEnd?.Invoke();
             }
             else
             {
@@ -131,6 +142,9 @@ public class CameraController : MonoBehaviour
 
         transitionProgress = 0f;
         isTransitioning = true;
+
+        // Disparar evento de inicio de transición
+        OnTransitionStart?.Invoke();
     }
 
     float LogisticFunctionNormalized(float t, float k, float t0)
