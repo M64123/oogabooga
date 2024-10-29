@@ -561,8 +561,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraController: {fileID: 1393452457}
-  arenaTag: Arena
-  boxAreaTag: BoxArea
   allyTag: Ally
   arenaLayerMask:
     serializedVersion: 2
@@ -570,6 +568,12 @@ MonoBehaviour:
   boxAreaLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  dinoLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  ignoreLayers:
+    serializedVersion: 2
+    m_Bits: 0
   boxAreaY: 0
   arenaY: 10
   dinoYOffset: 2
@@ -578,6 +582,7 @@ MonoBehaviour:
   arenaCollider: {fileID: 1116417798}
   cameraDinoOffset: {x: 0, y: 0, z: 4}
   dinoTransitionDuration: 1
+  dinoToCursorTransitionDuration: 0.4
 --- !u!114 &853920164
 MonoBehaviour:
   m_ObjectHideFlags: 0
