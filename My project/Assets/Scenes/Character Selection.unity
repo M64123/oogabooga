@@ -168,7 +168,7 @@ MonoBehaviour:
     rotation: {x: 20, y: 0, z: 0}
   - position: {x: 5, y: 3, z: -1}
     rotation: {x: 20, y: 0, z: 0}
-  - position: {x: 11, y: 3, z: -14}
+  - position: {x: 11, y: 3, z: -5}
     rotation: {x: 20, y: 0, z: 0}
   cameraTransitionDuration: 1
   bottomZoneThreshold: 0.1
@@ -305,7 +305,7 @@ Transform:
   m_GameObject: {fileID: 757691049}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.83, y: 1.33, z: -2.51}
+  m_LocalPosition: {x: 10.83, y: 1.33, z: -1}
   m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -549,7 +549,7 @@ Transform:
   m_GameObject: {fileID: 894967860}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9.22, y: 1.33, z: -1.26}
+  m_LocalPosition: {x: -9.22, y: 1.33, z: -1}
   m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
