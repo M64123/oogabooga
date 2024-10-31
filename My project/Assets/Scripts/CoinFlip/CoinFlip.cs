@@ -8,8 +8,8 @@ public class CoinFlip : MonoBehaviour
     private bool thrown = false;
 
     [Header("Force Settings")]
-    public float upwardForce = 20f; // Ajusta este valor según tus necesidades
-    public float torqueForce = 1000f; // Ajusta este valor según tus necesidades
+    public float upwardForce = 10f; // Ajusta según sea necesario
+    public float torqueForce = 1500f; // Incrementa este valor para mayor rotación
 
     [Header("Result")]
     public string coinSide; // "Cara" o "Cruz"
@@ -19,8 +19,10 @@ public class CoinFlip : MonoBehaviour
     {
         Debug.Log("Start() llamado");
         rb = GetComponent<Rigidbody>();
-        // Bajar el centro de masa en el eje Y
-        rb.centerOfMass = new Vector3(0, -0.1f, 0);
+
+        // Opcional: ajustar el centro de masa si es necesario
+        // rb.centerOfMass = new Vector3(0, -0.1f, 0);
+
         ResetCoin();
     }
 
@@ -41,13 +43,6 @@ public class CoinFlip : MonoBehaviour
             Debug.Log("La moneda ha aterrizado - DetermineSide()");
             hasLanded = true;
             DetermineSide();
-
-            // Si la moneda cayó de canto, permitir volver a lanzar
-            if (coinSide == "Canto")
-            {
-                thrown = false;
-                hasLanded = false;
-            }
         }
 
         if (Input.GetKeyDown(KeyCode.R))
@@ -56,7 +51,6 @@ public class CoinFlip : MonoBehaviour
             ResetCoin();
         }
     }
-
     public void FlipCoin()
     {
         Debug.Log("FlipCoin() llamado");
@@ -66,28 +60,37 @@ public class CoinFlip : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        // Aplicar fuerza hacia arriba y torque aleatorio
+        // **Aplicar una rotación inicial aleatoria**
+        transform.rotation = Random.rotation;
+
+        // Aplicar fuerza hacia arriba
         rb.AddForce(Vector3.up * upwardForce, ForceMode.Impulse);
-        rb.AddTorque(Random.insideUnitSphere * torqueForce);
+
+        // Aplicar torque aleatorio
+        Vector3 randomTorque = new Vector3(
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f),
+            Random.Range(-1f, 1f)
+        ).normalized * torqueForce;
+
+        rb.AddTorque(randomTorque, ForceMode.Impulse);
     }
+
+
     void DetermineSide()
     {
         Debug.Log("DetermineSide() llamado");
 
-        // Obtener el vector hacia arriba de la moneda en el mundo
-        Vector3 coinUp = transform.up;
+        // Calcular el producto punto entre el vector hacia arriba de la moneda y el eje Y
+        float dot = Vector3.Dot(transform.up, Vector3.up);
+        Debug.Log("Valor del producto punto: " + dot);
 
-        // Calcular el ángulo entre el vector hacia arriba de la moneda y el eje Y
-        float angle = Vector3.Angle(coinUp, Vector3.up);
-
-        Debug.Log("Ángulo respecto al eje Y: " + angle);
-
-        // Determinar el lado basándose en el ángulo
-        if (angle < 10f)
+        // Determinar el lado basándose en el producto punto
+        if (dot > 0)
         {
             coinSide = "Cara";
         }
-        else if (angle > 170f)
+        else if (dot < 0)
         {
             coinSide = "Cruz";
         }
@@ -96,6 +99,7 @@ public class CoinFlip : MonoBehaviour
             coinSide = "Canto";
         }
 
+        // Mostrar el resultado
         if (coinSide == "Canto")
         {
             if (resultText != null)
@@ -113,6 +117,8 @@ public class CoinFlip : MonoBehaviour
             Debug.Log("Resultado: " + coinSide);
         }
     }
+
+
 
     public void ResetCoin()
     {

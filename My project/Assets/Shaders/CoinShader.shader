@@ -2,7 +2,7 @@ Shader "Custom/CoinShader"
 {
     Properties
     {
-        _MainTex ("Base Texture", 2D) = "white" {}
+        _MainTex ("Edge Texture", 2D) = "white" {}
         _TopTex ("Top Texture", 2D) = "white" {}
         _BottomTex ("Bottom Texture", 2D) = "white" {}
     }
@@ -12,7 +12,7 @@ Shader "Custom/CoinShader"
         LOD 200
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows
+        #pragma surface surf Standard fullforwardshadows vertex:vert
         #pragma target 3.0
 
         sampler2D _MainTex;
@@ -22,21 +22,28 @@ Shader "Custom/CoinShader"
         struct Input
         {
             float2 uv_MainTex;
-            float3 worldNormal;
+            float3 normalOS; // Normal en espacio de objeto
         };
+
+        void vert (inout appdata_full v, out Input o)
+        {
+            UNITY_INITIALIZE_OUTPUT(Input, o);
+            o.normalOS = v.normal;
+            o.uv_MainTex = v.texcoord;
+        }
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
-            float3 normalWorld = normalize(IN.worldNormal);
+            float yNormal = IN.normalOS.y;
 
             fixed4 texColor;
 
-            if (normalWorld.y > 0.5)
+            if (yNormal > 0.5)
             {
                 // Cara superior
                 texColor = tex2D(_TopTex, IN.uv_MainTex);
             }
-            else if (normalWorld.y < -0.5)
+            else if (yNormal < -0.5)
             {
                 // Cara inferior
                 texColor = tex2D(_BottomTex, IN.uv_MainTex);
@@ -50,6 +57,7 @@ Shader "Custom/CoinShader"
             o.Albedo = texColor.rgb;
             o.Alpha = texColor.a;
         }
+
         ENDCG
     }
     FallBack "Diffuse"
