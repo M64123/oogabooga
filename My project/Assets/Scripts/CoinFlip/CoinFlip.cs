@@ -8,74 +8,73 @@ public class CoinFlip : MonoBehaviour
     private bool thrown = false;
 
     [Header("Force Settings")]
-    public float upwardForce = 10f; // Ajusta según sea necesario
-    public float torqueForce = 1500f; // Incrementa este valor para mayor rotación
+    public float upwardForce = 7f; // Ajusta según sea necesario
+    public float torqueForce = 1000f; // Ajusta según sea necesario
 
     [Header("Result")]
     public string coinSide; // "Cara" o "Cruz"
     public Text resultText; // Asigna el elemento de texto en el inspector (opcional)
+
+    // Propiedad pública para acceder al estado 'thrown'
+    public bool IsThrown
+    {
+        get { return thrown; }
+    }
 
     void Start()
     {
         Debug.Log("Start() llamado");
         rb = GetComponent<Rigidbody>();
 
-        // Opcional: ajustar el centro de masa si es necesario
-        // rb.centerOfMass = new Vector3(0, -0.1f, 0);
+        // Bajar el centro de masa en el eje Y para evitar que caiga de canto
+        rb.centerOfMass = new Vector3(0, -0.1f, 0);
+
+        // Asegurarse de que la gravedad está desactivada inicialmente
+        rb.useGravity = false;
+
+        // Configurar Collision Detection y Interpolation
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
 
         ResetCoin();
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && !thrown && !hasLanded)
+        // Nota: Eliminamos el Input.GetKeyDown(KeyCode.Space) de aquí si ahora el lanzamiento lo controla la cámara
+    }
+
+    public void FlipCoin()
+    {
+        if (!thrown && !hasLanded)
         {
-            Debug.Log("Tecla Espacio presionada - FlipCoin()");
+            Debug.Log("FlipCoin() llamado");
+            thrown = true;
+
+            // Activar la gravedad
+            rb.useGravity = true;
+
+            // Limpiar velocidades anteriores
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+
+            // Aplicar una rotación inicial aleatoria
+            transform.rotation = Random.rotation;
+
+            // Aplicar fuerza hacia arriba con variación aleatoria
+            float randomUpwardForce = Random.Range(upwardForce * 0.9f, upwardForce * 1.1f);
+            rb.AddForce(Vector3.up * randomUpwardForce, ForceMode.Impulse);
+
+            // Aplicar torque aleatorio
+            Vector3 randomTorque = Random.insideUnitSphere * torqueForce;
+            rb.AddTorque(randomTorque, ForceMode.Impulse);
+
             if (resultText != null)
             {
                 resultText.text = "Lanzando...";
             }
-            FlipCoin();
-        }
-
-        if (rb.IsSleeping() && thrown && !hasLanded)
-        {
-            Debug.Log("La moneda ha aterrizado - DetermineSide()");
-            hasLanded = true;
-            DetermineSide();
-        }
-
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            Debug.Log("Tecla R presionada - ResetCoin()");
-            ResetCoin();
         }
     }
-    public void FlipCoin()
-    {
-        Debug.Log("FlipCoin() llamado");
-        thrown = true;
-
-        // Limpiar velocidades anteriores
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-
-        // **Aplicar una rotación inicial aleatoria**
-        transform.rotation = Random.rotation;
-
-        // Aplicar fuerza hacia arriba
-        rb.AddForce(Vector3.up * upwardForce, ForceMode.Impulse);
-
-        // Aplicar torque aleatorio
-        Vector3 randomTorque = new Vector3(
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f),
-            Random.Range(-1f, 1f)
-        ).normalized * torqueForce;
-
-        rb.AddTorque(randomTorque, ForceMode.Impulse);
-    }
-
 
     void DetermineSide()
     {
@@ -85,40 +84,31 @@ public class CoinFlip : MonoBehaviour
         float dot = Vector3.Dot(transform.up, Vector3.up);
         Debug.Log("Valor del producto punto: " + dot);
 
-        // Determinar el lado basándose en el producto punto
-        if (dot > 0)
+        // Umbral para considerar si está de canto
+        float threshold = 0.1f; // Puedes ajustar este valor
+
+        if (dot > threshold)
         {
             coinSide = "Cara";
         }
-        else if (dot < 0)
+        else if (dot < -threshold)
         {
             coinSide = "Cruz";
         }
         else
         {
-            coinSide = "Canto";
+            // Forzar el resultado a "Cara" o "Cruz" si está cerca del canto
+            coinSide = (Random.value > 0.5f) ? "Cara" : "Cruz";
+            Debug.Log("La moneda cayó cerca del canto. Resultado forzado a: " + coinSide);
         }
 
         // Mostrar el resultado
-        if (coinSide == "Canto")
+        if (resultText != null)
         {
-            if (resultText != null)
-            {
-                resultText.text = "La moneda cayó de canto. Vuelve a lanzar.";
-            }
-            Debug.Log("La moneda cayó de canto. Vuelve a lanzar.");
+            resultText.text = "Resultado: " + coinSide;
         }
-        else
-        {
-            if (resultText != null)
-            {
-                resultText.text = "Resultado: " + coinSide;
-            }
-            Debug.Log("Resultado: " + coinSide);
-        }
+        Debug.Log("Resultado: " + coinSide);
     }
-
-
 
     public void ResetCoin()
     {
@@ -131,12 +121,27 @@ public class CoinFlip : MonoBehaviour
         // Restablecer la posición y rotación
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        transform.position = new Vector3(0, 1, 0); // Ajusta la posición según necesites
+
+        // Establecer la posición inicial en Y = 1
+        transform.position = new Vector3(0, 1f, 0);
         transform.rotation = Quaternion.identity;
+
+        // Desactivar la gravedad
+        rb.useGravity = false;
 
         if (resultText != null)
         {
             resultText.text = "Presiona Espacio para lanzar la moneda";
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (thrown && !hasLanded)
+        {
+            Debug.Log("La moneda ha aterrizado - DetermineSide()");
+            hasLanded = true;
+            DetermineSide();
         }
     }
 }

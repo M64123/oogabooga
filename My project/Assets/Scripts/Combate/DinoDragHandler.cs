@@ -1,7 +1,6 @@
-// DinoDragHandler.cs
-
 using UnityEngine;
 using System.Collections;
+
 
 public class DinoDragHandler : MonoBehaviour
 {
@@ -20,10 +19,10 @@ public class DinoDragHandler : MonoBehaviour
     public string allyTag = "Ally";
 
     // LayerMasks para detección
-    public LayerMask arenaLayerMask;   // Agregado
-    public LayerMask boxAreaLayerMask; // Agregado
-    public LayerMask dinoLayerMask;    // LayerMask para el dinosaurio
-    public LayerMask ignoreLayers;     // Capas a ignorar en los raycasts
+    public LayerMask arenaLayerMask;
+    public LayerMask boxAreaLayerMask;
+    public LayerMask dinoLayerMask;
+    public LayerMask ignoreLayers;
 
     // Referencia al script de movimiento aleatorio
     private UnitIdleMovement idleMovementScript;
@@ -77,8 +76,11 @@ public class DinoDragHandler : MonoBehaviour
         }
 
         // Suscribirse a los eventos de transición de la cámara
-        cameraController.OnTransitionStart += OnCameraTransitionStart;
-        cameraController.OnTransitionEnd += OnCameraTransitionEnd;
+        if (cameraController != null)
+        {
+            cameraController.OnTransitionStart += OnCameraTransitionStart;
+            cameraController.OnTransitionEnd += OnCameraTransitionEnd;
+        }
 
         // Inicializar currentPlaneY
         currentPlaneY = transform.position.y - dinoYOffset;
