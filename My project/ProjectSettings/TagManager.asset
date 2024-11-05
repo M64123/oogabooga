@@ -18,9 +18,9 @@ TagManager:
   - BoxAreaLayer
   - ArenaLayer
   - DIno
-  - 
-  - 
-  - 
+  - Ground
+  - Clickable
+  - Attackable
   - 
   - 
   - 
