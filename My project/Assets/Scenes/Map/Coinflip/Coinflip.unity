@@ -234,7 +234,7 @@ MonoBehaviour:
   finalEulerAngles: {x: 90, y: 0, z: 0}
   movementDuration: 2
   followOffsetY: 2
-  curveHeight: 5
+  curveHeight: -5
 --- !u!1 &578221354
 GameObject:
   m_ObjectHideFlags: 0
