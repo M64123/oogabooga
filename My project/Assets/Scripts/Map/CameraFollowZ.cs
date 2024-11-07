@@ -2,30 +2,29 @@ using UnityEngine;
 
 public class CameraFollowZ : MonoBehaviour
 {
-    public Transform target;        // El transform del jugador
+    public Transform target;            // Transform del jugador
     public float smoothSpeed = 0.125f;  // Velocidad de suavizado
-    public Vector3 offset;          // Desplazamiento de la cámara respecto al jugador
+    public Vector3 offset;              // Desplazamiento de la cámara respecto al jugador
 
-    private float initialX;
-    private float initialY;
+    private Vector3 initialPosition;    // Posición inicial de la cámara
+    private bool isTransitioning = false; // Indica si la cámara está en transición
+    public float transitionDuration = 2f; // Duración de la transición en segundos
+    private float transitionTimer = 0f;   // Temporizador para la transición
 
     void Start()
     {
-        if (target != null)
-        {
-            // Guardar las posiciones iniciales X e Y de la cámara
-            initialX = transform.position.x;
-            initialY = transform.position.y;
+        // Guardar la posición inicial de la cámara
+        initialPosition = transform.position;
 
-            // Calcular el desplazamiento inicial si no se ha establecido
-            if (offset == Vector3.zero)
-            {
-                offset = transform.position - target.position;
-            }
+        if (target == null)
+        {
+            Debug.LogWarning("CameraFollowZ: El objetivo (jugador) no está asignado en Start.");
         }
         else
         {
-            Debug.Log("CameraFollowZ: El objetivo (jugador) no está asignado en Start. Se asignará cuando el jugador sea instanciado.");
+            // Iniciar la transición
+            isTransitioning = true;
+            transitionTimer = 0f;
         }
     }
 
@@ -33,15 +32,43 @@ public class CameraFollowZ : MonoBehaviour
     {
         if (target != null)
         {
-            // Mantener X e Y constantes, solo actualizar Z
-            float desiredZ = target.position.z + offset.z;
-            Vector3 desiredPosition = new Vector3(initialX, initialY, desiredZ);
+            if (isTransitioning)
+            {
+                // Incrementar el temporizador
+                transitionTimer += Time.deltaTime;
 
-            // Suavizar el movimiento de la cámara
-            Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
+                // Calcular el porcentaje completado de la transición
+                float t = transitionTimer / transitionDuration;
 
-            // Actualizar la posición de la cámara
-            transform.position = smoothedPosition;
+                // Suavizar el valor de t
+                t = Mathf.SmoothStep(0f, 1f, t);
+
+                // Posición objetivo con offset
+                Vector3 targetPosition = target.position + offset;
+
+                // Interpolar entre la posición inicial y la posición objetivo
+                Vector3 newPosition = Vector3.Lerp(initialPosition, targetPosition, t);
+
+                // Actualizar la posición de la cámara
+                transform.position = newPosition;
+
+                // Finalizar la transición cuando se alcance la duración
+                if (t >= 1f)
+                {
+                    isTransitioning = false;
+                }
+            }
+            else
+            {
+                // Una vez finalizada la transición, seguir al jugador manteniendo el offset
+                Vector3 desiredPosition = target.position + offset;
+
+                // Suavizar el movimiento de la cámara
+                Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
+
+                // Actualizar la posición de la cámara
+                transform.position = smoothedPosition;
+            }
         }
     }
 }

@@ -1,4 +1,3 @@
-// MapGenerator.cs
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -8,8 +7,17 @@ public class MapGenerator : MonoBehaviour
     public float nodeSpacingX = 2f;          // Espaciado horizontal base entre nodos
     public float nodeSpacingZ = 2f;          // Espaciado en el eje Z entre niveles
     public float xVariation = 0.5f;          // Variación máxima en X para los nodos
-    public GameObject nodePrefab;            // Prefab del nodo
-    public GameObject playerPrefab;          // Prefab del jugador
+
+    // Estructura para asociar NodeType con su prefab
+    [System.Serializable]
+    public struct NodePrefab
+    {
+        public NodeType nodeType;
+        public GameObject prefab;
+    }
+
+    public List<NodePrefab> nodePrefabs;  // Lista de prefabs por tipo de nodo
+    public GameObject playerPrefab;       // Prefab del jugador
 
     [HideInInspector]
     public List<MapNode> allNodes = new List<MapNode>();  // Lista de todos los nodos generados
@@ -430,8 +438,16 @@ public class MapGenerator : MonoBehaviour
         Debug.Log($"Dibujando {allNodes.Count} nodos en el mapa.");
         foreach (MapNode node in allNodes)
         {
+            // Obtener el prefab correspondiente al tipo de nodo
+            GameObject prefabToInstantiate = GetPrefabForNodeType(node.nodeType);
+            if (prefabToInstantiate == null)
+            {
+                Debug.LogError($"No se encontró un prefab para el tipo de nodo {node.nodeType}. Asegúrate de asignarlo en el Inspector.");
+                continue;
+            }
+
             // Instanciar el prefab del nodo
-            GameObject nodeObj = Instantiate(nodePrefab, node.position, Quaternion.identity);
+            GameObject nodeObj = Instantiate(prefabToInstantiate, node.position, Quaternion.identity);
             node.nodeObject = nodeObj;
 
             // Asignar el MapNode al script de interacción
@@ -455,6 +471,18 @@ public class MapGenerator : MonoBehaviour
                 DrawLine(node.position, connectedNode.position, Color.white);
             }
         }
+    }
+
+    private GameObject GetPrefabForNodeType(NodeType nodeType)
+    {
+        foreach (NodePrefab np in nodePrefabs)
+        {
+            if (np.nodeType == nodeType)
+            {
+                return np.prefab;
+            }
+        }
+        return null;
     }
 
     private void DrawLine(Vector3 start, Vector3 end, Color color)
