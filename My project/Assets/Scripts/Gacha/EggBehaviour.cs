@@ -17,17 +17,24 @@ public class EggBehaviour : MonoBehaviour
     public GameObject cubePrefab;       // Prefab del cubo que será lanzado
     public float cubeUpwardForce = 7f;  // Fuerza hacia arriba aplicada al cubo
     public float cubeTorqueForce = 1000f; // Fuerza de torque aplicada al cubo
+    public float sidewaysForceVariation = 0.1f; // Variación aleatoria lateral en la fuerza
 
     [Header("Dinosaur Display")]
     public Image dinoDisplay;          // Imagen UI para mostrar el dinosaurio
     public Text dinoInfoText;          // Texto para mostrar información del dinosaurio
     public float dinoScaleDuration = 1f; // Duración de la animación de escala
 
+    [Header("Dinosaur Scaling")]
+    public float dinoScaleMultiplier = 0.5f; // Multiplicador para ajustar el tamaño del dinosaurio desde el Inspector
+
     [Header("Dinosaur Sprites")]
     public List<Sprite> commonDinos;
     public List<Sprite> rareDinos;
     public List<Sprite> shinyCommonDinos;
     public List<Sprite> shinyRareDinos;
+
+    [Header("Timing Settings")]
+    public float maxWaitTime = 5f; // Tiempo máximo de espera antes de mostrar el dinosaurio
 
     private int clickCount = 0;
     private bool isAnimating = false;
@@ -38,6 +45,8 @@ public class EggBehaviour : MonoBehaviour
     private Sprite obtainedDinoSprite;
     private string obtainedDinoInfo;
     private Rarity obtainedDinoRarity;
+
+    private bool hasHatched = false; // Indica si el huevo ya se ha roto
 
     void Start()
     {
@@ -64,7 +73,7 @@ public class EggBehaviour : MonoBehaviour
 
     void OnMouseDown()
     {
-        if (!isAnimating)
+        if (!isAnimating && !hasHatched)
         {
             StartCoroutine(EggClickRoutine());
         }
@@ -149,10 +158,20 @@ public class EggBehaviour : MonoBehaviour
 
     void HatchEgg()
     {
+        // Indicar que el huevo ya se ha roto
+        hasHatched = true;
+
         // Ocultar los modelos del huevo
         foreach (GameObject eggModel in eggStages)
         {
             eggModel.SetActive(false);
+        }
+
+        // Desactivar el collider del huevo
+        Collider eggCollider = GetComponent<Collider>();
+        if (eggCollider != null)
+        {
+            eggCollider.enabled = false;
         }
 
         // Determinar el dinosaurio obtenido
@@ -218,23 +237,31 @@ public class EggBehaviour : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
+        // Calcular la dirección de la fuerza con variación aleatoria
+        Vector3 forceDirection = Vector3.up + new Vector3(
+            Random.Range(-sidewaysForceVariation, sidewaysForceVariation),
+            0f,
+            Random.Range(-sidewaysForceVariation, sidewaysForceVariation)
+        );
+        forceDirection.Normalize();
+
         // Aplicar fuerza hacia arriba con variación aleatoria
         float randomUpwardForce = Random.Range(cubeUpwardForce * 0.9f, cubeUpwardForce * 1.1f);
-        rb.AddForce(Vector3.up * randomUpwardForce, ForceMode.Impulse);
+        rb.AddForce(forceDirection * randomUpwardForce, ForceMode.Impulse);
 
         // Aplicar torque aleatorio
         Vector3 randomTorque = Random.insideUnitSphere * cubeTorqueForce;
         rb.AddTorque(randomTorque, ForceMode.Impulse);
 
-        // Iniciar coroutine para esperar a que el cubo aterrice
-        StartCoroutine(WaitForCubeToLand(cube));
+        // Iniciar coroutine para esperar el tiempo máximo antes de mostrar el dinosaurio
+        StartCoroutine(WaitForMaxTimeAndShowDino(cube));
     }
 
     void ConfigureCube(GameObject cube, Rarity rarity)
     {
         Renderer cubeRenderer = cube.GetComponent<Renderer>();
         TrailRenderer trail = cube.GetComponent<TrailRenderer>();
-        ParticleSystem particles = cube.GetComponentInChildren<ParticleSystem>();
+        ParticleSystem particles = cube.GetComponentInChildren<ParticleSystem>(true); // Incluir objetos inactivos
 
         switch (rarity)
         {
@@ -245,6 +272,7 @@ public class EggBehaviour : MonoBehaviour
                 {
                     trail.startColor = Color.white;
                     trail.endColor = Color.white;
+                    trail.enabled = true;
                 }
                 if (particles != null)
                 {
@@ -258,6 +286,7 @@ public class EggBehaviour : MonoBehaviour
                 {
                     trail.startColor = Color.blue;
                     trail.endColor = Color.blue;
+                    trail.enabled = true;
                 }
                 if (particles != null)
                 {
@@ -271,10 +300,12 @@ public class EggBehaviour : MonoBehaviour
                 {
                     trail.startColor = Color.white;
                     trail.endColor = Color.white;
+                    trail.enabled = true;
                 }
                 if (particles != null)
                 {
                     particles.gameObject.SetActive(true);
+                    // Configurar las partículas para shiny common
                     var main = particles.main;
                     main.startColor = new ParticleSystem.MinMaxGradient(Color.white, Color.cyan);
                 }
@@ -286,10 +317,12 @@ public class EggBehaviour : MonoBehaviour
                 {
                     trail.startColor = Color.blue;
                     trail.endColor = Color.blue;
+                    trail.enabled = true;
                 }
                 if (particles != null)
                 {
                     particles.gameObject.SetActive(true);
+                    // Configurar las partículas para shiny rare
                     var main = particles.main;
                     main.startColor = new ParticleSystem.MinMaxGradient(Color.blue, Color.magenta);
                 }
@@ -297,23 +330,15 @@ public class EggBehaviour : MonoBehaviour
         }
     }
 
-    IEnumerator WaitForCubeToLand(GameObject cube)
+    IEnumerator WaitForMaxTimeAndShowDino(GameObject cube)
     {
-        Rigidbody rb = cube.GetComponent<Rigidbody>();
-
-        // Esperar hasta que la velocidad del cubo sea baja (ha aterrizado)
-        while (rb.velocity.magnitude > 0.1f)
-        {
-            yield return null;
-        }
-
-        // Esperar un momento adicional para asegurarse
-        yield return new WaitForSeconds(1f);
+        // Esperar durante el tiempo máximo especificado
+        yield return new WaitForSeconds(maxWaitTime);
 
         // Mostrar el dinosaurio obtenido
         StartCoroutine(DisplayDinoWithScale(obtainedDinoSprite, obtainedDinoInfo));
 
-        // Puedes destruir el cubo si lo deseas
+        // Destruir el cubo
         Destroy(cube);
     }
 
@@ -323,9 +348,9 @@ public class EggBehaviour : MonoBehaviour
         dinoDisplay.gameObject.SetActive(true);
         dinoDisplay.sprite = dinoSprite;
 
-        // Ajustar el tamaño de la imagen al tamaño del sprite
+        // Ajustar el tamaño de la imagen al tamaño del sprite, multiplicado por el multiplicador de escala
         RectTransform rectTransform = dinoDisplay.GetComponent<RectTransform>();
-        rectTransform.sizeDelta = new Vector2(dinoSprite.rect.width, dinoSprite.rect.height);
+        rectTransform.sizeDelta = new Vector2(dinoSprite.rect.width * dinoScaleMultiplier, dinoSprite.rect.height * dinoScaleMultiplier);
 
         // Restablecer la escala a cero
         dinoDisplay.transform.localScale = Vector3.zero;
