@@ -13,6 +13,11 @@ public class EggBehaviour : MonoBehaviour
     public float rotationSpeed = 5f;   // Velocidad de inclinación
     public float rotationPauseDuration = 0.2f; // Pausa entre inclinaciones
 
+    [Header("Cube Settings")]
+    public GameObject cubePrefab;       // Prefab del cubo que será lanzado
+    public float cubeUpwardForce = 7f;  // Fuerza hacia arriba aplicada al cubo
+    public float cubeTorqueForce = 1000f; // Fuerza de torque aplicada al cubo
+
     [Header("Dinosaur Display")]
     public Image dinoDisplay;          // Imagen UI para mostrar el dinosaurio
     public Text dinoInfoText;          // Texto para mostrar información del dinosaurio
@@ -28,6 +33,11 @@ public class EggBehaviour : MonoBehaviour
     private bool isAnimating = false;
     private GameObject currentEggModel; // Modelo de huevo activo
     private Quaternion initialRotation;
+
+    // Información del dinosaurio obtenido
+    private Sprite obtainedDinoSprite;
+    private string obtainedDinoInfo;
+    private Rarity obtainedDinoRarity;
 
     void Start()
     {
@@ -75,7 +85,7 @@ public class EggBehaviour : MonoBehaviour
         }
         else
         {
-            // El huevo se rompe y aparece un dinosaurio
+            // El huevo se rompe y aparece un cubo
             HatchEgg();
         }
 
@@ -146,15 +156,13 @@ public class EggBehaviour : MonoBehaviour
         }
 
         // Determinar el dinosaurio obtenido
-        Sprite dinoSprite;
-        string dinoInfo;
-        GetRandomDino(out dinoSprite, out dinoInfo);
+        GetRandomDino(out obtainedDinoSprite, out obtainedDinoInfo, out obtainedDinoRarity);
 
-        // Mostrar el dinosaurio en pantalla con animación de escala
-        StartCoroutine(DisplayDinoWithScale(dinoSprite, dinoInfo));
+        // Lanzar el cubo correspondiente
+        LaunchCube();
     }
 
-    void GetRandomDino(out Sprite dinoSprite, out string dinoInfo)
+    void GetRandomDino(out Sprite dinoSprite, out string dinoInfo, out Rarity rarity)
     {
         float randomValue = Random.Range(0f, 100f);
 
@@ -163,24 +171,28 @@ public class EggBehaviour : MonoBehaviour
             // 4% Shiny Raro
             dinoSprite = GetRandomSpriteFromList(shinyRareDinos);
             dinoInfo = "¡Dinosaurio Shiny Raro!";
+            rarity = Rarity.ShinyRare;
         }
         else if (randomValue < 10f)
         {
             // 6% Shiny Común
             dinoSprite = GetRandomSpriteFromList(shinyCommonDinos);
             dinoInfo = "¡Dinosaurio Shiny Común!";
+            rarity = Rarity.ShinyCommon;
         }
         else if (randomValue < 40f)
         {
             // 30% Raro
             dinoSprite = GetRandomSpriteFromList(rareDinos);
             dinoInfo = "Dinosaurio Raro";
+            rarity = Rarity.Rare;
         }
         else
         {
             // 60% Común
             dinoSprite = GetRandomSpriteFromList(commonDinos);
             dinoInfo = "Dinosaurio Común";
+            rarity = Rarity.Common;
         }
     }
 
@@ -188,6 +200,121 @@ public class EggBehaviour : MonoBehaviour
     {
         int index = Random.Range(0, spriteList.Count);
         return spriteList[index];
+    }
+
+    void LaunchCube()
+    {
+        // Instanciar el cubo en la posición del huevo
+        GameObject cube = Instantiate(cubePrefab, transform.position, Random.rotation);
+
+        // Configurar el color y efectos del cubo según la rareza
+        ConfigureCube(cube, obtainedDinoRarity);
+
+        // Obtener el Rigidbody del cubo
+        Rigidbody rb = cube.GetComponent<Rigidbody>();
+
+        // Aplicar fuerzas para lanzarlo
+        rb.useGravity = true;
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+
+        // Aplicar fuerza hacia arriba con variación aleatoria
+        float randomUpwardForce = Random.Range(cubeUpwardForce * 0.9f, cubeUpwardForce * 1.1f);
+        rb.AddForce(Vector3.up * randomUpwardForce, ForceMode.Impulse);
+
+        // Aplicar torque aleatorio
+        Vector3 randomTorque = Random.insideUnitSphere * cubeTorqueForce;
+        rb.AddTorque(randomTorque, ForceMode.Impulse);
+
+        // Iniciar coroutine para esperar a que el cubo aterrice
+        StartCoroutine(WaitForCubeToLand(cube));
+    }
+
+    void ConfigureCube(GameObject cube, Rarity rarity)
+    {
+        Renderer cubeRenderer = cube.GetComponent<Renderer>();
+        TrailRenderer trail = cube.GetComponent<TrailRenderer>();
+        ParticleSystem particles = cube.GetComponentInChildren<ParticleSystem>();
+
+        switch (rarity)
+        {
+            case Rarity.Common:
+                // Cubo blanco con estela blanca
+                cubeRenderer.material.color = Color.white;
+                if (trail != null)
+                {
+                    trail.startColor = Color.white;
+                    trail.endColor = Color.white;
+                }
+                if (particles != null)
+                {
+                    particles.gameObject.SetActive(false);
+                }
+                break;
+            case Rarity.Rare:
+                // Cubo azul con estela azul
+                cubeRenderer.material.color = Color.blue;
+                if (trail != null)
+                {
+                    trail.startColor = Color.blue;
+                    trail.endColor = Color.blue;
+                }
+                if (particles != null)
+                {
+                    particles.gameObject.SetActive(false);
+                }
+                break;
+            case Rarity.ShinyCommon:
+                // Cubo blanco con estela blanca y partículas brillantes
+                cubeRenderer.material.color = Color.white;
+                if (trail != null)
+                {
+                    trail.startColor = Color.white;
+                    trail.endColor = Color.white;
+                }
+                if (particles != null)
+                {
+                    particles.gameObject.SetActive(true);
+                    var main = particles.main;
+                    main.startColor = new ParticleSystem.MinMaxGradient(Color.white, Color.cyan);
+                }
+                break;
+            case Rarity.ShinyRare:
+                // Cubo azul con estela azul y partículas brillantes
+                cubeRenderer.material.color = Color.blue;
+                if (trail != null)
+                {
+                    trail.startColor = Color.blue;
+                    trail.endColor = Color.blue;
+                }
+                if (particles != null)
+                {
+                    particles.gameObject.SetActive(true);
+                    var main = particles.main;
+                    main.startColor = new ParticleSystem.MinMaxGradient(Color.blue, Color.magenta);
+                }
+                break;
+        }
+    }
+
+    IEnumerator WaitForCubeToLand(GameObject cube)
+    {
+        Rigidbody rb = cube.GetComponent<Rigidbody>();
+
+        // Esperar hasta que la velocidad del cubo sea baja (ha aterrizado)
+        while (rb.velocity.magnitude > 0.1f)
+        {
+            yield return null;
+        }
+
+        // Esperar un momento adicional para asegurarse
+        yield return new WaitForSeconds(1f);
+
+        // Mostrar el dinosaurio obtenido
+        StartCoroutine(DisplayDinoWithScale(obtainedDinoSprite, obtainedDinoInfo));
+
+        // Puedes destruir el cubo si lo deseas
+        Destroy(cube);
     }
 
     IEnumerator DisplayDinoWithScale(Sprite dinoSprite, string dinoInfo)
@@ -223,5 +350,14 @@ public class EggBehaviour : MonoBehaviour
         {
             dinoInfoText.text = dinoInfo;
         }
+    }
+
+    // Enum para representar la rareza
+    public enum Rarity
+    {
+        Common,
+        Rare,
+        ShinyCommon,
+        ShinyRare
     }
 }
