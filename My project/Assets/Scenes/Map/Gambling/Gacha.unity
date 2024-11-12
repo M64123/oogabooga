@@ -742,7 +742,7 @@ MonoBehaviour:
   cubePrefab: {fileID: 5252764213435580731, guid: 219666d389fd06245bffbca083a54ff3, type: 3}
   cubeUpwardForce: 10
   cubeTorqueForce: 1000
-  sidewaysForceVariation: 0.5
+  sidewaysForceVariation: 0.2
   dinoDisplay: {fileID: 258783550}
   dinoInfoText: {fileID: 0}
   dinoScaleDuration: 1
