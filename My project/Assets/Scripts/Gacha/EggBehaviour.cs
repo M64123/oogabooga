@@ -48,6 +48,8 @@ public class EggBehaviour : MonoBehaviour
 
     private bool hasHatched = false; // Indica si el huevo ya se ha roto
 
+    private CamaraControllerGacha camaraController;
+
     void Start()
     {
         // Inicializar el huevo al primer modelo
@@ -69,6 +71,9 @@ public class EggBehaviour : MonoBehaviour
         {
             dinoInfoText.text = "";
         }
+
+        // Obtener la referencia al CamaraControllerGacha
+        camaraController = Camera.main.GetComponent<CamaraControllerGacha>();
     }
 
     void OnMouseDown()
@@ -76,6 +81,12 @@ public class EggBehaviour : MonoBehaviour
         if (!isAnimating && !hasHatched)
         {
             StartCoroutine(EggClickRoutine());
+
+            // Notificar al CamaraControllerGacha que el huevo ha sido clicado
+            if (camaraController != null)
+            {
+                camaraController.OnEggClicked();
+            }
         }
     }
 
@@ -253,6 +264,12 @@ public class EggBehaviour : MonoBehaviour
         Vector3 randomTorque = Random.insideUnitSphere * cubeTorqueForce;
         rb.AddTorque(randomTorque, ForceMode.Impulse);
 
+        // Notificar al CamaraControllerGacha que debe seguir al cubo
+        if (camaraController != null)
+        {
+            camaraController.StartFollowingCube(cube.transform);
+        }
+
         // Iniciar coroutine para esperar el tiempo máximo antes de mostrar el dinosaurio
         StartCoroutine(WaitForMaxTimeAndShowDino(cube));
     }
@@ -340,6 +357,12 @@ public class EggBehaviour : MonoBehaviour
 
         // Destruir el cubo
         Destroy(cube);
+
+        // Notificar al CamaraControllerGacha que deje de seguir al cubo
+        if (camaraController != null)
+        {
+            camaraController.StopFollowingCube();
+        }
     }
 
     IEnumerator DisplayDinoWithScale(Sprite dinoSprite, string dinoInfo)
