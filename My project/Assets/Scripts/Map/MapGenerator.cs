@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Experimental.GlobalIllumination;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -46,6 +47,11 @@ public class MapGenerator : MonoBehaviour
     // Conteo de nodos buenos generados
     private int manaNodeCount = 0;
     private int revivirNodeCount = 0;
+
+    [Header("Line Renderer Settings")]
+    public float lineWidth = 0.05f;            // Ancho de la línea
+    public Material lineMaterial;              // Material para el LineRenderer
+    public Color lineColor = Color.white;      // Color de la línea
 
     void Start()
     {
@@ -134,7 +140,6 @@ public class MapGenerator : MonoBehaviour
         // Instanciar al jugador en el nodo inicial
         InstantiatePlayerAtStartNode();
     }
-
     private void AssignNodeTypes()
     {
         // Inicializar los nodos del nivel inicial
@@ -490,19 +495,30 @@ public class MapGenerator : MonoBehaviour
         GameObject line = new GameObject("Line");
         line.transform.parent = this.transform; // Para organizar en la jerarquía
         LineRenderer lr = line.AddComponent<LineRenderer>();
-        lr.startWidth = 0.05f;
-        lr.endWidth = 0.05f;
         lr.positionCount = 2;
         lr.useWorldSpace = true;
         lr.SetPosition(0, start);
         lr.SetPosition(1, end);
 
-        // Asegurarse de que el material soporte el rendering de líneas
-        lr.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
-        lr.startColor = color;
-        lr.endColor = color;
-    }
+        // Configurar el ancho de la línea desde el Inspector
+        lr.startWidth = lineWidth;
+        lr.endWidth = lineWidth;
 
+        // Configurar el material desde el Inspector
+        if (lineMaterial != null)
+        {
+            lr.material = lineMaterial;
+        }
+        else
+        {
+            // Si no se asigna un material, usar uno por defecto
+            lr.material = new Material(Shader.Find("Legacy Shaders/Particles/Alpha Blended Premultiply"));
+        }
+
+        // Configurar el color desde el Inspector
+        lr.startColor = lineColor;
+        lr.endColor = lineColor;
+    }
     private void InstantiatePlayerAtStartNode()
     {
         if (playerPrefab != null && allNodes.Count > 0)
