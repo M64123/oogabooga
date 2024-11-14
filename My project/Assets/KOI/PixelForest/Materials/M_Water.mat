@@ -89,9 +89,9 @@ Material:
     - _DepthMaxDistance: 30.4
     - _Distance: 25
     - _FlowSpeed: 1.21
-    - _FoamAmount: 3
+    - _FoamAmount: 1
     - _FoamDistance: 0.4
-    - _FoamScale: 40
+    - _FoamScale: 3
     - _FoamSpeed: 0.02
     - _FresnelPower: 2
     - _Glossiness: 0.368
