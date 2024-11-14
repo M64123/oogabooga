@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.SceneManagement; // Necesario para cargar escenas
+using System.Collections;
 
 public class NodeInteraction : MonoBehaviour
 {
@@ -109,17 +111,54 @@ public class NodeInteraction : MonoBehaviour
             return;
         }
 
-        Debug.Log($"Nodo {node.nodeType} en posición {node.position} ha sido clicado.");
-
         // Obtener el jugador y moverlo a este nodo
         PlayerMovement playerMovement = FindObjectOfType<PlayerMovement>();
         if (playerMovement != null)
         {
+            // Suscribirse al evento OnMovementFinished
+            playerMovement.OnMovementFinished += OnPlayerMovementFinished;
+
             playerMovement.MoveToNode(node);
         }
         else
         {
             Debug.LogError("NodeInteraction: No se encontró el script PlayerMovement en la escena.");
+        }
+    }
+
+    private void OnPlayerMovementFinished()
+    {
+        // Desuscribirse del evento para evitar múltiples llamadas
+        PlayerMovement playerMovement = FindObjectOfType<PlayerMovement>();
+        if (playerMovement != null)
+        {
+            playerMovement.OnMovementFinished -= OnPlayerMovementFinished;
+        }
+
+        // Iniciar la carga de la escena después de una pequeña espera
+        StartCoroutine(LoadSceneAfterDelay(0.1f));
+    }
+
+    private IEnumerator LoadSceneAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        // Cargar la escena correspondiente al tipo de nodo
+        if (NodeSceneManager.Instance != null)
+        {
+            string sceneName = NodeSceneManager.Instance.GetRandomSceneName(node.nodeType);
+            if (!string.IsNullOrEmpty(sceneName))
+            {
+                SceneManager.LoadScene(sceneName);
+            }
+            else
+            {
+                Debug.LogWarning($"No se pudo obtener una escena para el tipo de nodo {node.nodeType}.");
+            }
+        }
+        else
+        {
+            Debug.LogError("NodeInteraction: No se encontró el NodeSceneManager en la escena.");
         }
     }
 }

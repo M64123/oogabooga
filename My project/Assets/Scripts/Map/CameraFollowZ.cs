@@ -3,72 +3,72 @@ using UnityEngine;
 public class CameraFollowZ : MonoBehaviour
 {
     public Transform target;            // Transform del jugador
-    public float smoothSpeed = 0.125f;  // Velocidad de suavizado
     public Vector3 offset;              // Desplazamiento de la cámara respecto al jugador
 
     private Vector3 initialPosition;    // Posición inicial de la cámara
-    private bool isTransitioning = false; // Indica si la cámara está en transición
-    public float transitionDuration = 2f; // Duración de la transición en segundos
-    private float transitionTimer = 0f;   // Temporizador para la transición
+    private Vector3 targetPosition;     // Posición objetivo final de la cámara
+    private bool isMovingToNode = false; // Indica si la cámara está moviéndose hacia el nodo
+    private float journeyLength;        // Distancia total del viaje
+    private float startTime;            // Tiempo en que inicia el movimiento
+    private float travelDuration = 2f;  // Duración del viaje en segundos
+
+    // Parámetros para la trayectoria cóncava
+    public float arcHeight = 2f;        // Altura máxima de la parábola
 
     void Start()
     {
-        // Guardar la posición inicial de la cámara
-        initialPosition = transform.position;
-
         if (target == null)
         {
             Debug.LogWarning("CameraFollowZ: El objetivo (jugador) no está asignado en Start.");
-        }
-        else
-        {
-            // Iniciar la transición
-            isTransitioning = true;
-            transitionTimer = 0f;
         }
     }
 
     void LateUpdate()
     {
-        if (target != null)
+        if (isMovingToNode && target != null)
         {
-            if (isTransitioning)
+            // Tiempo transcurrido desde el inicio del movimiento
+            float elapsedTime = Time.time - startTime;
+            float t = Mathf.Clamp01(elapsedTime / travelDuration);
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            // Interpolar la posición en línea recta
+            Vector3 newPosition = Vector3.Lerp(initialPosition, targetPosition, t);
+
+            // Añadir la trayectoria cóncava (parábola invertida)
+            float heightOffset = arcHeight * Mathf.Sin(Mathf.PI * t);
+            newPosition.y += heightOffset;
+
+            // Actualizar la posición de la cámara
+            transform.position = newPosition;
+
+            if (t >= 1f)
             {
-                // Incrementar el temporizador
-                transitionTimer += Time.deltaTime;
-
-                // Calcular el porcentaje completado de la transición
-                float t = transitionTimer / transitionDuration;
-
-                // Suavizar el valor de t
-                t = Mathf.SmoothStep(0f, 1f, t);
-
-                // Posición objetivo con offset
-                Vector3 targetPosition = target.position + offset;
-
-                // Interpolar entre la posición inicial y la posición objetivo
-                Vector3 newPosition = Vector3.Lerp(initialPosition, targetPosition, t);
-
-                // Actualizar la posición de la cámara
-                transform.position = newPosition;
-
-                // Finalizar la transición cuando se alcance la duración
-                if (t >= 1f)
-                {
-                    isTransitioning = false;
-                }
-            }
-            else
-            {
-                // Una vez finalizada la transición, seguir al jugador manteniendo el offset
-                Vector3 desiredPosition = target.position + offset;
-
-                // Suavizar el movimiento de la cámara
-                Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed);
-
-                // Actualizar la posición de la cámara
-                transform.position = smoothedPosition;
+                isMovingToNode = false;
             }
         }
+        else if (target != null)
+        {
+            // Seguimiento normal del jugador después de llegar al nodo
+            Vector3 desiredPosition = target.position + offset;
+            transform.position = desiredPosition;
+        }
+    }
+
+    // Método para iniciar el movimiento hacia el nodo seleccionado
+    public void MoveCameraToNode(Vector3 nodePosition, float playerTravelDuration)
+    {
+        // Ajustar la duración del viaje de la cámara para que coincida con el del jugador
+        travelDuration = playerTravelDuration;
+
+        // Establecer la posición objetivo de la cámara con el offset
+        targetPosition = nodePosition + offset;
+
+        // Reiniciar parámetros de movimiento
+        initialPosition = transform.position;
+        startTime = Time.time;
+        journeyLength = Vector3.Distance(initialPosition, targetPosition);
+
+        isMovingToNode = true;
     }
 }
