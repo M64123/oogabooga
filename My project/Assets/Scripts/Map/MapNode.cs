@@ -1,9 +1,10 @@
-// MapNode.cs
 using UnityEngine;
 using System.Collections.Generic;
 
+[System.Serializable]
 public class MapNode
 {
+    public string nodeID;
     public Vector3 position;
     public int depthLevel;
     public NodeType nodeType;
@@ -16,6 +17,7 @@ public class MapNode
 
     public MapNode(Vector3 pos, int depth)
     {
+        nodeID = System.Guid.NewGuid().ToString(); // Generar un ID único
         position = pos;
         depthLevel = depth;
     }
