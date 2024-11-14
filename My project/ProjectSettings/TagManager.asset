@@ -3,7 +3,11 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Arena
+  - BoxArea
+  - Ally
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -11,12 +15,12 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - BoxAreaLayer
+  - ArenaLayer
+  - DIno
+  - Ground
+  - Clickable
+  - Attackable
   - 
   - 
   - 
