@@ -114,7 +114,7 @@ Material:
     - _WaveFrequency: 3.12
     - _WaveHeight: 0.1
     - _WaveScale: 0.1
-    - _WaveSpeed: 2
+    - _WaveSpeed: 0
     m_Colors:
     - _Color: {r: 0.68516374, g: 0.762696, b: 0.8396226, a: 0.34117648}
     - _DeepColor: {r: 0.074626215, g: 0.10727744, b: 0.4056604, a: 1}
