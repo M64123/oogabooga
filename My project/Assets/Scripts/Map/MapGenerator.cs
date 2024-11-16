@@ -1,9 +1,14 @@
+// MapGenerator.cs
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.Experimental.GlobalIllumination;
 
+/// <summary>
+/// Clase que genera y gestiona el mapa, incluyendo nodos, conexiones y la posición del jugador.
+/// </summary>
 public class MapGenerator : MonoBehaviour
 {
+    public static MapGenerator Instance;
+
     public int totalLevels = 17;             // Niveles totales del mapa
     public float nodeSpacingX = 2f;          // Espaciado horizontal base entre nodos
     public float nodeSpacingZ = 2f;          // Espaciado en el eje Z entre niveles
@@ -53,11 +58,36 @@ public class MapGenerator : MonoBehaviour
     public Material lineMaterial;              // Material para el LineRenderer
     public Color lineColor = Color.white;      // Color de la línea
 
-    void Start()
+    void Awake()
     {
-        GenerateMap();
+        // Implementación del Singleton
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); // Persiste entre escenas si es necesario
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
+    void Start()
+    {
+        // Verificar si hay un mapa guardado en el GameManager
+        if (GameManager.Instance != null && GameManager.Instance.GetSavedMapData() != null && GameManager.Instance.GetSavedMapData().Count > 0)
+        {
+            LoadMap();
+        }
+        else
+        {
+            GenerateMap();
+        }
+    }
+
+    /// <summary>
+    /// Genera el mapa desde cero.
+    /// </summary>
     public void GenerateMap()
     {
         // Limpiar las listas por si se llama más de una vez
@@ -117,7 +147,7 @@ public class MapGenerator : MonoBehaviour
                 float zPos = level * nodeSpacingZ;
                 Vector3 nodePos = new Vector3(xPos, 0, zPos);
 
-                MapNode newNode = CreateNode(nodePos, level);
+                MapNode newNode = CreateNode(nodePos, level, i); // Pasar 'i' como índice
                 allNodes.Add(newNode);
                 currentLevelNodes.Add(newNode);
             }
@@ -137,11 +167,141 @@ public class MapGenerator : MonoBehaviour
         // Visualizar el mapa
         DrawMap();
 
-        // Instanciar al jugador en el nodo inicial
-        InstantiatePlayerAtStartNode();
+        // Instanciar al jugador en el nodo inicial o guardado
+        if (GameManager.Instance != null && !string.IsNullOrEmpty(GameManager.Instance.GetCurrentPlayerNodeID()))
+        {
+            InstantiatePlayerAtSavedNode();
+        }
+        else
+        {
+            InstantiatePlayerAtStartNode();
+        }
+
+        // Guardar el estado del mapa en el GameManager
+        SaveMapState();
     }
+
+    /// <summary>
+    /// Guarda el estado actual del mapa en el GameManager.
+    /// </summary>
+    private void SaveMapState()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SaveMapState(allNodes);
+            Debug.Log("Estado del mapa guardado en GameManager.");
+        }
+        else
+        {
+            Debug.LogError("GameManager.Instance es null. Asegúrate de que GameManager esté presente en la escena.");
+        }
+    }
+
+    /// <summary>
+    /// Carga el mapa desde los datos guardados en el GameManager.
+    /// </summary>
+    private void LoadMap()
+    {
+        List<MapNodeData> nodesData = GameManager.Instance.GetSavedMapData();
+        allNodes.Clear();
+        levels.Clear();
+        parentNodes.Clear();
+        manaNodeCount = 0;
+        revivirNodeCount = 0;
+
+        // Diccionario para mapear nodeID a MapNode
+        Dictionary<string, MapNode> nodeDictionary = new Dictionary<string, MapNode>();
+
+        // Reconstruir los nodos y niveles
+        foreach (MapNodeData nodeData in nodesData)
+        {
+            // Crear un nuevo GameObject para el nodo
+            GameObject nodeObj = new GameObject($"MapNode_{nodeData.nodeID}");
+            nodeObj.transform.position = nodeData.position;
+
+            // Añadir el componente MapNode
+            MapNode node = nodeObj.AddComponent<MapNode>();
+
+            // Configurar las propiedades del nodo basadas en MapNodeData
+            node.nodeID = nodeData.nodeID;
+            node.depthLevel = nodeData.depthLevel;
+            node.nodeType = nodeData.nodeType;
+            node.isActive = nodeData.isActive;
+            node.connectedNodes = new List<MapNode>();
+            node.nodeTypesInPaths = new HashSet<NodeType>();
+            node.isTypeAssigned = true; // Asumimos que el tipo ya está asignado
+
+            // Añadir al diccionario y a la lista general
+            allNodes.Add(node);
+            nodeDictionary[node.nodeID] = node;
+
+            // Añadir el nodo al nivel correspondiente
+            while (levels.Count <= node.depthLevel)
+            {
+                levels.Add(new List<MapNode>());
+            }
+            levels[node.depthLevel].Add(node);
+
+            // Actualizar conteo de nodos buenos
+            if (node.nodeType == NodeType.Mana_Tamaño)
+            {
+                manaNodeCount++;
+            }
+            else if (node.nodeType == NodeType.Revivir)
+            {
+                revivirNodeCount++;
+            }
+        }
+
+        // Reconstruir las conexiones y los nodos padres
+        foreach (MapNodeData nodeData in nodesData)
+        {
+            if (!nodeDictionary.TryGetValue(nodeData.nodeID, out MapNode node))
+            {
+                Debug.LogError($"No se encontró el nodo con nodeID: {nodeData.nodeID}");
+                continue;
+            }
+
+            foreach (string connectedID in nodeData.connectedNodeIDs)
+            {
+                if (nodeDictionary.TryGetValue(connectedID, out MapNode connectedNode))
+                {
+                    node.connectedNodes.Add(connectedNode);
+
+                    // Agregar al diccionario de nodos padres
+                    if (!parentNodes.ContainsKey(connectedNode))
+                    {
+                        parentNodes[connectedNode] = new List<MapNode>();
+                    }
+                    parentNodes[connectedNode].Add(node);
+                }
+                else
+                {
+                    Debug.LogError($"No se encontró el nodo conectado con nodeID: {connectedID}");
+                }
+            }
+        }
+
+        // Visualizar el mapa
+        DrawMap();
+
+        // Instanciar al jugador en el nodo guardado
+        InstantiatePlayerAtSavedNode();
+
+        Debug.Log("Mapa cargado desde GameManager.");
+    }
+
+    /// <summary>
+    /// Asigna tipos a los nodos considerando los caminos.
+    /// </summary>
     private void AssignNodeTypes()
     {
+        if (levels.Count == 0)
+        {
+            Debug.LogError("No hay niveles generados para asignar tipos de nodos.");
+            return;
+        }
+
         // Inicializar los nodos del nivel inicial
         foreach (MapNode node in levels[0])
         {
@@ -204,6 +364,11 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Obtiene un tipo de nodo adecuado sin repetir tipos en el camino.
+    /// </summary>
+    /// <param name="node">Nodo actual.</param>
+    /// <returns>Tipo de nodo asignado.</returns>
     private NodeType GetNodeTypeForNode(MapNode node)
     {
         // Niveles específicos
@@ -211,11 +376,11 @@ public class MapGenerator : MonoBehaviour
 
         if (bossLevels.Contains(userLevel))
         {
-            return NodeType.Boss;
+            return NodeType.GAMBLING;
         }
         else if (gamblingLevels.Contains(userLevel))
         {
-            return NodeType.GAMBLING;
+            return NodeType.Boss;
         }
 
         // Obtener los tipos disponibles
@@ -244,6 +409,11 @@ public class MapGenerator : MonoBehaviour
         return selectedType;
     }
 
+    /// <summary>
+    /// Obtiene un tipo de nodo permitiendo repeticiones si es necesario.
+    /// </summary>
+    /// <param name="node">Nodo actual.</param>
+    /// <returns>Tipo de nodo asignado.</returns>
     private NodeType GetNodeTypeAllowingRepetition(MapNode node)
     {
         // Niveles específicos
@@ -270,6 +440,11 @@ public class MapGenerator : MonoBehaviour
         return selectedType;
     }
 
+    /// <summary>
+    /// Selecciona un tipo de nodo basado en probabilidades definidas.
+    /// </summary>
+    /// <param name="availableTypes">Lista de tipos disponibles.</param>
+    /// <returns>Tipo de nodo seleccionado.</returns>
     private NodeType SelectNodeTypeBasedOnProbability(List<NodeType> availableTypes)
     {
         // Definir las probabilidades
@@ -308,6 +483,9 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Asegura que al menos un nodo de cada tipo bueno esté presente en el mapa.
+    /// </summary>
     private void EnsureGoodNodesPresence()
     {
         // Si falta algún tipo de nodo bueno, reemplazar nodos existentes
@@ -334,6 +512,9 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Conecta los nodos entre niveles adyacentes.
+    /// </summary>
     private void ConnectNodes()
     {
         parentNodes = new Dictionary<MapNode, List<MapNode>>();
@@ -348,6 +529,12 @@ public class MapGenerator : MonoBehaviour
 
             foreach (MapNode currentNode in currentLevelNodes)
             {
+                if (currentNode == null)
+                {
+                    Debug.LogError($"currentNode en nivel {level + 1} es null.");
+                    continue;
+                }
+
                 // Determinar el número de conexiones según la probabilidad deseada
                 int connections = (Random.value < 0.18f) ? 2 : 1; // 18% para 2 conexiones, 82% para 1 conexión
 
@@ -356,6 +543,12 @@ public class MapGenerator : MonoBehaviour
 
                 foreach (MapNode nextNode in possibleConnections)
                 {
+                    if (nextNode == null)
+                    {
+                        Debug.LogError($"nextNode es null al intentar conectar desde {currentNode.nodeID}.");
+                        continue;
+                    }
+
                     if (!currentNode.connectedNodes.Contains(nextNode))
                     {
                         currentNode.connectedNodes.Add(nextNode);
@@ -374,24 +567,44 @@ public class MapGenerator : MonoBehaviour
             // Conectar nodos del siguiente nivel que no hayan sido conectados
             foreach (MapNode nextNode in nextLevelNodes)
             {
+                if (nextNode == null)
+                {
+                    Debug.LogError($"nextNode en el nivel {level + 2} es null.");
+                    continue;
+                }
+
                 if (!connectedNextNodes.Contains(nextNode))
                 {
                     // Conectar con el nodo del nivel actual más cercano en X
                     MapNode closestNode = FindClosestNode(nextNode, currentLevelNodes);
-                    closestNode.connectedNodes.Add(nextNode);
-                    connectedNextNodes.Add(nextNode);
-
-                    // Agregar al diccionario de nodos padres
-                    if (!parentNodes.ContainsKey(nextNode))
+                    if (closestNode != null)
                     {
-                        parentNodes[nextNode] = new List<MapNode>();
+                        closestNode.connectedNodes.Add(nextNode);
+                        connectedNextNodes.Add(nextNode);
+
+                        // Agregar al diccionario de nodos padres
+                        if (!parentNodes.ContainsKey(nextNode))
+                        {
+                            parentNodes[nextNode] = new List<MapNode>();
+                        }
+                        parentNodes[nextNode].Add(closestNode);
                     }
-                    parentNodes[nextNode].Add(closestNode);
+                    else
+                    {
+                        Debug.LogError($"No se pudo encontrar un nodo cercano para conectar el nodo {nextNode.nodeID}.");
+                    }
                 }
             }
         }
     }
 
+    /// <summary>
+    /// Obtiene posibles conexiones para un nodo dado.
+    /// </summary>
+    /// <param name="currentNode">Nodo actual.</param>
+    /// <param name="nextLevelNodes">Lista de nodos en el siguiente nivel.</param>
+    /// <param name="maxConnections">Número máximo de conexiones.</param>
+    /// <returns>Lista de nodos posibles para conectar.</returns>
     private List<MapNode> GetPossibleConnections(MapNode currentNode, List<MapNode> nextLevelNodes, int maxConnections)
     {
         List<MapNode> possibleConnections = new List<MapNode>();
@@ -400,8 +613,8 @@ public class MapGenerator : MonoBehaviour
         List<MapNode> sortedNextLevelNodes = new List<MapNode>(nextLevelNodes);
         sortedNextLevelNodes.Sort((a, b) =>
         {
-            float distanceA = Mathf.Abs(a.position.x - currentNode.position.x);
-            float distanceB = Mathf.Abs(b.position.x - currentNode.position.x);
+            float distanceA = Mathf.Abs(a.transform.position.x - currentNode.transform.position.x);
+            float distanceB = Mathf.Abs(b.transform.position.x - currentNode.transform.position.x);
             return distanceA.CompareTo(distanceB);
         });
 
@@ -414,6 +627,12 @@ public class MapGenerator : MonoBehaviour
         return possibleConnections;
     }
 
+    /// <summary>
+    /// Encuentra el nodo más cercano en X a un nodo objetivo dentro de una lista de nodos.
+    /// </summary>
+    /// <param name="targetNode">Nodo objetivo.</param>
+    /// <param name="nodes">Lista de nodos para buscar.</param>
+    /// <returns>Nodo más cercano.</returns>
     private MapNode FindClosestNode(MapNode targetNode, List<MapNode> nodes)
     {
         MapNode closestNode = null;
@@ -421,7 +640,7 @@ public class MapGenerator : MonoBehaviour
 
         foreach (MapNode node in nodes)
         {
-            float distance = Mathf.Abs(node.position.x - targetNode.position.x);
+            float distance = Mathf.Abs(node.transform.position.x - targetNode.transform.position.x);
             if (distance < minDistance)
             {
                 minDistance = distance;
@@ -432,12 +651,44 @@ public class MapGenerator : MonoBehaviour
         return closestNode;
     }
 
-    private MapNode CreateNode(Vector3 position, int depth)
+    /// <summary>
+    /// Genera un identificador único para un nodo basado en su nivel y su índice.
+    /// </summary>
+    /// <param name="depth">Nivel de profundidad del nodo.</param>
+    /// <param name="index">Índice del nodo dentro de su nivel.</param>
+    /// <returns>ID único del nodo.</returns>
+    private string GenerateNodeID(int depth, int index)
     {
-        MapNode node = new MapNode(position, depth);
+        return $"Level{depth + 1}_Node{index + 1}";
+    }
+
+    /// <summary>
+    /// Crea un nodo en una posición específica con un nivel y un índice.
+    /// </summary>
+    /// <param name="position">Posición del nodo.</param>
+    /// <param name="depth">Nivel de profundidad.</param>
+    /// <param name="index">Índice dentro del nivel.</param>
+    /// <returns>Nodo creado.</returns>
+    private MapNode CreateNode(Vector3 position, int depth, int index)
+    {
+        GameObject nodeObj = new GameObject($"MapNode_Level{depth + 1}_Index{index + 1}");
+        nodeObj.transform.position = position;
+
+        MapNode node = nodeObj.AddComponent<MapNode>();
+        node.nodeID = GenerateNodeID(depth, index);
+        node.depthLevel = depth;
+        node.nodeType = NodeType.None; // Asigna un tipo por defecto; se actualizará más adelante
+        node.isActive = true; // Asigna el estado activo por defecto
+        node.connectedNodes = new List<MapNode>(); // Inicializar la lista de nodos conectados
+        node.nodeTypesInPaths = new HashSet<NodeType>(); // Inicializar el conjunto de tipos en caminos
+        node.isTypeAssigned = false; // Indica que el tipo aún no ha sido asignado
+
         return node;
     }
 
+    /// <summary>
+    /// Dibuja el mapa instanciando prefabs de nodos y conectándolos con líneas.
+    /// </summary>
     private void DrawMap()
     {
         Debug.Log($"Dibujando {allNodes.Count} nodos en el mapa.");
@@ -452,7 +703,7 @@ public class MapGenerator : MonoBehaviour
             }
 
             // Instanciar el prefab del nodo
-            GameObject nodeObj = Instantiate(prefabToInstantiate, node.position, Quaternion.identity);
+            GameObject nodeObj = Instantiate(prefabToInstantiate, node.transform.position, Quaternion.identity);
             node.nodeObject = nodeObj;
 
             // Asignar el MapNode al script de interacción
@@ -473,11 +724,20 @@ public class MapGenerator : MonoBehaviour
             // Dibujar las conexiones
             foreach (MapNode connectedNode in node.connectedNodes)
             {
-                DrawLine(node.position, connectedNode.position, Color.white);
+                // Evitar dibujar líneas duplicadas
+                if (string.Compare(node.nodeID, connectedNode.nodeID) < 0)
+                {
+                    DrawLine(node.transform.position, connectedNode.transform.position, Color.white);
+                }
             }
         }
     }
 
+    /// <summary>
+    /// Obtiene el prefab correspondiente a un tipo de nodo.
+    /// </summary>
+    /// <param name="nodeType">Tipo de nodo.</param>
+    /// <returns>Prefab correspondiente o null si no se encuentra.</returns>
     private GameObject GetPrefabForNodeType(NodeType nodeType)
     {
         foreach (NodePrefab np in nodePrefabs)
@@ -490,6 +750,12 @@ public class MapGenerator : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// Dibuja una línea entre dos puntos utilizando un LineRenderer.
+    /// </summary>
+    /// <param name="start">Punto de inicio.</param>
+    /// <param name="end">Punto de fin.</param>
+    /// <param name="color">Color de la línea.</param>
     private void DrawLine(Vector3 start, Vector3 end, Color color)
     {
         GameObject line = new GameObject("Line");
@@ -516,9 +782,13 @@ public class MapGenerator : MonoBehaviour
         }
 
         // Configurar el color desde el Inspector
-        lr.startColor = lineColor;
-        lr.endColor = lineColor;
+        lr.startColor = color;
+        lr.endColor = color;
     }
+
+    /// <summary>
+    /// Instancia al jugador en el nodo inicial (primer nodo del primer nivel).
+    /// </summary>
     private void InstantiatePlayerAtStartNode()
     {
         if (playerPrefab != null && allNodes.Count > 0)
@@ -527,7 +797,7 @@ public class MapGenerator : MonoBehaviour
             MapNode startNode = allNodes[0];
 
             // Instanciar al jugador en la posición del nodo inicial
-            GameObject playerObj = Instantiate(playerPrefab, startNode.position, Quaternion.identity);
+            GameObject playerObj = Instantiate(playerPrefab, startNode.transform.position, Quaternion.identity);
 
             // Asignar el nodo actual en el script PlayerMovement
             PlayerMovement playerMovement = playerObj.GetComponent<PlayerMovement>();
@@ -535,6 +805,64 @@ public class MapGenerator : MonoBehaviour
             {
                 playerMovement.currentNode = startNode;
                 playerMovement.InitializePlayer();
+
+                // Guardar el nodeID del nodo actual en el GameManager
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.SetCurrentPlayerNodeID(startNode.nodeID);
+                }
+            }
+            else
+            {
+                Debug.LogError("PlayerMovement script no encontrado en el prefab del jugador.");
+            }
+
+            // Asignar el jugador al script CameraFollowZ
+            CameraFollowZ cameraFollow = Camera.main.GetComponent<CameraFollowZ>();
+            if (cameraFollow != null)
+            {
+                cameraFollow.target = playerObj.transform;
+            }
+            else
+            {
+                Debug.LogError("CameraFollowZ script not found on the Main Camera.");
+            }
+        }
+        else
+        {
+            Debug.LogError("PlayerPrefab no asignado o no hay nodos generados.");
+        }
+    }
+
+    /// <summary>
+    /// Instancia al jugador en el nodo guardado.
+    /// </summary>
+    private void InstantiatePlayerAtSavedNode()
+    {
+        if (playerPrefab != null && allNodes.Count > 0)
+        {
+            string nodeID = GameManager.Instance.GetCurrentPlayerNodeID();
+            MapNode startNode = allNodes.Find(node => node.nodeID == nodeID);
+
+            if (startNode == null)
+            {
+                Debug.LogError("No se encontró el nodo guardado. Instanciando en el nodo inicial.");
+                startNode = allNodes[0];
+            }
+
+            // Instanciar al jugador en la posición del nodo guardado
+            GameObject playerObj = Instantiate(playerPrefab, startNode.transform.position, Quaternion.identity);
+
+            // Asignar el nodo actual en el script PlayerMovement
+            PlayerMovement playerMovement = playerObj.GetComponent<PlayerMovement>();
+            if (playerMovement != null)
+            {
+                playerMovement.currentNode = startNode;
+                playerMovement.InitializePlayer();
+            }
+            else
+            {
+                Debug.LogError("PlayerMovement script no encontrado en el prefab del jugador.");
             }
 
             // Asignar el jugador al script CameraFollowZ

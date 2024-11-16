@@ -3,10 +3,10 @@ public enum NodeType
     None,
     Inicio,
     Combate,
-    GAMBLING,
-    Mana_Tamaño,
+    Boss,
     Revivir,
-    Random,
+    Mana_Tamaño,
     CoinFlip,
-    Boss
+    Random,
+    GAMBLING
 }

@@ -1,49 +1,30 @@
 using UnityEngine;
-using System; // Necesario para usar Action
+using System;
 
 public class PlayerMovement : MonoBehaviour
 {
     public MapNode currentNode;
-    public float moveDuration = 2f; // Duración del movimiento hacia el nodo
+    public float moveSpeed = 5f;
 
     private bool isMoving = false;
-    private Vector3 startPosition;
     private Vector3 targetPosition;
-    private float moveStartTime;
 
-    // Evento que se disparará cuando el jugador llegue al nodo
+    // Evento para notificar cuando el movimiento ha terminado
     public event Action OnMovementFinished;
+
+    void Start()
+    {
+        if (currentNode != null)
+        {
+            transform.position = currentNode.position;
+        }
+    }
 
     public void InitializePlayer()
     {
-        // Colocar al jugador en la posición del nodo actual
-        transform.position = currentNode.position;
-    }
-
-    public void MoveToNode(MapNode targetNode)
-    {
-        if (isMoving)
-            return;
-
-        if (currentNode.connectedNodes.Contains(targetNode))
+        if (currentNode != null)
         {
-            isMoving = true;
-            startPosition = transform.position;
-            targetPosition = targetNode.position;
-            currentNode = targetNode;
-            moveStartTime = Time.time;
-            Debug.Log($"Moviendo al jugador al nodo en posición {targetNode.position}");
-
-            // Iniciar el movimiento de la cámara
-            CameraFollowZ cameraFollow = Camera.main.GetComponent<CameraFollowZ>();
-            if (cameraFollow != null)
-            {
-                cameraFollow.MoveCameraToNode(targetPosition, moveDuration);
-            }
-        }
-        else
-        {
-            Debug.LogWarning("El nodo seleccionado no está conectado al nodo actual.");
+            transform.position = currentNode.position;
         }
     }
 
@@ -51,22 +32,33 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isMoving)
         {
-            float elapsed = Time.time - moveStartTime;
-            float t = Mathf.Clamp01(elapsed / moveDuration);
-            t = Mathf.SmoothStep(0f, 1f, t);
+            MoveTowardsTarget();
+        }
+    }
 
-            // Interpolar la posición del jugador
-            transform.position = Vector3.Lerp(startPosition, targetPosition, t);
+    public void MoveToNode(MapNode targetNode)
+    {
+        if (!isMoving)
+        {
+            currentNode = targetNode;
+            targetPosition = targetNode.position;
+            isMoving = true;
 
-            if (t >= 1f)
-            {
-                isMoving = false;
-                transform.position = targetPosition;
-                Debug.Log("El jugador ha llegado al nodo.");
+            // Guardar el nodeID del nodo actual en el GameManager
+            GameManager.Instance.SetCurrentPlayerNodeID(currentNode.nodeID);
+        }
+    }
 
-                // Disparar el evento para notificar que el movimiento ha terminado
-                OnMovementFinished?.Invoke();
-            }
+    private void MoveTowardsTarget()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+        if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+        {
+            isMoving = false;
+            transform.position = targetPosition;
+
+            // Notificar que el movimiento ha terminado
+            OnMovementFinished?.Invoke();
         }
     }
 }
