@@ -2,9 +2,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/// <summary>
-/// Clase serializable para almacenar datos de un nodo en el mapa.
-/// </summary>
 [System.Serializable]
 public class MapNodeData
 {
@@ -13,7 +10,7 @@ public class MapNodeData
     public int depthLevel;
     public NodeType nodeType;
     public List<string> connectedNodeIDs;
-    public bool isActive; // Nueva propiedad añadida
+    public bool isActive;
 
     /// <summary>
     /// Constructor que inicializa MapNodeData a partir de un MapNode.

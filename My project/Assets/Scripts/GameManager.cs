@@ -2,9 +2,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/// <summary>
-/// Clase que maneja la persistencia de datos del juego, incluyendo el estado del mapa, la posición del jugador y la gestión de dinosaurios.
-/// </summary>
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;

@@ -7,14 +7,7 @@ using System.Collections.Generic;
 /// </summary>
 public class MapGenerator : MonoBehaviour
 {
-    public static MapGenerator Instance;
 
-    public int totalLevels = 17;             // Niveles totales del mapa
-    public float nodeSpacingX = 2f;          // Espaciado horizontal base entre nodos
-    public float nodeSpacingZ = 2f;          // Espaciado en el eje Z entre niveles
-    public float xVariation = 0.5f;          // Variación máxima en X para los nodos
-
-    // Estructura para asociar NodeType con su prefab
     [System.Serializable]
     public struct NodePrefab
     {
@@ -27,6 +20,12 @@ public class MapGenerator : MonoBehaviour
 
     [HideInInspector]
     public List<MapNode> allNodes = new List<MapNode>();  // Lista de todos los nodos generados
+
+    [Header("Map Settings")]
+    public int totalLevels = 17;             // Niveles totales del mapa
+    public float nodeSpacingX = 2f;          // Espaciado horizontal base entre nodos
+    public float nodeSpacingZ = 2f;          // Espaciado en el eje Z entre niveles
+    public float xVariation = 0.5f;          // Variación máxima en X para los nodos
 
     // Lista de nodos por nivel según la estructura deseada
     private List<int> nodesPerLevel = new List<int>
@@ -58,20 +57,6 @@ public class MapGenerator : MonoBehaviour
     public Material lineMaterial;              // Material para el LineRenderer
     public Color lineColor = Color.white;      // Color de la línea
 
-    void Awake()
-    {
-        // Implementación del Singleton
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject); // Persiste entre escenas si es necesario
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-
     void Start()
     {
         // Verificar si hay un mapa guardado en el GameManager
@@ -98,10 +83,10 @@ public class MapGenerator : MonoBehaviour
         parentNodes.Clear();
 
         // Verificar que totalLevels coincide con nodesPerLevel
-        if (totalLevels != nodesPerLevel.Count)
+        if (nodesPerLevel.Count != totalLevels)
         {
+            Debug.LogWarning("El número de elementos en nodesPerLevel no coincide con totalLevels. Ajustando totalLevels.");
             totalLevels = nodesPerLevel.Count;
-            Debug.LogWarning("El total de niveles se ha ajustado para coincidir con nodesPerLevel.");
         }
 
         Debug.Log($"Generando mapa con {totalLevels} niveles.");
@@ -698,12 +683,21 @@ public class MapGenerator : MonoBehaviour
             GameObject prefabToInstantiate = GetPrefabForNodeType(node.nodeType);
             if (prefabToInstantiate == null)
             {
-                Debug.LogError($"No se encontró un prefab para el tipo de nodo {node.nodeType}. Asegúrate de asignarlo en el Inspector.");
-                continue;
+                // Intentar obtener el prefab para NodeType.None
+                NodePrefab nonePrefab = nodePrefabs.Find(np => np.nodeType == NodeType.None);
+                if (nonePrefab.prefab != null)
+                {
+                    prefabToInstantiate = nonePrefab.prefab;
+                }
+                else
+                {
+                    Debug.LogError($"No se encontró un prefab para el tipo de nodo {node.nodeType} ni para NodeType.None. Asegúrate de asignarlos en la lista nodePrefabs.");
+                    continue;
+                }
             }
 
-            // Instanciar el prefab del nodo
-            GameObject nodeObj = Instantiate(prefabToInstantiate, node.transform.position, Quaternion.identity);
+            // Instanciar el prefab del nodo como hijo del MapGenerator para mantener la jerarquía organizada
+            GameObject nodeObj = Instantiate(prefabToInstantiate, node.transform.position, Quaternion.identity, this.transform);
             node.nodeObject = nodeObj;
 
             // Asignar el MapNode al script de interacción
@@ -727,7 +721,7 @@ public class MapGenerator : MonoBehaviour
                 // Evitar dibujar líneas duplicadas
                 if (string.Compare(node.nodeID, connectedNode.nodeID) < 0)
                 {
-                    DrawLine(node.transform.position, connectedNode.transform.position, Color.white);
+                    DrawLine(node.transform.position, connectedNode.transform.position, lineColor);
                 }
             }
         }
