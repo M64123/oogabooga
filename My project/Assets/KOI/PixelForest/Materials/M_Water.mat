@@ -89,9 +89,9 @@ Material:
     - _DepthMaxDistance: 30.4
     - _Distance: 25
     - _FlowSpeed: 1.21
-    - _FoamAmount: 3
+    - _FoamAmount: 1
     - _FoamDistance: 0.4
-    - _FoamScale: 40
+    - _FoamScale: 3
     - _FoamSpeed: 0.02
     - _FresnelPower: 2
     - _Glossiness: 0.368
@@ -114,16 +114,16 @@ Material:
     - _WaveFrequency: 3.12
     - _WaveHeight: 0.1
     - _WaveScale: 0.1
-    - _WaveSpeed: 2
+    - _WaveSpeed: 0
     m_Colors:
     - _Color: {r: 0.68516374, g: 0.762696, b: 0.8396226, a: 0.34117648}
-    - _DeepColor: {r: 0.050980415, g: 0.24958917, b: 0.9607843, a: 1}
+    - _DeepColor: {r: 0.074626215, g: 0.10727744, b: 0.4056604, a: 1}
     - _DepthColor: {r: 0.31238872, g: 0.31238872, b: 0.33962262, a: 1}
     - _DepthGradientDeep: {r: 0.1882353, g: 0.5952834, b: 0.8117647, a: 1}
     - _DepthGradientShallow: {r: 0.031372566, g: 0.10129534, b: 0.78431374, a: 1}
-    - _FoamCollor: {r: 0.4269758, g: 0.75364286, b: 0.9528302, a: 1}
+    - _FoamCollor: {r: 0.427451, g: 0.7098271, b: 0.9529412, a: 1}
     - _FoamTiling: {r: 10, g: 20, b: 0, a: 0}
-    - _SurfaceColor: {r: 0.21960784, g: 0.58019704, b: 0.90588236, a: 0.6117647}
+    - _SurfaceColor: {r: 0.14618193, g: 0.43138057, b: 0.6886792, a: 0.6117647}
     - _SurfaceNoiseScroll: {r: 0.03, g: 0.03, b: 0, a: 0}
     - _WaterFogColor: {r: 0.9150943, g: 0.74339426, b: 0.14244394, a: 1}
     - _WaterTextureTiling: {r: 10, g: 14, b: 0, a: 0}
