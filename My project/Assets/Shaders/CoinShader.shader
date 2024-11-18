@@ -1,14 +1,14 @@
-Shader "Custom/CoinShader"
+Shader "Custom/SimpleCoinShader"
 {
     Properties
     {
-        _MainTex ("Edge Texture", 2D) = "white" {}
-        _TopTex ("Top Texture", 2D) = "white" {}
-        _BottomTex ("Bottom Texture", 2D) = "white" {}
+        _MainTex("Edge Texture", 2D) = "white" {}
+        _TopTex("Top Texture", 2D) = "white" {}
+        _BottomTex("Bottom Texture", 2D) = "white" {}
     }
-    SubShader
+        SubShader
     {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType" = "Opaque" }
         LOD 200
 
         CGPROGRAM
@@ -25,32 +25,32 @@ Shader "Custom/CoinShader"
             float3 normalOS; // Normal en espacio de objeto
         };
 
-        void vert (inout appdata_full v, out Input o)
+        void vert(inout appdata_full v, out Input o)
         {
             UNITY_INITIALIZE_OUTPUT(Input, o);
             o.normalOS = v.normal;
             o.uv_MainTex = v.texcoord;
         }
 
-        void surf (Input IN, inout SurfaceOutputStandard o)
+        void surf(Input IN, inout SurfaceOutputStandard o)
         {
+            // Asignar texturas de manera simple, sin lógica adicional.
+            // Esto es solo una muestra visual, ya que la lógica se manejará en los colliders.
             float yNormal = IN.normalOS.y;
 
-            fixed4 texColor;
+            fixed4 texColor = tex2D(_MainTex, IN.uv_MainTex);
 
+            // Ajustar las texturas para las caras superior, inferior y borde
             if (yNormal > 0.5)
             {
-                // Cara superior
                 texColor = tex2D(_TopTex, IN.uv_MainTex);
             }
             else if (yNormal < -0.5)
             {
-                // Cara inferior
                 texColor = tex2D(_BottomTex, IN.uv_MainTex);
             }
             else
             {
-                // Borde
                 texColor = tex2D(_MainTex, IN.uv_MainTex);
             }
 
@@ -60,5 +60,5 @@ Shader "Custom/CoinShader"
 
         ENDCG
     }
-    FallBack "Diffuse"
+        FallBack "Diffuse"
 }

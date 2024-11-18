@@ -15,7 +15,9 @@ public class CoinFlip : MonoBehaviour
     public string coinSide; // "Cara" o "Cruz"
     public Text resultText; // Asigna el elemento de texto en el inspector (opcional)
 
-    // Propiedad pública para acceder al estado 'thrown'
+    public Collider caraCollider;  // Collider para detectar "Cara"
+    public Collider cruzCollider;  // Collider para detectar "Cruz"
+
     public bool IsThrown
     {
         get { return thrown; }
@@ -23,11 +25,7 @@ public class CoinFlip : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Start() llamado");
         rb = GetComponent<Rigidbody>();
-
-        // Bajar el centro de masa en el eje Y para evitar que caiga de canto
-        rb.centerOfMass = new Vector3(0, -0.1f, 0);
 
         // Asegurarse de que la gravedad está desactivada inicialmente
         rb.useGravity = false;
@@ -39,16 +37,10 @@ public class CoinFlip : MonoBehaviour
         ResetCoin();
     }
 
-    void Update()
-    {
-        // Nota: Eliminamos el Input.GetKeyDown(KeyCode.Space) de aquí si ahora el lanzamiento lo controla la cámara
-    }
-
     public void FlipCoin()
     {
         if (!thrown && !hasLanded)
         {
-            Debug.Log("FlipCoin() llamado");
             thrown = true;
 
             // Activar la gravedad
@@ -76,57 +68,18 @@ public class CoinFlip : MonoBehaviour
         }
     }
 
-    void DetermineSide()
-    {
-        Debug.Log("DetermineSide() llamado");
-
-        // Calcular el producto punto entre el vector hacia arriba de la moneda y el eje Y
-        float dot = Vector3.Dot(transform.up, Vector3.up);
-        Debug.Log("Valor del producto punto: " + dot);
-
-        // Umbral para considerar si está de canto
-        float threshold = 0.1f; // Puedes ajustar este valor
-
-        if (dot > threshold)
-        {
-            coinSide = "Cara";
-        }
-        else if (dot < -threshold)
-        {
-            coinSide = "Cruz";
-        }
-        else
-        {
-            // Forzar el resultado a "Cara" o "Cruz" si está cerca del canto
-            coinSide = (Random.value > 0.5f) ? "Cara" : "Cruz";
-            Debug.Log("La moneda cayó cerca del canto. Resultado forzado a: " + coinSide);
-        }
-
-        // Mostrar el resultado
-        if (resultText != null)
-        {
-            resultText.text = "Resultado: " + coinSide;
-        }
-        Debug.Log("Resultado: " + coinSide);
-    }
-
     public void ResetCoin()
     {
-        Debug.Log("ResetCoin() llamado");
-        // Reiniciar variables
         hasLanded = false;
         thrown = false;
         coinSide = "";
 
-        // Restablecer la posición y rotación
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        // Establecer la posición inicial en Y = 1
         transform.position = new Vector3(0, 1f, 0);
         transform.rotation = Quaternion.identity;
 
-        // Desactivar la gravedad
         rb.useGravity = false;
 
         if (resultText != null)
@@ -135,13 +88,28 @@ public class CoinFlip : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider other)
     {
         if (thrown && !hasLanded)
         {
-            Debug.Log("La moneda ha aterrizado - DetermineSide()");
+            // Verificar cuál de los colliders (cara o cruz) ha tocado el suelo
+            if (other == caraCollider)
+            {
+                coinSide = "Cara";
+            }
+            else if (other == cruzCollider)
+            {
+                coinSide = "Cruz";
+            }
+
+            // Mostrar el resultado
+            if (resultText != null)
+            {
+                resultText.text = "Resultado: " + coinSide;
+            }
+            Debug.Log("Resultado: " + coinSide);
+
             hasLanded = true;
-            DetermineSide();
         }
     }
 }
