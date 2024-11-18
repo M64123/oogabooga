@@ -8,6 +8,8 @@ TagManager:
   - BoxArea
   - Ally
   - Enemy
+  - QTELeft
+  - QTERight
   layers:
   - Default
   - TransparentFX
