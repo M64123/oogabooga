@@ -6,10 +6,11 @@ TagManager:
   tags:
   - Arena
   - BoxArea
-  - Ally
-  - Enemy
   - QTELeft
   - QTERight
+  - ally
+  - enemy
+  - Enemy
   layers:
   - Default
   - TransparentFX

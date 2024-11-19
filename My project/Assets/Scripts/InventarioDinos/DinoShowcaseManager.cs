@@ -24,11 +24,11 @@ public class DinoShowcaseManager : MonoBehaviour
             GameObject dinoObj = Instantiate(dino.prefab, spawnPosition, Quaternion.identity, dinosParent);
 
             // Añadir el script de movimiento (asegúrate de que el prefab tiene Animator)
-            if (dinoObj.GetComponent<UnitIdleMovement>() == null)
+            /*if (dinoObj.GetComponent<UnitIdleMovement>() == null)
             {
                 dinoObj.AddComponent<UnitIdleMovement>();
             }
-
+            */
             // Mostrar el nombre del dinosaurio encima
             GameObject nameTag = CreateNameTag(dino.name);
             nameTag.transform.SetParent(dinoObj.transform);

@@ -37,6 +37,7 @@ public class QTEManager : MonoBehaviour
     public RectTransform qteCenterRectTransform; // Asigna el RectTransform del QTECenter desde el Inspector
 
     private bool isQTEInProgress = false; // Variable para evitar múltiples QTEs simultáneos
+    private bool wasLastQTESuccessful = false; // Flag para saber si el último QTE fue exitoso
 
     void Awake()
     {
@@ -69,20 +70,12 @@ public class QTEManager : MonoBehaviour
         }
     }
 
-    void OnDestroy()
-    {
-        // No es necesario desuscribirse ya que BeatManager llama directamente a HandleBeat()
-    }
-
     void CheckSceneActivation()
     {
         // Puedes implementar lógica adicional para activar/desactivar QTEs basados en la escena
         isQTEActive = true; // Por simplicidad, siempre activo. Ajusta según tus necesidades.
     }
 
-    /// <summary>
-    /// Método llamado por BeatManager en cada beat.
-    /// </summary>
     public void HandleBeat()
     {
         if (!isQTEActive)
@@ -90,43 +83,30 @@ public class QTEManager : MonoBehaviour
 
         beatCounter += 1f;
 
-        // Iterar sobre la lista de QTETriggers en BeatManager para ver si alguno debe activarse
         foreach (QTETrigger trigger in BeatManager.Instance.qteTriggers)
         {
             if (beatCounter >= trigger.beatsAfterLastTrigger)
             {
                 if (!isQTEInProgress) // Evitar múltiples QTEs simultáneos
                 {
-                    // Activar el QTE según el tipo definido
                     StartCoroutine(ActivateQTE(trigger));
-
-                    // Invocar el evento específico del trigger
                     trigger.onQTEActivated.Invoke();
-
-                    // Restar el beatsAfterLastTrigger del contador
                     beatCounter -= trigger.beatsAfterLastTrigger;
                 }
             }
         }
     }
 
-    /// <summary>
-    /// Activa la secuencia QTE según la configuración del trigger.
-    /// </summary>
-    /// <param name="trigger">El trigger que define cómo activar el QTE.</param>
-    /// <returns></returns>
     IEnumerator ActivateQTE(QTETrigger trigger)
     {
         if (isQTEInProgress)
-            yield break; // Evitar múltiples QTEs
+            yield break;
 
         isQTEInProgress = true;
 
-        // Seleccionar los prefabs personalizados si están definidos
         GameObject leftPrefab = trigger.customLeftPrefab != null ? trigger.customLeftPrefab : qteIndicatorLeftPrefab;
         GameObject rightPrefab = trigger.customRightPrefab != null ? trigger.customRightPrefab : qteIndicatorRightPrefab;
 
-        // Instanciar indicadores según el tipo de QTE
         GameObject indicatorLeft = null;
         GameObject indicatorRight = null;
 
@@ -134,20 +114,18 @@ public class QTEManager : MonoBehaviour
         {
             indicatorLeft = Instantiate(leftPrefab, qteBarTransform);
             RectTransform leftRect = indicatorLeft.GetComponent<RectTransform>();
-            leftRect.localScale = Vector3.one; // Asegurar escala original
+            leftRect.localScale = Vector3.one;
         }
 
         if (trigger.qteType == QTEType.Right || trigger.qteType == QTEType.Both)
         {
             indicatorRight = Instantiate(rightPrefab, qteBarTransform);
             RectTransform rightRect = indicatorRight.GetComponent<RectTransform>();
-            rightRect.localScale = Vector3.one; // Asegurar escala original
+            rightRect.localScale = Vector3.one;
         }
 
-        // Obtener el componente RectTransform para manipular posiciones
         RectTransform barRect = qteBarTransform.GetComponent<RectTransform>();
 
-        // Usar la referencia directa a QTECenter
         if (qteCenterRectTransform == null)
         {
             Debug.LogError("QTECenter RectTransform no está asignado. Abortando QTE.");
@@ -156,11 +134,9 @@ public class QTEManager : MonoBehaviour
 
         Vector2 centerPos = qteCenterRectTransform.anchoredPosition;
 
-        // Definir posiciones de inicio
         Vector2 leftStartPos = new Vector2(-barRect.rect.width / 2, 0);
         Vector2 rightStartPos = new Vector2(barRect.rect.width / 2, 0);
 
-        // Asignar posiciones iniciales
         if (indicatorLeft != null)
         {
             RectTransform leftRect = indicatorLeft.GetComponent<RectTransform>();
@@ -173,11 +149,8 @@ public class QTEManager : MonoBehaviour
             rightRect.anchoredPosition = rightStartPos;
         }
 
-        // Definir duración del movimiento basado en BPM
         float beatInterval = 60f / BeatManager.Instance.BPM;
-        float moveDuration = beatInterval; // Tiempo para completar el movimiento
-
-        // Mover indicadores hacia el centro
+        float moveDuration = beatInterval;
         float elapsedTime = 0f;
 
         while (elapsedTime < moveDuration)
@@ -185,7 +158,6 @@ public class QTEManager : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float t = Mathf.Clamp01(elapsedTime / moveDuration);
 
-            // Movimiento lineal hacia el centro
             if (indicatorLeft != null)
             {
                 RectTransform leftRect = indicatorLeft.GetComponent<RectTransform>();
@@ -198,7 +170,6 @@ public class QTEManager : MonoBehaviour
                 rightRect.anchoredPosition = Vector2.Lerp(rightStartPos, centerPos, t);
             }
 
-            // Si se presiona la tecla, evaluar si es éxito o fallo
             if (Input.GetKeyDown(qteKey))
             {
                 bool success = CheckQTESuccess(indicatorLeft, indicatorRight, centerPos);
@@ -211,7 +182,6 @@ public class QTEManager : MonoBehaviour
                     OnQTEFail(trigger);
                 }
 
-                // Destruir los indicadores
                 if (indicatorLeft != null)
                     Destroy(indicatorLeft);
                 if (indicatorRight != null)
@@ -224,10 +194,8 @@ public class QTEManager : MonoBehaviour
             yield return null;
         }
 
-        // Si no se presiona la tecla antes de que el movimiento termine, contar como fallo
         OnQTEFail(trigger);
 
-        // Destruir los indicadores
         if (indicatorLeft != null)
             Destroy(indicatorLeft);
         if (indicatorRight != null)
@@ -236,10 +204,6 @@ public class QTEManager : MonoBehaviour
         isQTEInProgress = false;
     }
 
-    /// <summary>
-    /// Comprueba si el QTE ha sido exitoso en base a la distancia de los indicadores al centro.
-    /// </summary>
-    /// <returns>True si el QTE ha sido exitoso, False si no.</returns>
     bool CheckQTESuccess(GameObject indicatorLeft, GameObject indicatorRight, Vector2 centerPos)
     {
         bool leftNear = false;
@@ -259,18 +223,15 @@ public class QTEManager : MonoBehaviour
             rightNear = distanceRight <= successThreshold;
         }
 
-        return leftNear && rightNear;
+        wasLastQTESuccessful = leftNear && rightNear;
+        return wasLastQTESuccessful;
     }
 
-    /// <summary>
-    /// Maneja el éxito del QTE.
-    /// </summary>
     void OnQTESuccess(QTETrigger trigger)
     {
         onQTESuccess.Invoke();
         Debug.Log("QTE Exitoso!");
 
-        // Reproducir sonido de éxito
         if (successClip != null && audioSource != null)
         {
             audioSource.PlayOneShot(successClip);
@@ -279,15 +240,11 @@ public class QTEManager : MonoBehaviour
         StartCoroutine(RevertCenterColor(Color.green));
     }
 
-    /// <summary>
-    /// Maneja el fallo del QTE.
-    /// </summary>
     void OnQTEFail(QTETrigger trigger)
     {
         onQTEFail.Invoke();
         Debug.Log("QTE Fallido!");
 
-        // Reproducir sonido de fallo
         if (failClip != null && audioSource != null)
         {
             audioSource.PlayOneShot(failClip);
@@ -296,9 +253,6 @@ public class QTEManager : MonoBehaviour
         StartCoroutine(RevertCenterColor(Color.red));
     }
 
-    /// <summary>
-    /// Coroutine para revertir el color de QTECenter al color original después de un tiempo.
-    /// </summary>
     IEnumerator RevertCenterColor(Color color)
     {
         Image centerImage = qteCenterRectTransform.GetComponent<Image>();
@@ -306,7 +260,12 @@ public class QTEManager : MonoBehaviour
         {
             centerImage.color = color;
             yield return new WaitForSeconds(0.5f);
-            centerImage.color = Color.white; // Revertir al color original
+            centerImage.color = Color.white;
         }
+    }
+
+    public bool WasLastQTESuccessful()
+    {
+        return wasLastQTESuccessful;
     }
 }

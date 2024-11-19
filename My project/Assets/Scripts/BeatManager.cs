@@ -1,4 +1,3 @@
-// BeatManager.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +7,7 @@ public class BeatManager : MonoBehaviour
 {
     [SerializeField] private float _bpm = 120f; // BPM por defecto
     [SerializeField] private AudioSource _audioSource;
-    [SerializeField] private Intervals[] _intervals;
+    [SerializeField] private List<Intervals> _intervals; // Lista de intervalos configurables desde el inspector
 
     [Header("Beat Events")]
     public UnityEvent onBeat; // Evento que se dispara en cada beat
@@ -39,6 +38,9 @@ public class BeatManager : MonoBehaviour
             }
         }
     }
+
+    // Propiedad pública para acceder a los intervalos
+    public List<Intervals> Intervals => _intervals;
 
     private void Awake()
     {
@@ -115,8 +117,11 @@ public class BeatManager : MonoBehaviour
 public class Intervals
 {
     [SerializeField] private float _steps;
-    [SerializeField] private UnityEvent _trigger;
+    [SerializeField] private UnityEvent _trigger; // Evento a disparar cuando se cumple el intervalo
     private int _lastInterval;
+
+    // Propiedad pública para acceder al trigger
+    public UnityEvent Trigger => _trigger;
 
     public float GetIntervalLength(float bpm)
     {
@@ -128,7 +133,7 @@ public class Intervals
         if (Mathf.FloorToInt(interval) != _lastInterval)
         {
             _lastInterval = Mathf.FloorToInt(interval);
-            _trigger.Invoke();
+            _trigger.Invoke(); // Disparar el evento
         }
     }
 }
