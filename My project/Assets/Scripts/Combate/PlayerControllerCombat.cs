@@ -5,9 +5,12 @@ using UnityEngine;
 public class PlayerControllerCombat : MonoBehaviour
 {
     [Header("Combat Settings")]
+    public float movementSpeed = 5f; // Velocidad de movimiento hacia el enemigo
     public float attackDamage = 10f; // Daño que el jugador hace por ataque
+    public float distanceToStop = 1f; // Distancia al enemigo en la que se detiene
 
     private Transform enemyTarget;
+    private bool isMoving = true;
 
     void Start()
     {
@@ -21,48 +24,55 @@ public class PlayerControllerCombat : MonoBehaviour
         {
             Debug.LogError("No se encontró ningún objeto con el tag 'enemy'");
         }
+    }
 
-        // Subscribirse al evento de éxito del QTE
-        if (QTEManager.Instance != null)
+    void Update()
+    {
+        if (enemyTarget != null && isMoving)
         {
-            QTEManager.Instance.onQTESuccess.AddListener(HandleQTESuccess);
+            MoveTowardsEnemy();
+        }
+    }
+
+    private void MoveTowardsEnemy()
+    {
+        float distance = Vector2.Distance(transform.position, enemyTarget.position);
+
+        if (distance > distanceToStop)
+        {
+            // Mover al jugador hacia el enemigo con la velocidad especificada
+            transform.position = Vector2.MoveTowards(transform.position, enemyTarget.position, movementSpeed * Time.deltaTime);
         }
         else
         {
-            Debug.LogError("No se encontró QTEManager en la escena");
+            // Detener movimiento y comenzar la fase de combate
+            isMoving = false;
+            StartCombat();
         }
     }
 
-    void HandleQTESuccess()
+    private void StartCombat()
     {
-        if (enemyTarget == null)
-            return;
-
-        // Realizar el ataque al enemigo
-        Attack(enemyTarget.gameObject);
-    }
-
-    void Attack(GameObject target)
-    {
-        // Intentar obtener el componente Health del objetivo
-        Health targetHealth = target.GetComponent<Health>();
-        if (targetHealth != null)
+        if (BeatManager.Instance != null)
         {
-            targetHealth.TakeDamage(attackDamage);
-            Debug.Log(target.tag + " recibió " + attackDamage + " de daño del jugador");
-        }
-        else
-        {
-            Debug.LogError("El objeto " + target.name + " no tiene un componente Health");
+            BeatManager.Instance.StartCombatPhase(); // Cambiado de StartCombatBeat a StartCombatPhase
         }
     }
 
-    private void OnDestroy()
+    public void Attack()
     {
-        // Desuscribirse del evento de QTEManager si el objeto se destruye
-        if (QTEManager.Instance != null)
+        if (enemyTarget != null)
         {
-            QTEManager.Instance.onQTESuccess.RemoveListener(HandleQTESuccess);
+            Health enemyHealth = enemyTarget.GetComponent<Health>();
+            if (enemyHealth != null)
+            {
+                enemyHealth.TakeDamage(attackDamage);
+                Debug.Log("El enemigo recibió " + attackDamage + " de daño.");
+            }
+            else
+            {
+                Debug.LogError("El enemigo no tiene un componente Health");
+            }
         }
     }
 }
