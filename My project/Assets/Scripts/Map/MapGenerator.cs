@@ -361,11 +361,11 @@ public class MapGenerator : MonoBehaviour
 
         if (bossLevels.Contains(userLevel))
         {
-            return NodeType.Boss;
+            return NodeType.GAMBLING;
         }
         else if (gamblingLevels.Contains(userLevel))
         {
-            return NodeType.GAMBLING;
+            return NodeType.Boss;
         }
 
         // Obtener los tipos disponibles

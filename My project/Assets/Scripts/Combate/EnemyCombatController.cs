@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class EnemyCombatController : MonoBehaviour
 {
@@ -13,21 +12,24 @@ public class EnemyCombatController : MonoBehaviour
 
     void Start()
     {
-        // Buscar el jugador con el tag "Ally"
-        GameObject player = GameObject.FindGameObjectWithTag("Ally");
+        // Buscar el jugador con el tag "ally"
+        GameObject player = GameObject.FindGameObjectWithTag("ally");
         if (player != null)
         {
             playerTarget = player.transform;
         }
         else
         {
-            Debug.LogError("No se encontró ningún objeto con el tag 'Ally'");
+            Debug.LogError("No se encontró ningún objeto con el tag 'ally'");
         }
 
-        // Suscribirse al evento del beat de combate del BeatManager
+        // Subscribirse al evento del Interval del BeatManager
         if (BeatManager.Instance != null)
         {
-            BeatManager.Instance.onCombatBeat.AddListener(HandleAttack);
+            foreach (Intervals interval in BeatManager.Instance.Intervals) // Cambiado para usar la propiedad pública
+            {
+                interval.Trigger.AddListener(HandleAttack); // Cambiado para usar la propiedad pública
+            }
         }
         else
         {
@@ -40,7 +42,7 @@ public class EnemyCombatController : MonoBehaviour
         if (playerTarget == null)
             return;
 
-        // Atacar con una probabilidad definida (e.g., 70% de éxito)
+        // Atacar con una probabilidad del 30% de fallar (ajustable)
         if (Random.value > attackProbability)
         {
             Debug.Log("El enemigo falló el ataque");
@@ -69,10 +71,13 @@ public class EnemyCombatController : MonoBehaviour
 
     private void OnDestroy()
     {
-        // Desuscribirse del evento de combate del BeatManager si el objeto se destruye
+        // Desuscribirse de los eventos del BeatManager si el objeto se destruye
         if (BeatManager.Instance != null)
         {
-            BeatManager.Instance.onCombatBeat.RemoveListener(HandleAttack);
+            foreach (Intervals interval in BeatManager.Instance.Intervals) // Cambiado para usar la propiedad pública
+            {
+                interval.Trigger.RemoveListener(HandleAttack); // Cambiado para usar la propiedad pública
+            }
         }
     }
 }

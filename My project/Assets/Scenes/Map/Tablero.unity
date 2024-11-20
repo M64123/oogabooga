@@ -736,7 +736,7 @@ MonoBehaviour:
   - nodeType: 2
     prefab: {fileID: 5080964239807985962, guid: 375a82b53fb0bdd4db7a380ef5d54c3d, type: 3}
   - nodeType: 3
-    prefab: {fileID: 7117204360704312840, guid: d87985685acb1bc409574a8a97b80b3f, type: 3}
+    prefab: {fileID: 6899662037169094284, guid: c0ab52e1bc724d14d8252bb018722c13, type: 3}
   - nodeType: 4
     prefab: {fileID: 5408356654722150860, guid: 0834a99c2577404458b299c87f7fd20d, type: 3}
   - nodeType: 5
@@ -746,7 +746,7 @@ MonoBehaviour:
   - nodeType: 7
     prefab: {fileID: 5354254137620424564, guid: 0bb2ac7e122089c46b4c87dfeed32222, type: 3}
   - nodeType: 8
-    prefab: {fileID: 6899662037169094284, guid: c0ab52e1bc724d14d8252bb018722c13, type: 3}
+    prefab: {fileID: 7117204360704312840, guid: d87985685acb1bc409574a8a97b80b3f, type: 3}
   playerPrefab: {fileID: 5442698315759687718, guid: 2d37e26e4ac902042aedded83916cd78, type: 3}
   allNodes: []
   totalLevels: 17
@@ -974,7 +974,7 @@ MonoBehaviour:
   - nodeType: 2
     sceneNames:
     - 
-  - nodeType: 8
+  - nodeType: 3
     sceneNames:
     - Gacha
   - nodeType: 4
@@ -985,7 +985,7 @@ MonoBehaviour:
     sceneNames: []
   - nodeType: 7
     sceneNames: []
-  - nodeType: 3
+  - nodeType: 8
     sceneNames:
     - 
 --- !u!4 &1679504393

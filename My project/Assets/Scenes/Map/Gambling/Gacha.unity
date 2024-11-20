@@ -596,7 +596,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   qteTriggers:
-  - beatsAfterLastTrigger: 4
+  - beatsAfterLastTrigger: 3
     qteType: 2
     customLeftPrefab: {fileID: 5731161360162568145, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
     customRightPrefab: {fileID: 3706431039766217878, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
@@ -2537,7 +2537,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8055638111951870553, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -800
+      value: -575
       objectReference: {fileID: 0}
     - target: {fileID: 8055638111951870553, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -2727,7 +2727,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6987042134202999264, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 800
+      value: 575
       objectReference: {fileID: 0}
     - target: {fileID: 6987042134202999264, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
       propertyPath: m_AnchoredPosition.y

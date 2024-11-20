@@ -1,4 +1,3 @@
-// QTEManager.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -24,18 +23,25 @@ public class QTEManager : MonoBehaviour
     public AudioClip failClip;
     private AudioSource audioSource;
 
+    private string currentSceneName;
+
+    private bool isQTEActive = true; // Activado por defecto
+    private float beatCounter = 0f; // Contador de beats acumulados
+
     [Header("QTE Detection Settings")]
     [Range(10f, 100f)]
-    public float successThreshold = 50f;
+    [Tooltip("Distancia máxima permitida desde el centro para considerar un QTE exitoso.")]
+    public float successThreshold = 50f; // Valor por defecto aumentado para facilitar el éxito
 
     [Header("QTE Center")]
-    public RectTransform qteCenterRectTransform;
+    public RectTransform qteCenterRectTransform; // Asigna el RectTransform del QTECenter desde el Inspector
 
-    private bool isQTEInProgress = false;
-    private bool wasLastQTESuccessful = false;
+    private bool isQTEInProgress = false; // Variable para evitar múltiples QTEs simultáneos
+    private bool wasLastQTESuccessful = false; // Flag para saber si el último QTE fue exitoso
 
     void Awake()
     {
+        // Implementación del Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(this.gameObject);
@@ -47,6 +53,9 @@ public class QTEManager : MonoBehaviour
 
     void Start()
     {
+        currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        CheckSceneActivation();
+
         // Inicializar AudioSource para feedback auditivo
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
@@ -54,64 +63,130 @@ public class QTEManager : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
         }
 
+        // Verificar que qteCenterRectTransform esté asignado
         if (qteCenterRectTransform == null)
         {
             Debug.LogError("QTECenter RectTransform no está asignado en el Inspector.");
         }
     }
 
+    void CheckSceneActivation()
+    {
+        // Puedes implementar lógica adicional para activar/desactivar QTEs basados en la escena
+        isQTEActive = true; // Por simplicidad, siempre activo. Ajusta según tus necesidades.
+    }
+
     public void HandleBeat()
     {
-        if (BeatManager.Instance != null)
+        if (!isQTEActive)
+            return;
+
+        beatCounter += 1f;
+
+        foreach (QTETrigger trigger in BeatManager.Instance.qteTriggers)
         {
-            if (BeatManager.Instance.IsCombatPhase())
+            if (beatCounter >= trigger.beatsAfterLastTrigger)
             {
-                StartCoroutine(ActivateQTE());
+                if (!isQTEInProgress) // Evitar múltiples QTEs simultáneos
+                {
+                    StartCoroutine(ActivateQTE(trigger));
+                    trigger.onQTEActivated.Invoke();
+                    beatCounter -= trigger.beatsAfterLastTrigger;
+                }
             }
         }
     }
 
-    IEnumerator ActivateQTE()
+    IEnumerator ActivateQTE(QTETrigger trigger)
     {
         if (isQTEInProgress)
             yield break;
 
         isQTEInProgress = true;
 
-        GameObject indicatorLeft = Instantiate(qteIndicatorLeftPrefab, qteBarTransform);
-        GameObject indicatorRight = Instantiate(qteIndicatorRightPrefab, qteBarTransform);
+        GameObject leftPrefab = trigger.customLeftPrefab != null ? trigger.customLeftPrefab : qteIndicatorLeftPrefab;
+        GameObject rightPrefab = trigger.customRightPrefab != null ? trigger.customRightPrefab : qteIndicatorRightPrefab;
 
-        RectTransform leftRect = indicatorLeft.GetComponent<RectTransform>();
-        RectTransform rightRect = indicatorRight.GetComponent<RectTransform>();
+        GameObject indicatorLeft = null;
+        GameObject indicatorRight = null;
+
+        if (trigger.qteType == QTEType.Left || trigger.qteType == QTEType.Both)
+        {
+            indicatorLeft = Instantiate(leftPrefab, qteBarTransform);
+            RectTransform leftRect = indicatorLeft.GetComponent<RectTransform>();
+            leftRect.localScale = Vector3.one;
+        }
+
+        if (trigger.qteType == QTEType.Right || trigger.qteType == QTEType.Both)
+        {
+            indicatorRight = Instantiate(rightPrefab, qteBarTransform);
+            RectTransform rightRect = indicatorRight.GetComponent<RectTransform>();
+            rightRect.localScale = Vector3.one;
+        }
+
+        RectTransform barRect = qteBarTransform.GetComponent<RectTransform>();
+
+        if (qteCenterRectTransform == null)
+        {
+            Debug.LogError("QTECenter RectTransform no está asignado. Abortando QTE.");
+            yield break;
+        }
 
         Vector2 centerPos = qteCenterRectTransform.anchoredPosition;
 
-        float beatInterval = 60f / BeatManager.Instance.CombatBPM;
-        float moveDuration = beatInterval;
+        Vector2 leftStartPos = new Vector2(-barRect.rect.width / 2, 0);
+        Vector2 rightStartPos = new Vector2(barRect.rect.width / 2, 0);
 
+        if (indicatorLeft != null)
+        {
+            RectTransform leftRect = indicatorLeft.GetComponent<RectTransform>();
+            leftRect.anchoredPosition = leftStartPos;
+        }
+
+        if (indicatorRight != null)
+        {
+            RectTransform rightRect = indicatorRight.GetComponent<RectTransform>();
+            rightRect.anchoredPosition = rightStartPos;
+        }
+
+        float beatInterval = 60f / BeatManager.Instance.BPM;
+        float moveDuration = beatInterval;
         float elapsedTime = 0f;
+
         while (elapsedTime < moveDuration)
         {
             elapsedTime += Time.deltaTime;
             float t = Mathf.Clamp01(elapsedTime / moveDuration);
 
-            leftRect.anchoredPosition = Vector2.Lerp(new Vector2(-qteBarTransform.GetComponent<RectTransform>().rect.width / 2, 0), centerPos, t);
-            rightRect.anchoredPosition = Vector2.Lerp(new Vector2(qteBarTransform.GetComponent<RectTransform>().rect.width / 2, 0), centerPos, t);
+            if (indicatorLeft != null)
+            {
+                RectTransform leftRect = indicatorLeft.GetComponent<RectTransform>();
+                leftRect.anchoredPosition = Vector2.Lerp(leftStartPos, centerPos, t);
+            }
+
+            if (indicatorRight != null)
+            {
+                RectTransform rightRect = indicatorRight.GetComponent<RectTransform>();
+                rightRect.anchoredPosition = Vector2.Lerp(rightStartPos, centerPos, t);
+            }
 
             if (Input.GetKeyDown(qteKey))
             {
-                bool success = CheckQTESuccess(leftRect, rightRect, centerPos);
+                bool success = CheckQTESuccess(indicatorLeft, indicatorRight, centerPos);
                 if (success)
                 {
-                    OnQTESuccess();
+                    OnQTESuccess(trigger);
                 }
                 else
                 {
-                    OnQTEFail();
+                    OnQTEFail(trigger);
                 }
 
-                Destroy(indicatorLeft);
-                Destroy(indicatorRight);
+                if (indicatorLeft != null)
+                    Destroy(indicatorLeft);
+                if (indicatorRight != null)
+                    Destroy(indicatorRight);
+
                 isQTEInProgress = false;
                 yield break;
             }
@@ -119,37 +194,62 @@ public class QTEManager : MonoBehaviour
             yield return null;
         }
 
-        OnQTEFail();
-        Destroy(indicatorLeft);
-        Destroy(indicatorRight);
+        OnQTEFail(trigger);
+
+        if (indicatorLeft != null)
+            Destroy(indicatorLeft);
+        if (indicatorRight != null)
+            Destroy(indicatorRight);
+
         isQTEInProgress = false;
     }
 
-    bool CheckQTESuccess(RectTransform leftRect, RectTransform rightRect, Vector2 centerPos)
+    bool CheckQTESuccess(GameObject indicatorLeft, GameObject indicatorRight, Vector2 centerPos)
     {
-        bool leftNear = Vector2.Distance(leftRect.anchoredPosition, centerPos) <= successThreshold;
-        bool rightNear = Vector2.Distance(rightRect.anchoredPosition, centerPos) <= successThreshold;
+        bool leftNear = false;
+        bool rightNear = false;
+
+        if (indicatorLeft != null)
+        {
+            RectTransform leftRect = indicatorLeft.GetComponent<RectTransform>();
+            float distanceLeft = Vector2.Distance(leftRect.anchoredPosition, centerPos);
+            leftNear = distanceLeft <= successThreshold;
+        }
+
+        if (indicatorRight != null)
+        {
+            RectTransform rightRect = indicatorRight.GetComponent<RectTransform>();
+            float distanceRight = Vector2.Distance(rightRect.anchoredPosition, centerPos);
+            rightNear = distanceRight <= successThreshold;
+        }
+
         wasLastQTESuccessful = leftNear && rightNear;
         return wasLastQTESuccessful;
     }
 
-    void OnQTESuccess()
+    void OnQTESuccess(QTETrigger trigger)
     {
         onQTESuccess.Invoke();
-        if (successClip != null)
+        Debug.Log("QTE Exitoso!");
+
+        if (successClip != null && audioSource != null)
         {
             audioSource.PlayOneShot(successClip);
         }
+
         StartCoroutine(RevertCenterColor(Color.green));
     }
 
-    void OnQTEFail()
+    void OnQTEFail(QTETrigger trigger)
     {
         onQTEFail.Invoke();
-        if (failClip != null)
+        Debug.Log("QTE Fallido!");
+
+        if (failClip != null && audioSource != null)
         {
             audioSource.PlayOneShot(failClip);
         }
+
         StartCoroutine(RevertCenterColor(Color.red));
     }
 
@@ -162,5 +262,10 @@ public class QTEManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
             centerImage.color = Color.white;
         }
+    }
+
+    public bool WasLastQTESuccessful()
+    {
+        return wasLastQTESuccessful;
     }
 }
