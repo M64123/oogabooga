@@ -16,6 +16,9 @@ public class NodeSceneManager : MonoBehaviour
     // Singleton instance
     public static NodeSceneManager Instance;
 
+
+
+
     void Awake()
     {
         // Configurar el patrón Singleton

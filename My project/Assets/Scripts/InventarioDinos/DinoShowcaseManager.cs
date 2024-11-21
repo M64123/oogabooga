@@ -13,15 +13,15 @@ public class DinoShowcaseManager : MonoBehaviour
 
     void GenerateDinosaurs()
     {
-        List<Dinosaur> playerDinos = GameManager.Instance.playerDinosaurs;
+        List<GameObject> playerDinos = GameManager.Instance.playerDinosaurs;
 
-        foreach (Dinosaur dino in playerDinos)
+        foreach (GameObject dino in playerDinos)
         {
             // Generar una posición aleatoria dentro del área
             Vector3 spawnPosition = GetRandomPosition();
 
             // Instanciar el prefab del dinosaurio
-            GameObject dinoObj = Instantiate(dino.prefab, spawnPosition, Quaternion.identity, dinosParent);
+            GameObject dinoObj = Instantiate(dino, spawnPosition, Quaternion.identity, dinosParent);
 
             // Añadir el script de movimiento (asegúrate de que el prefab tiene Animator)
             /*if (dinoObj.GetComponent<UnitIdleMovement>() == null)

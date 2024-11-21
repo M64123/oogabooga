@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance;
+    private static GameManager _instance;
+    public static GameManager Instance
+        { get { return _instance; } }
 
     // Lista para almacenar los datos de todos los nodos
     private List<MapNodeData> savedMapData = new List<MapNodeData>();
@@ -13,7 +15,7 @@ public class GameManager : MonoBehaviour
     private string currentPlayerNodeID = "";
 
     // Lista para almacenar los dinosaurios del jugador
-    public List<Dinosaur> playerDinosaurs = new List<Dinosaur>();
+    public List<GameObject> playerDinosaurs = new List<GameObject>();
 
     // Propiedad para acceder al estado del tablero (mapa)
     public List<MapNodeData> boardState
@@ -27,7 +29,7 @@ public class GameManager : MonoBehaviour
         // Implementación del Singleton
         if (Instance == null)
         {
-            Instance = this;
+            _instance = this;
             DontDestroyOnLoad(gameObject); // Persiste entre escenas
         }
         else
@@ -83,7 +85,7 @@ public class GameManager : MonoBehaviour
     /// Añade un dinosaurio a la lista de dinosaurios del jugador.
     /// </summary>
     /// <param name="newDino">Dinosaurio a añadir.</param>
-    public void AddDinosaur(Dinosaur newDino)
+    public void AddDinosaur(GameObject newDino)
     {
         if (newDino != null)
         {
@@ -100,7 +102,7 @@ public class GameManager : MonoBehaviour
     /// Guarda un dinosaurio a través de EggBehaviour o cualquier otro script.
     /// </summary>
     /// <param name="dino">Dinosaurio a guardar.</param>
-    public void SaveDinosaur(Dinosaur dino)
+    public void SaveDinosaur(GameObject dino)
     {
         AddDinosaur(dino);
         // Aquí puedes agregar lógica adicional para guardar el estado del dinosaurio si es necesario.

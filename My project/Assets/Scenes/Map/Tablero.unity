@@ -784,7 +784,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   nodePrefab: {fileID: 5442698315759687718, guid: 2d37e26e4ac902042aedded83916cd78, type: 3}
-  playerPrefab: {fileID: 0}
+  playerPrefab: {fileID: 5442698315759687718, guid: 2d37e26e4ac902042aedded83916cd78, type: 3}
   nodePrefabs:
   - nodeType: 1
     prefab: {fileID: 4674173787521336667, guid: 82f295cd165f4d64fb21763519ba1867, type: 3}
