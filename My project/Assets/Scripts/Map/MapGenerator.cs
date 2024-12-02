@@ -2,12 +2,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-/// <summary>
-/// Clase que genera y gestiona el mapa, incluyendo nodos, conexiones y la posición del jugador.
-/// </summary>
 public class MapGenerator : MonoBehaviour
 {
-
     [System.Serializable]
     public struct NodePrefab
     {
@@ -33,9 +29,9 @@ public class MapGenerator : MonoBehaviour
         1, 1, 3, 3, 3, 1, 1, 3, 4, 4, 3, 1, 1, 3, 3, 3, 1
     };
 
-    // Listas de niveles específicos para Boss y GAMBLING
+    // Niveles específicos para Boss y GACHA
     private HashSet<int> bossLevels = new HashSet<int> { 6, 12, 17 };
-    private HashSet<int> gamblingLevels = new HashSet<int> { 2, 7, 13 };
+    private HashSet<int> gachaLevels = new HashSet<int> { 2, 7, 13 };
 
     // Almacena los niveles generados
     private List<List<MapNode>> levels = new List<List<MapNode>>();
@@ -56,6 +52,11 @@ public class MapGenerator : MonoBehaviour
     public float lineWidth = 0.05f;            // Ancho de la línea
     public Material lineMaterial;              // Material para el LineRenderer
     public Color lineColor = Color.white;      // Color de la línea
+
+    // Objetos padres para organizar nodos y líneas en la jerarquía
+    [Header("Parent Objects")]
+    public Transform nodesParent;              // Parent para organizar los nodos
+    public Transform linesParent;              // Parent para organizar las líneas
 
     void Start()
     {
@@ -132,7 +133,7 @@ public class MapGenerator : MonoBehaviour
                 float zPos = level * nodeSpacingZ;
                 Vector3 nodePos = new Vector3(xPos, 0, zPos);
 
-                MapNode newNode = CreateNode(nodePos, level, i); // Pasar 'i' como índice
+                MapNode newNode = CreateNode(nodePos, level, i);
                 allNodes.Add(newNode);
                 currentLevelNodes.Add(newNode);
             }
@@ -203,6 +204,7 @@ public class MapGenerator : MonoBehaviour
             // Crear un nuevo GameObject para el nodo
             GameObject nodeObj = new GameObject($"MapNode_{nodeData.nodeID}");
             nodeObj.transform.position = nodeData.position;
+            nodeObj.transform.parent = nodesParent; // Organizar en la jerarquía
 
             // Añadir el componente MapNode
             MapNode node = nodeObj.AddComponent<MapNode>();
@@ -352,8 +354,6 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Obtiene un tipo de nodo adecuado sin repetir tipos en el camino.
     /// </summary>
-    /// <param name="node">Nodo actual.</param>
-    /// <returns>Tipo de nodo asignado.</returns>
     private NodeType GetNodeTypeForNode(MapNode node)
     {
         // Niveles específicos
@@ -361,11 +361,11 @@ public class MapGenerator : MonoBehaviour
 
         if (bossLevels.Contains(userLevel))
         {
-            return NodeType.GAMBLING;
-        }
-        else if (gamblingLevels.Contains(userLevel))
-        {
             return NodeType.Boss;
+        }
+        else if (gachaLevels.Contains(userLevel))
+        {
+            return NodeType.GAMBLING;
         }
 
         // Obtener los tipos disponibles
@@ -397,8 +397,6 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Obtiene un tipo de nodo permitiendo repeticiones si es necesario.
     /// </summary>
-    /// <param name="node">Nodo actual.</param>
-    /// <returns>Tipo de nodo asignado.</returns>
     private NodeType GetNodeTypeAllowingRepetition(MapNode node)
     {
         // Niveles específicos
@@ -408,7 +406,7 @@ public class MapGenerator : MonoBehaviour
         {
             return NodeType.Boss;
         }
-        else if (gamblingLevels.Contains(userLevel))
+        else if (gachaLevels.Contains(userLevel))
         {
             return NodeType.GAMBLING;
         }
@@ -428,8 +426,6 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Selecciona un tipo de nodo basado en probabilidades definidas.
     /// </summary>
-    /// <param name="availableTypes">Lista de tipos disponibles.</param>
-    /// <returns>Tipo de nodo seleccionado.</returns>
     private NodeType SelectNodeTypeBasedOnProbability(List<NodeType> availableTypes)
     {
         // Definir las probabilidades
@@ -586,10 +582,6 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Obtiene posibles conexiones para un nodo dado.
     /// </summary>
-    /// <param name="currentNode">Nodo actual.</param>
-    /// <param name="nextLevelNodes">Lista de nodos en el siguiente nivel.</param>
-    /// <param name="maxConnections">Número máximo de conexiones.</param>
-    /// <returns>Lista de nodos posibles para conectar.</returns>
     private List<MapNode> GetPossibleConnections(MapNode currentNode, List<MapNode> nextLevelNodes, int maxConnections)
     {
         List<MapNode> possibleConnections = new List<MapNode>();
@@ -615,9 +607,6 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Encuentra el nodo más cercano en X a un nodo objetivo dentro de una lista de nodos.
     /// </summary>
-    /// <param name="targetNode">Nodo objetivo.</param>
-    /// <param name="nodes">Lista de nodos para buscar.</param>
-    /// <returns>Nodo más cercano.</returns>
     private MapNode FindClosestNode(MapNode targetNode, List<MapNode> nodes)
     {
         MapNode closestNode = null;
@@ -639,9 +628,6 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Genera un identificador único para un nodo basado en su nivel y su índice.
     /// </summary>
-    /// <param name="depth">Nivel de profundidad del nodo.</param>
-    /// <param name="index">Índice del nodo dentro de su nivel.</param>
-    /// <returns>ID único del nodo.</returns>
     private string GenerateNodeID(int depth, int index)
     {
         return $"Level{depth + 1}_Node{index + 1}";
@@ -650,14 +636,11 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Crea un nodo en una posición específica con un nivel y un índice.
     /// </summary>
-    /// <param name="position">Posición del nodo.</param>
-    /// <param name="depth">Nivel de profundidad.</param>
-    /// <param name="index">Índice dentro del nivel.</param>
-    /// <returns>Nodo creado.</returns>
     private MapNode CreateNode(Vector3 position, int depth, int index)
     {
-        GameObject nodeObj = new GameObject($"MapNode_Level{depth + 1}_Index{index + 1}");
+        GameObject nodeObj = new GameObject($"MapNode_{GenerateNodeID(depth, index)}");
         nodeObj.transform.position = position;
+        nodeObj.transform.parent = nodesParent; // Organizar en la jerarquía
 
         MapNode node = nodeObj.AddComponent<MapNode>();
         node.nodeID = GenerateNodeID(depth, index);
@@ -696,12 +679,12 @@ public class MapGenerator : MonoBehaviour
                 }
             }
 
-            // Instanciar el prefab del nodo como hijo del MapGenerator para mantener la jerarquía organizada
-            GameObject nodeObj = Instantiate(prefabToInstantiate, node.transform.position, Quaternion.identity, this.transform);
-            node.nodeObject = nodeObj;
+            // Instanciar el prefab del nodo como hijo de nodesParent para mantener la jerarquía organizada
+            GameObject nodeObjInstance = Instantiate(prefabToInstantiate, node.transform.position, Quaternion.identity, nodesParent);
+            node.nodeObject = nodeObjInstance;
 
             // Asignar el MapNode al script de interacción
-            NodeInteraction interaction = nodeObj.GetComponentInChildren<NodeInteraction>();
+            NodeInteraction interaction = nodeObjInstance.GetComponent<NodeInteraction>();
             if (interaction != null)
             {
                 interaction.node = node;
@@ -713,7 +696,7 @@ public class MapGenerator : MonoBehaviour
             }
 
             // Configurar el nombre del nodo
-            nodeObj.name = $"Node_Level{node.depthLevel + 1}_{node.nodeType}";
+            nodeObjInstance.name = $"Node_{node.nodeID}";
 
             // Dibujar las conexiones
             foreach (MapNode connectedNode in node.connectedNodes)
@@ -730,8 +713,6 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Obtiene el prefab correspondiente a un tipo de nodo.
     /// </summary>
-    /// <param name="nodeType">Tipo de nodo.</param>
-    /// <returns>Prefab correspondiente o null si no se encuentra.</returns>
     private GameObject GetPrefabForNodeType(NodeType nodeType)
     {
         foreach (NodePrefab np in nodePrefabs)
@@ -747,13 +728,10 @@ public class MapGenerator : MonoBehaviour
     /// <summary>
     /// Dibuja una línea entre dos puntos utilizando un LineRenderer.
     /// </summary>
-    /// <param name="start">Punto de inicio.</param>
-    /// <param name="end">Punto de fin.</param>
-    /// <param name="color">Color de la línea.</param>
     private void DrawLine(Vector3 start, Vector3 end, Color color)
     {
         GameObject line = new GameObject("Line");
-        line.transform.parent = this.transform; // Para organizar en la jerarquía
+        line.transform.parent = linesParent; // Para organizar en la jerarquía
         LineRenderer lr = line.AddComponent<LineRenderer>();
         lr.positionCount = 2;
         lr.useWorldSpace = true;
@@ -853,6 +831,12 @@ public class MapGenerator : MonoBehaviour
             {
                 playerMovement.currentNode = startNode;
                 playerMovement.InitializePlayer();
+
+                // Asegurarse de que el GameManager tenga el nodeID actualizado
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.SetCurrentPlayerNodeID(startNode.nodeID);
+                }
             }
             else
             {

@@ -70,7 +70,6 @@ public class PlayerMovement : MonoBehaviour
     /// <summary>
     /// Mueve al jugador hacia el nodo objetivo.
     /// </summary>
-    /// <param name="targetNode">Nodo al cual mover al jugador.</param>
     public void MoveToNode(MapNode targetNode)
     {
         if (targetNode == null)
@@ -81,19 +80,27 @@ public class PlayerMovement : MonoBehaviour
 
         if (!isMoving)
         {
-            currentNode = targetNode;
-            targetPosition = targetNode.transform.position;
-            isMoving = true;
-
-            // Guardar el nodeID del nodo actual en el GameManager
-            if (GameManager.Instance != null)
+            // Verificar si el nodo objetivo está conectado al nodo actual
+            if (currentNode.connectedNodes.Contains(targetNode))
             {
-                GameManager.Instance.SetCurrentPlayerNodeID(currentNode.nodeID);
-                Debug.Log($"Jugador movido al nodo: {currentNode.nodeID}");
+                targetPosition = targetNode.transform.position;
+                isMoving = true;
+                currentNode = targetNode;
+
+                // Guardar el nodeID del nodo actual en el GameManager
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.SetCurrentPlayerNodeID(currentNode.nodeID);
+                    Debug.Log($"Jugador movido al nodo: {currentNode.nodeID}");
+                }
+                else
+                {
+                    Debug.LogError("GameManager.Instance es null. No se puede guardar el nodo actual del jugador.");
+                }
             }
             else
             {
-                Debug.LogError("GameManager.Instance es null. No se puede guardar el nodo actual del jugador.");
+                Debug.LogWarning($"No se puede mover al nodo {targetNode.nodeID} porque no está conectado al nodo actual {currentNode.nodeID}.");
             }
         }
     }

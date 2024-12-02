@@ -22,13 +22,13 @@ public class MapNodeData
         this.position = node.transform.position;
         this.depthLevel = node.depthLevel;
         this.nodeType = node.nodeType;
-        connectedNodeIDs = new List<string>();
+        this.isActive = node.isActive;
 
+        connectedNodeIDs = new List<string>();
         foreach (MapNode connectedNode in node.connectedNodes)
         {
             connectedNodeIDs.Add(connectedNode.nodeID);
         }
-        this.isActive = node.isActive;
     }
 
     /// <summary>
@@ -41,9 +41,9 @@ public class MapNodeData
     {
         this.nodeID = nodeID;
         this.isActive = isActive;
-        this.position = Vector3.zero; // Puedes asignar un valor por defecto o ajustarlo según tus necesidades
-        this.depthLevel = 0;          // Valor por defecto
-        this.nodeType = NodeType.None; // Valor por defecto, ajusta según tus tipos de nodos
+        this.position = Vector3.zero;   // Valor por defecto
+        this.depthLevel = 0;            // Valor por defecto
+        this.nodeType = NodeType.None;  // Valor por defecto
         this.connectedNodeIDs = new List<string>();
     }
 }

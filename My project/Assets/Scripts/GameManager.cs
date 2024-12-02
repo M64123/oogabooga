@@ -5,8 +5,7 @@ using System.Collections.Generic;
 public class GameManager : MonoBehaviour
 {
     private static GameManager _instance;
-    public static GameManager Instance
-        { get { return _instance; } }
+    public static GameManager Instance { get { return _instance; } }
 
     // Lista para almacenar los datos de todos los nodos
     private List<MapNodeData> savedMapData = new List<MapNodeData>();
@@ -27,7 +26,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         // Implementación del Singleton
-        if (Instance == null)
+        if (_instance == null)
         {
             _instance = this;
             DontDestroyOnLoad(gameObject); // Persiste entre escenas
