@@ -11,6 +11,9 @@ TagManager:
   - ally
   - enemy
   - Enemy
+  - slot
+  - Dino
+  - Slot
   layers:
   - Default
   - TransparentFX
