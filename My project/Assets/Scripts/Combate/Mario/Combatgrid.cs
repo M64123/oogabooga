@@ -6,15 +6,15 @@ using UnityEngine;
 public class Combatgrid : MonoBehaviour
 {
     public GameObject gridSlotPrefab; // Prefab de las casillas
-    public Transform gridOrigin;     // Origen de la grid en el suelo
-    public int minGridSize = 3;      // Tamaño mínimo de la grid
-    public float slotSpacing = 1.1f; // Espaciado entre las casillas
+    public Transform gridOrigin; // Origen de la grid
+    public int minGridSize = 3; // Tamaño mínimo de la grid
+    public float slotSpacing = 1.1f; // Espaciado entre los slots
 
-    private List<GameObject> gridSlots = new List<GameObject>();
+    private List<GameObject> gridSlots = new List<GameObject>(); // Lista de slots actuales
 
     private void Start()
     {
-        // Genera la grid inicial
+        // Generar la grid inicial
         for (int i = 0; i < minGridSize; i++)
         {
             AddSlot();
@@ -28,51 +28,28 @@ public class Combatgrid : MonoBehaviour
 
         // Instancia el nuevo slot
         GameObject newSlot = Instantiate(gridSlotPrefab, slotPosition, Quaternion.identity);
-        newSlot.transform.SetParent(gridOrigin); // Organiza los slots bajo el origen
-        newSlot.tag = "Slot"; // Asegúrate de que el prefab tenga el tag "Slot"
+        newSlot.transform.SetParent(gridOrigin); // Mantén los slots organizados bajo la grid
+        newSlot.tag = "Slot"; // Asegúrate de que el slot tenga el tag correcto
         gridSlots.Add(newSlot);
     }
 
-    public void RemoveSlot()
+    public bool AreAllSlotsOccupied()
     {
-        if (gridSlots.Count > minGridSize)
-        {
-            GameObject slotToRemove = gridSlots[0];
-            gridSlots.RemoveAt(0);
-            Destroy(slotToRemove);
-
-            // Reorganiza los slots restantes
-            for (int i = 0; i < gridSlots.Count; i++)
-            {
-                gridSlots[i].transform.position = gridOrigin.position + new Vector3(i * slotSpacing, 0, 0);
-            }
-        }
-    }
-
-    public void UpdateGrid()
-    {
-        // Ajusta el tamaño de la grid si es necesario
-        if (gridSlots.Count > minGridSize && gridSlots[0].transform.childCount == 0)
-        {
-            RemoveSlot();
-        }
-    }
-
-    public void EnsureEnoughSlots()
-    {
-        // Comprueba si todos los slots están ocupados
-        bool allSlotsOccupied = true;
+        // Revisa si todos los slots tienen un hijo (es decir, están ocupados)
         foreach (GameObject slot in gridSlots)
         {
             if (slot.transform.childCount == 0)
             {
-                allSlotsOccupied = false;
-                break;
+                return false; // Hay al menos un slot vacío
             }
         }
+        return true; // Todos los slots están ocupados
+    }
 
-        // Si están ocupados, añade un nuevo slot
-        if (allSlotsOccupied)
+    public void EnsureEnoughSlots()
+    {
+        // Si todos los slots están ocupados, añade un nuevo slot
+        if (AreAllSlotsOccupied())
         {
             AddSlot();
         }

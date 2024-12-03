@@ -2,13 +2,19 @@ using UnityEngine;
 
 public class GridSlot3D : MonoBehaviour
 {
-    private void OnTriggerEnter(Collider other)
+    public bool IsOccupied()
     {
-        // Detecta si un dinosaurio entra en el slot
-        if (other.CompareTag("Dino") && transform.childCount == 0)
+        // Retorna verdadero si hay un hijo en este slot
+        return transform.childCount > 0;
+    }
+
+    public void RemoveOccupant()
+    {
+        // Elimina la relación padre-hijo del objeto en el slot
+        if (transform.childCount > 0)
         {
-            other.transform.SetParent(transform);
-            other.transform.localPosition = Vector3.zero;
+            Transform occupant = transform.GetChild(0);
+            occupant.SetParent(null);
         }
     }
 }

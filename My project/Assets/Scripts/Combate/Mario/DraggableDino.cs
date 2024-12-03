@@ -2,40 +2,54 @@ using UnityEngine;
 
 public class DraggableDino3D : MonoBehaviour
 {
+    private Vector3 initialPosition;
+    private Transform initialParent;
     private Vector3 offset;
     private bool isDragging = false;
-    private Transform originalParent;
-    private Vector3 originalPosition;
     private Transform closestSlot;
+    private Combatgrid combatGrid;
+
+    public float elevation = 0.5f;
+    public float smoothSpeed = 10f;
+
+    private void Start()
+    {
+        // Guarda la posición y el parent iniciales
+        initialPosition = transform.position;
+        initialParent = transform.parent;
+
+        // Encuentra el script CombatGrid en la escena
+        combatGrid = FindObjectOfType<Combatgrid>();
+    }
 
     private void OnMouseDown()
     {
-        // Guarda la posición original
-        originalParent = transform.parent;
-        originalPosition = transform.position;
+        // Desvincula el objeto temporalmente
+        transform.SetParent(null);
 
-        // Activa el modo de arrastre
+        // Calcula el offset
         offset = transform.position - GetMouseWorldPosition();
         isDragging = true;
 
-        // Asegúrate de que el dinosaurio sea visible durante el arrastre
-        transform.position += Vector3.up * 0.5f; // Elevarlo ligeramente
+        // Eleva el objeto para feedback visual
+        transform.position += Vector3.up * elevation;
     }
 
     private void OnMouseDrag()
     {
         if (isDragging)
         {
-            // Mueve el dinosaurio según el cursor del mouse
-            transform.position = GetMouseWorldPosition() + offset;
+            // Calcula la nueva posición basada en el mouse
+            Vector3 targetPosition = GetMouseWorldPosition() + offset;
 
-            // Busca el slot más cercano mientras arrastras
+            // Suaviza el movimiento
+            transform.position = Vector3.Lerp(transform.position, new Vector3(targetPosition.x, elevation, targetPosition.z), Time.deltaTime * smoothSpeed);
+
+            // Encuentra el slot más cercano
             closestSlot = FindClosestSlot();
-            if (closestSlot != null)
-            {
-                // Previsualiza el snap al slot más cercano
-                transform.position = closestSlot.position + Vector3.up * 0.5f; // Elevado para indicar previsualización
-            }
+
+            // Asegúrate de que haya suficientes slots
+            combatGrid.EnsureEnoughSlots();
         }
     }
 
@@ -45,30 +59,27 @@ public class DraggableDino3D : MonoBehaviour
 
         if (closestSlot != null && closestSlot.childCount == 0)
         {
-            // Coloca el dinosaurio en el slot más cercano
+            // Coloca el objeto en el slot más cercano
             transform.SetParent(closestSlot);
             transform.localPosition = Vector3.zero;
-
-            // Notifica a la grid para asegurarse de que haya suficientes slots
-            Combatgrid grid = closestSlot.GetComponentInParent<Combatgrid>();
-            grid.EnsureEnoughSlots();
         }
         else
         {
-            // Si no está sobre un slot, regresa a la posición original
-            transform.position = originalPosition;
-            transform.SetParent(originalParent);
+            // Regresa el objeto a su posición inicial
+            ReturnToInitialPosition();
         }
     }
 
     private Vector3 GetMouseWorldPosition()
     {
-        // Convierte la posición del cursor en coordenadas del mundo
+        Plane gridPlane = new Plane(Vector3.up, Vector3.zero);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit))
+
+        if (gridPlane.Raycast(ray, out float enter))
         {
-            return hit.point;
+            return ray.GetPoint(enter);
         }
+
         return Vector3.zero;
     }
 
@@ -87,15 +98,31 @@ public class DraggableDino3D : MonoBehaviour
                 bestSlot = slot.transform;
             }
 
-            // Cambiar el material del slot más cercano
-            slot.GetComponent<Renderer>().material.color = Color.white; // Resetear color
+            // Cambiar el color de los slots
+            Renderer renderer = slot.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.material.color = Color.white;
+            }
         }
 
         if (bestSlot != null)
         {
-            bestSlot.GetComponent<Renderer>().material.color = Color.green; // Resaltar el más cercano
+            Renderer renderer = bestSlot.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.material.color = Color.green; // Resalta el slot más cercano
+            }
         }
 
         return bestSlot;
     }
+
+    private void ReturnToInitialPosition()
+    {
+        // Devuelve el objeto a su posición inicial
+        transform.position = initialPosition;
+        transform.SetParent(initialParent);
+    }
 }
+
