@@ -1,5 +1,6 @@
-using System.Collections;
+// CoinFlipCameraController.cs
 using UnityEngine;
+using System.Collections;
 
 public class CoinFlipCameraController : MonoBehaviour
 {
@@ -37,37 +38,24 @@ public class CoinFlipCameraController : MonoBehaviour
 
     void Update()
     {
-        // Detectar la tecla Espacio
-        if (Input.GetKeyDown(KeyCode.Space) && !isMoving)
+        // No iniciar el movimiento de la cámara hasta que la moneda haya sido lanzada
+        if (!isMoving && coinFlip != null && coinFlip.IsThrown)
         {
-            // Iniciar el movimiento de la cámara
             StartCameraMovement();
-        }
-
-        // Reiniciar la moneda con la tecla R (opcional)
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            if (coinFlip != null)
-            {
-                coinFlip.ResetCoin();
-            }
-            // Reiniciar la cámara a la posición y rotación inicial
-            transform.position = initialPosition;
-            transform.rotation = initialRotation;
         }
     }
 
     void LateUpdate()
     {
-        if (!isMoving && coinFlip != null && coinFlip.IsThrown)
+        if (isMoving)
+            return;
+
+        if (coinFlip != null && coinFlip.IsThrown)
         {
             // Seguir a la moneda manteniendo el offset
             Vector3 offset = new Vector3(0f, followOffsetY, 0f);
             Vector3 targetPos = coinTransform.position + offset;
             transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 5f);
-
-            // Opcionalmente, hacer que la cámara mire hacia la moneda
-            // transform.LookAt(coinTransform);
         }
     }
 
@@ -108,12 +96,6 @@ public class CoinFlipCameraController : MonoBehaviour
         // Asegurarse de que la cámara llegue exactamente a la posición y rotación final
         transform.position = finalPosition;
         transform.rotation = finalRotation;
-
-        // Llamar al método para lanzar la moneda
-        LaunchCoin();
-
-        // Iniciar el seguimiento de la moneda
-        StartCoroutine(FollowCoin());
     }
 
     Vector3 CalculateCurvePosition(float t)
@@ -127,46 +109,5 @@ public class CoinFlipCameraController : MonoBehaviour
                          + Mathf.Pow(t, 2) * finalPosition;
 
         return position;
-    }
-
-    void LaunchCoin()
-    {
-        // Llamar al método FlipCoin() en el script CoinFlip
-        if (coinFlip != null)
-        {
-            coinFlip.FlipCoin();
-        }
-    }
-
-    IEnumerator FollowCoin()
-    {
-        // Posición inicial de la cámara
-        Vector3 startPosition = transform.position;
-
-        // Offset deseado en relación a la moneda
-        Vector3 offset = new Vector3(0f, followOffsetY, 0f);
-
-        // Duración de la transición
-        float transitionDuration = 1f;
-        float elapsedTime = 0f;
-
-        while (elapsedTime < transitionDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / transitionDuration;
-
-            // Posición objetivo basada en la posición de la moneda más el offset
-            Vector3 targetPos = coinTransform.position + offset;
-
-            // Interpolar la posición de la cámara
-            transform.position = Vector3.Lerp(startPosition, targetPos, t);
-
-            yield return null;
-        }
-
-        // Asegurarse de que la cámara está en la posición correcta
-        transform.position = coinTransform.position + offset;
-
-        isMoving = false;
     }
 }

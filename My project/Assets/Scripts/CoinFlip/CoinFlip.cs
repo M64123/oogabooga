@@ -1,5 +1,7 @@
+// CoinFlip.cs
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class CoinFlip : MonoBehaviour
 {
@@ -8,15 +10,11 @@ public class CoinFlip : MonoBehaviour
     private bool thrown = false;
 
     [Header("Force Settings")]
-    public float upwardForce = 7f; // Ajusta según sea necesario
-    public float torqueForce = 1000f; // Ajusta según sea necesario
+    public float upwardForce = 5f; // Fuerza inicial de 5
 
     [Header("Result")]
     public string coinSide; // "Cara" o "Cruz"
     public Text resultText; // Asigna el elemento de texto en el inspector (opcional)
-
-    public Collider caraCollider;  // Collider para detectar "Cara"
-    public Collider cruzCollider;  // Collider para detectar "Cruz"
 
     public bool IsThrown
     {
@@ -53,18 +51,20 @@ public class CoinFlip : MonoBehaviour
             // Aplicar una rotación inicial aleatoria
             transform.rotation = Random.rotation;
 
-            // Aplicar fuerza hacia arriba con variación aleatoria
-            float randomUpwardForce = Random.Range(upwardForce * 0.9f, upwardForce * 1.1f);
-            rb.AddForce(Vector3.up * randomUpwardForce, ForceMode.Impulse);
+            // Aplicar fuerza hacia arriba con la fuerza acumulada
+            rb.AddForce(Vector3.up * upwardForce, ForceMode.Impulse);
 
             // Aplicar torque aleatorio
-            Vector3 randomTorque = Random.insideUnitSphere * torqueForce;
+            Vector3 randomTorque = Random.insideUnitSphere * upwardForce * 100f; // Ajusta el multiplicador según sea necesario
             rb.AddTorque(randomTorque, ForceMode.Impulse);
 
             if (resultText != null)
             {
                 resultText.text = "Lanzando...";
             }
+
+            // Iniciar la corutina para verificar cuándo la moneda ha aterrizado
+            StartCoroutine(CheckForLanding());
         }
     }
 
@@ -88,28 +88,37 @@ public class CoinFlip : MonoBehaviour
         }
     }
 
-    void OnTriggerEnter(Collider other)
+    private IEnumerator CheckForLanding()
     {
-        if (thrown && !hasLanded)
+        // Esperar al menos 1 segundo antes de comenzar a verificar
+        yield return new WaitForSeconds(1f);
+
+        // Esperar hasta que la moneda esté en reposo
+        while (!rb.IsSleeping())
         {
-            // Verificar cuál de los colliders (cara o cruz) ha tocado el suelo
-            if (other == caraCollider)
-            {
-                coinSide = "Cara";
-            }
-            else if (other == cruzCollider)
-            {
-                coinSide = "Cruz";
-            }
-
-            // Mostrar el resultado
-            if (resultText != null)
-            {
-                resultText.text = "Resultado: " + coinSide;
-            }
-            Debug.Log("Resultado: " + coinSide);
-
-            hasLanded = true;
+            yield return null;
         }
+
+        // La moneda ha aterrizado
+        hasLanded = true;
+
+        // Determinar qué lado está hacia arriba
+        float dot = Vector3.Dot(transform.up, Vector3.up);
+
+        if (dot > 0)
+        {
+            coinSide = "Cara";
+        }
+        else
+        {
+            coinSide = "Cruz";
+        }
+
+        if (resultText != null)
+        {
+            resultText.text = "Resultado: " + coinSide;
+        }
+
+        Debug.Log("Resultado: " + coinSide);
     }
 }
