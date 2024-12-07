@@ -1,57 +1,117 @@
-using System.Collections.Generic;
 using UnityEngine;
-
-
+using System.Collections.Generic;
 
 public class Combatgrid : MonoBehaviour
 {
-    public GameObject gridSlotPrefab; // Prefab de las casillas
-    public Transform gridOrigin; // Origen de la grid
-    public int minGridSize = 3; // Tamaño mínimo de la grid
-    public float slotSpacing = 1.1f; // Espaciado entre los slots
+    public List<Transform> gridSlots = new List<Transform>(); // Lista de slots en la grid
+    public GameObject slotPrefab;      // Prefab del slot
+    public Transform gridParent;       // Parent de la grid
+    public int initialSlots = 3;       // Número de slots iniciales
+    public float slotSpacing = 2.0f;   // Espaciado entre los slots
 
-    private List<GameObject> gridSlots = new List<GameObject>(); // Lista de slots actuales
+    public Vector3 slotScale = new Vector3(0.11f, 0.15f, 1f); // Escala personalizada para los slots
 
     private void Start()
     {
-        // Generar la grid inicial
-        for (int i = 0; i < minGridSize; i++)
+        GenerateInitialSlots();
+    }
+
+    private void GenerateInitialSlots()
+    {
+        for (int i = 0; i < initialSlots; i++)
         {
-            AddSlot();
+            AddSlot(i);
         }
     }
 
-    public void AddSlot()
+    public void AddSlot(int index)
     {
-        // Calcula la posición del nuevo slot
-        Vector3 slotPosition = gridOrigin.position + new Vector3(gridSlots.Count * slotSpacing, 0, 0);
+        Vector3 slotPosition = gridParent.position - new Vector3(index * slotSpacing, 0, 0);
 
-        // Instancia el nuevo slot
-        GameObject newSlot = Instantiate(gridSlotPrefab, slotPosition, Quaternion.identity);
-        newSlot.transform.SetParent(gridOrigin); // Mantén los slots organizados bajo la grid
-        newSlot.tag = "Slot"; // Asegúrate de que el slot tenga el tag correcto
-        gridSlots.Add(newSlot);
+        GameObject newSlot = Instantiate(slotPrefab, slotPosition, Quaternion.identity);
+        newSlot.transform.SetParent(gridParent, false);
+        newSlot.transform.localScale = slotScale;
+        newSlot.transform.localPosition = new Vector3(-index * slotSpacing, 0, 0);
+
+        gridSlots.Add(newSlot.transform);
     }
 
-    public bool AreAllSlotsOccupied()
+    public int NumberOfOccupiedSlots()
     {
-        // Revisa si todos los slots tienen un hijo (es decir, están ocupados)
-        foreach (GameObject slot in gridSlots)
+        int occupiedCount = 0;
+
+        foreach (Transform slot in gridSlots)
         {
-            if (slot.transform.childCount == 0)
+            if (slot.childCount > 0)
             {
-                return false; // Hay al menos un slot vacío
+                occupiedCount++;
             }
         }
-        return true; // Todos los slots están ocupados
+
+        return occupiedCount;
     }
 
-    public void EnsureEnoughSlots()
+    public void ReorganizeSlots()
     {
-        // Si todos los slots están ocupados, añade un nuevo slot
-        if (AreAllSlotsOccupied())
+        List<Transform> dinos = new List<Transform>();
+
+        foreach (Transform slot in gridSlots)
         {
-            AddSlot();
+            if (slot.childCount > 0)
+            {
+                dinos.Add(slot.GetChild(0));
+            }
+        }
+
+        int slotIndex = 0;
+        foreach (Transform dino in dinos)
+        {
+            dino.SetParent(gridSlots[slotIndex]);
+            dino.localPosition = Vector3.zero;
+            slotIndex++;
+        }
+    }
+
+    public void EnsureSlotAvailability()
+    {
+        if (AllSlotsOccupied())
+        {
+            AddSlot(gridSlots.Count);
+        }
+    }
+
+    private bool AllSlotsOccupied()
+    {
+        foreach (Transform slot in gridSlots)
+        {
+            if (slot.childCount == 0)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void RemoveTemporarySlots()
+    {
+        for (int i = gridSlots.Count - 1; i >= initialSlots; i--)
+        {
+            if (gridSlots[i].childCount == 0)
+            {
+                Destroy(gridSlots[i].gameObject);
+                gridSlots.RemoveAt(i);
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (gridSlots == null) return;
+
+        Gizmos.color = Color.blue;
+        foreach (Transform slot in gridSlots)
+        {
+            Gizmos.DrawWireCube(slot.position, slotScale);
         }
     }
 }

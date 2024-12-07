@@ -1,6 +1,7 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class DraggableDino3D : MonoBehaviour
+public class DraggableDinoPlatform : MonoBehaviour
 {
     private Vector3 initialPosition;      // Posición inicial del dino
     private Transform initialParent;     // Parent inicial del dino
@@ -9,6 +10,8 @@ public class DraggableDino3D : MonoBehaviour
 
     public float snapThreshold = 2.0f;   // Distancia para snap al slot
     public Combatgrid combatGrid;        // Referencia a la grid
+    public float returnSpeed = 5.0f;     // Velocidad de retorno
+    public float maxParabolaHeight = 2.0f; // Altura máxima de la parábola
 
     private void Start()
     {
@@ -18,6 +21,10 @@ public class DraggableDino3D : MonoBehaviour
         if (combatGrid == null)
         {
             combatGrid = FindObjectOfType<Combatgrid>();
+            if (combatGrid == null)
+            {
+                Debug.LogError("Combatgrid no encontrado en la escena.");
+            }
         }
     }
 
@@ -25,17 +32,27 @@ public class DraggableDino3D : MonoBehaviour
     {
         isDragging = true;
 
-        // Asegúrate de que hay suficiente espacio en la grid
-        combatGrid.EnsureSlotAvailability();
+        if (combatGrid != null)
+        {
+            combatGrid.EnsureSlotAvailability();
+        }
+        else
+        {
+            Debug.LogWarning("Combatgrid no asignado. No se pueden generar nuevos slots.");
+        }
 
-        // Desvincular temporalmente
         transform.SetParent(null);
     }
 
     private void OnMouseDrag()
     {
         Vector3 mouseWorldPosition = GetMouseWorldPosition();
-        transform.position = new Vector3(mouseWorldPosition.x, transform.position.y, mouseWorldPosition.z);
+
+        // Limitar el valor de Z
+        float clampedZ = Mathf.Min(mouseWorldPosition.z, 2.58f);
+
+        // Actualizar la posición, limitando Z
+        transform.position = new Vector3(mouseWorldPosition.x, transform.position.y, clampedZ);
 
         closestSlot = FindClosestSlot();
         HighlightSlot(closestSlot);
@@ -51,13 +68,15 @@ public class DraggableDino3D : MonoBehaviour
         }
         else
         {
-            ReturnToOrigin();
+            ReturnToOriginWithParabola();
         }
 
         RemoveSlotHighlight(closestSlot);
 
-        // Verifica y elimina slots temporales no ocupados
-        combatGrid.RemoveTemporarySlots();
+        if (combatGrid != null)
+        {
+            combatGrid.RemoveTemporarySlots();
+        }
     }
 
     private void SnapToSlot(Transform slot)
@@ -66,9 +85,35 @@ public class DraggableDino3D : MonoBehaviour
         transform.localPosition = Vector3.zero;
     }
 
-    private void ReturnToOrigin()
+    private void ReturnToOriginWithParabola()
     {
-        transform.position = initialPosition;
+        StopAllCoroutines(); // Detener cualquier movimiento anterior
+        StartCoroutine(MoveToOriginWithParabola());
+    }
+
+    private System.Collections.IEnumerator MoveToOriginWithParabola()
+    {
+        Vector3 startPoint = transform.position;
+        Vector3 endPoint = initialPosition;
+
+        float distance = Vector3.Distance(startPoint, endPoint);
+        float height = Mathf.Clamp(distance / 2, 0.5f, maxParabolaHeight);
+        float speed = Mathf.Clamp(returnSpeed / distance, 1.0f, 10.0f);
+
+        float t = 0;
+        while (t < 1.0f)
+        {
+            t += Time.deltaTime * speed;
+            Vector3 currentPosition = Vector3.Lerp(startPoint, endPoint, t);
+
+            // Aplicar altura parabólica
+            currentPosition.y += height * (1 - t) * t * 4; // Fórmula para parábola
+            transform.position = currentPosition;
+
+            yield return null;
+        }
+
+        transform.position = endPoint;
         transform.SetParent(initialParent);
     }
 

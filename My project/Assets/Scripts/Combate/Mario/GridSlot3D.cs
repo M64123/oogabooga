@@ -4,17 +4,15 @@ public class GridSlot3D : MonoBehaviour
 {
     public bool IsOccupied()
     {
-        // Retorna verdadero si hay un hijo en este slot
         return transform.childCount > 0;
     }
 
-    public void RemoveOccupant()
+    public void SnapDino(Transform dino)
     {
-        // Elimina la relación padre-hijo del objeto en el slot
-        if (transform.childCount > 0)
+        if (!IsOccupied())
         {
-            Transform occupant = transform.GetChild(0);
-            occupant.SetParent(null);
+            dino.SetParent(transform);
+            dino.localPosition = Vector3.zero;
         }
     }
 }
