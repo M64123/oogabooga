@@ -5,37 +5,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Clase que maneja el comportamiento del huevo en el juego, incluyendo la animación del huevo,
-/// la generación y lanzamiento del cubo, y la visualización del dinosaurio obtenido.
-/// </summary>
 public class EggBehaviour : MonoBehaviour
 {
     [Header("Egg Models")]
-    public List<GameObject> eggStages; // Asigna los modelos del huevo en orden de rareza
-    // Asegúrate de que los prefabs están en el orden: Azul, Morado, Rojo, Dorado
+    public List<GameObject> eggStages; // 0=Azul, 1=Morado, 2=Rojo, 3=Dorado
 
     [Header("Egg Animation")]
-    public float rotationAmount = 15f; // Grados de inclinación para la animación
-    public float rotationSpeed = 5f;   // Velocidad de inclinación
+    public float rotationAmount = 15f; // Grados de inclinación para la animación QTE
+    public float rotationSpeed = 5f;   // Velocidad de inclinación para la animación QTE
     public float rotationPauseDuration = 0.2f; // Pausa entre inclinaciones
 
-    public float moveDistance = 1f;    // Distancia que se moverá el huevo de izquierda a derecha
-    public float moveDuration = 1f;    // Duración del movimiento de izquierda a derecha
+    [Tooltip("Duración de la rotación agresiva final antes de eclosionar.")]
+    public float aggressiveRotationDuration = 1f;
+    [Tooltip("Grados de rotación para la rotación agresiva final.")]
+    public float aggressiveRotationDegrees = 30f;
 
     [Header("Cube Settings")]
-    public GameObject cubePrefab;           // Prefab del cubo que será lanzado
+    public GameObject cubePrefab;           // Prefab del cubo
     public float cubeUpwardForce = 7f;      // Fuerza hacia arriba aplicada al cubo
     public float cubeTorqueForce = 1000f;   // Fuerza de torque aplicada al cubo
-    public float sidewaysForceVariation = 0.1f; // Variación aleatoria lateral en la fuerza
+    public float sidewaysForceVariation = 0.1f;
 
     [Header("Dinosaur Display")]
-    public Image dinoDisplay;               // Imagen UI para mostrar el dinosaurio
-    public Text dinoInfoText;               // Texto para mostrar información del dinosaurio
-    public float dinoScaleDuration = 1f;    // Duración de la animación de escala
-
-    [Header("Dinosaur Scaling")]
-    public float dinoScaleMultiplier = 0.5f; // Multiplicador para ajustar el tamaño del dinosaurio desde el Inspector
+    public Image dinoDisplay;
+    public Text dinoInfoText;
+    public float dinoScaleDuration = 1f;
+    public float dinoScaleMultiplier = 0.5f;
 
     [Header("Dinosaur Sprites")]
     public List<Sprite> commonDinos;
@@ -44,25 +39,24 @@ public class EggBehaviour : MonoBehaviour
     public List<Sprite> shinyRareDinos;
 
     [Header("Timing Settings")]
-    public float maxWaitTime = 5f; // Tiempo máximo de espera antes de mostrar el dinosaurio
+    public float maxWaitTime = 5f;
 
     [Header("QTE Settings")]
-    public QTEManager qteManager; // Referencia al QTEManager
-    public BeatManager beatManager; // Referencia al BeatManager
-    public int maxQTEs = 4; // Número máximo de QTEs (actualizado a 4)
+    public QTEManager qteManager;
+    public BeatManager beatManager;
+    public int maxQTEs = 4; // 4 QTEs totales
 
     [Header("QTE Canvas Settings")]
-    [Tooltip("Arrastra aquí el QTECanvas para activarlo al entrar a la escena y desactivarlo al lanzar el cubo.")]
-    public CanvasGroup qteCanvasGroup; // CanvasGroup para hacer el fade out
+    [Tooltip("CanvasGroup del QTECanvas para hacer fade out.")]
+    public CanvasGroup qteCanvasGroup;
 
-    private int successfulQTEs = 0; // Contador de QTEs exitosos
-    private int currentQTEAttempt = 0; // Contador de intentos de QTE (aciertos y fallos)
+    private int successfulQTEs = 0; // QTEs exitosos
+    private int currentQTEAttempt = 0; // Intentos totales (acierto o fallo)
     private bool isAnimating = false;
-    private bool isHatching = false; // Indica si el huevo está eclosionando
-    private GameObject currentEggModel; // Modelo de huevo activo
+    private bool isHatching = false;
+    private GameObject currentEggModel;
     private Quaternion initialRotation;
 
-    // Información del dinosaurio obtenido
     private Sprite obtainedDinoSprite;
     private string obtainedDinoInfo;
     private Rarity obtainedDinoRarity;
@@ -71,30 +65,25 @@ public class EggBehaviour : MonoBehaviour
 
     void Start()
     {
-        // Inicializar el huevo al primer modelo
+        // Inicializar el primer huevo (Azul)
         SetEggStage(0);
 
-        // Obtener el modelo de huevo activo
         currentEggModel = eggStages[0];
         initialRotation = currentEggModel.transform.rotation;
 
-        // Asegurarse de que la imagen del dinosaurio esté oculta al inicio
         if (dinoDisplay != null)
         {
             dinoDisplay.gameObject.SetActive(false);
-            dinoDisplay.transform.localScale = Vector3.zero; // Escala inicial cero
+            dinoDisplay.transform.localScale = Vector3.zero;
         }
 
-        // Asegurarse de que el texto de información esté vacío
         if (dinoInfoText != null)
         {
             dinoInfoText.text = "";
         }
 
-        // Obtener la referencia al CamaraControllerGacha
         camaraController = Camera.main.GetComponent<CamaraControllerGacha>();
 
-        // Configurar los eventos del QTEManager
         if (qteManager != null)
         {
             qteManager.onQTESuccess.AddListener(OnQTESuccess);
@@ -102,10 +91,9 @@ public class EggBehaviour : MonoBehaviour
         }
         else
         {
-            Debug.LogError("QTEManager no está asignado en el Inspector.");
+            Debug.LogError("QTEManager no asignado.");
         }
 
-        // Activar el QTECanvas al entrar a la escena
         if (qteCanvasGroup != null)
         {
             qteCanvasGroup.gameObject.SetActive(true);
@@ -113,13 +101,12 @@ public class EggBehaviour : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("QTECanvasGroup no está asignado en EggBehaviour.");
+            Debug.LogWarning("qteCanvasGroup no asignado en EggBehaviour.");
         }
     }
 
     void OnDestroy()
     {
-        // Desuscribirse de los eventos para evitar errores
         if (qteManager != null)
         {
             qteManager.onQTESuccess.RemoveListener(OnQTESuccess);
@@ -127,69 +114,53 @@ public class EggBehaviour : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Método que se llama cuando el QTE es exitoso.
-    /// </summary>
     public void OnQTESuccess()
     {
         if (isAnimating || isHatching) return;
 
         successfulQTEs++;
         currentQTEAttempt++;
-
         Debug.Log($"QTE Exitoso. Total exitosos: {successfulQTEs}");
 
         if (currentQTEAttempt >= maxQTEs)
         {
-            // Finalizar secuencia de QTE y proceder con el siguiente paso
-            StartCoroutine(WaitAndAnimateEggThenHatch());
+            // Terminar secuencia QTE
+            StartCoroutine(EndQTESequence());
         }
         else
         {
             StartCoroutine(EggQTERoutine());
-            // Mejorar el huevo si es posible
             UpdateEggModel();
         }
     }
 
-    /// <summary>
-    /// Método que se llama cuando el QTE falla.
-    /// </summary>
     public void OnQTEFail()
     {
         if (isAnimating || isHatching) return;
 
         currentQTEAttempt++;
-
-        Debug.Log($"QTE Fallido. Intentos realizados: {currentQTEAttempt}");
+        Debug.Log($"QTE Fallido. Intentos: {currentQTEAttempt}");
 
         if (currentQTEAttempt >= maxQTEs)
         {
-            // Finalizar secuencia de QTE y proceder con el siguiente paso
-            StartCoroutine(WaitAndAnimateEggThenHatch());
+            StartCoroutine(EndQTESequence());
         }
         else
         {
-            // No mejorar el huevo, pero animarlo
             StartCoroutine(EggQTERoutine());
+            // No mejora el huevo porque falló el QTE
         }
     }
 
-    IEnumerator WaitAndAnimateEggThenHatch()
+    IEnumerator EndQTESequence()
     {
         isHatching = true;
 
-        // Desactivar los eventos del QTEManager
+        // Desvincular eventos QTE
         qteManager.onQTESuccess.RemoveListener(OnQTESuccess);
         qteManager.onQTEFail.RemoveListener(OnQTEFail);
 
-        // Esperar 1 segundo
-        yield return new WaitForSeconds(1f);
-
-        // Mover el huevo de izquierda a derecha
-        yield return StartCoroutine(MoveEggLeftRight());
-
-        // Hacer fade out del QTECanvas (opcional)
+        // Fade out del QTECanvas
         if (qteCanvasGroup != null)
         {
             float duration = 1f;
@@ -205,39 +176,28 @@ public class EggBehaviour : MonoBehaviour
             qteCanvasGroup.gameObject.SetActive(false);
         }
 
-        // Esperar un momento antes de eclosionar
-        yield return new WaitForSeconds(0.5f);
+        // Rotar agresivamente de izq a derecha antes de eclosionar
+        yield return StartCoroutine(RotateEggAggressively());
 
-        // Eclosionar el huevo
+        // Eclosionar
         HatchEgg();
     }
 
     IEnumerator EggQTERoutine()
     {
         isAnimating = true;
-
-        // Animar el huevo (inclinación hacia ambos lados)
         yield return StartCoroutine(RotateEggBothSides());
-
         isAnimating = false;
     }
 
     IEnumerator RotateEggBothSides()
     {
-        // Determinar aleatoriamente el orden de inclinación
         int firstDirection = Random.Range(0, 2) == 0 ? -1 : 1;
         int secondDirection = -firstDirection;
 
-        // Inclinación hacia el primer lado
         yield return StartCoroutine(RotateEggToSide(firstDirection));
-
-        // Pequeña pausa
         yield return new WaitForSeconds(rotationPauseDuration);
-
-        // Inclinación hacia el segundo lado
         yield return StartCoroutine(RotateEggToSide(secondDirection));
-
-        // Regresar a la rotación inicial
         yield return StartCoroutine(RotateEggToInitial());
     }
 
@@ -246,7 +206,11 @@ public class EggBehaviour : MonoBehaviour
         Quaternion targetRotation = Quaternion.Euler(0, 0, rotationAmount * direction) * initialRotation;
         while (Quaternion.Angle(currentEggModel.transform.rotation, targetRotation) > 0.1f)
         {
-            currentEggModel.transform.rotation = Quaternion.RotateTowards(currentEggModel.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime * 100f);
+            currentEggModel.transform.rotation = Quaternion.RotateTowards(
+                currentEggModel.transform.rotation,
+                targetRotation,
+                rotationSpeed * Time.deltaTime * 100f
+            );
             yield return null;
         }
         currentEggModel.transform.rotation = targetRotation;
@@ -256,56 +220,38 @@ public class EggBehaviour : MonoBehaviour
     {
         while (Quaternion.Angle(currentEggModel.transform.rotation, initialRotation) > 0.1f)
         {
-            currentEggModel.transform.rotation = Quaternion.RotateTowards(currentEggModel.transform.rotation, initialRotation, rotationSpeed * Time.deltaTime * 100f);
+            currentEggModel.transform.rotation = Quaternion.RotateTowards(
+                currentEggModel.transform.rotation,
+                initialRotation,
+                rotationSpeed * Time.deltaTime * 100f
+            );
             yield return null;
         }
         currentEggModel.transform.rotation = initialRotation;
     }
 
-    IEnumerator MoveEggLeftRight()
+    IEnumerator RotateEggAggressively()
     {
-        Vector3 startPosition = currentEggModel.transform.position;
-        Vector3 leftPosition = startPosition - new Vector3(moveDistance / 2f, 0, 0);
-        Vector3 rightPosition = startPosition + new Vector3(moveDistance / 2f, 0, 0);
-
-        float elapsedTime = 0f;
-
-        // Mover hacia la izquierda
-        while (elapsedTime < moveDuration / 2f)
+        // Rotar el huevo agresivamente en el eje Z de izq a der
+        float elapsed = 0f;
+        Quaternion startRot = currentEggModel.transform.rotation;
+        while (elapsed < aggressiveRotationDuration)
         {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / (moveDuration / 2f);
-            currentEggModel.transform.position = Vector3.Lerp(startPosition, leftPosition, t);
+            elapsed += Time.deltaTime;
+            // Oscilar la rotación usando Mathf.Sin
+            float angle = Mathf.Sin(elapsed * 20f) * aggressiveRotationDegrees;
+            currentEggModel.transform.rotation = startRot * Quaternion.Euler(0, 0, angle);
             yield return null;
         }
 
-        // Mover hacia la derecha
-        elapsedTime = 0f;
-        while (elapsedTime < moveDuration)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / moveDuration;
-            currentEggModel.transform.position = Vector3.Lerp(leftPosition, rightPosition, t);
-            yield return null;
-        }
-
-        // Regresar a la posición inicial
-        elapsedTime = 0f;
-        while (elapsedTime < moveDuration / 2f)
-        {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / (moveDuration / 2f);
-            currentEggModel.transform.position = Vector3.Lerp(rightPosition, startPosition, t);
-            yield return null;
-        }
-
-        // Asegurarse de que la posición final es exacta
-        currentEggModel.transform.position = startPosition;
+        // Regresar a rotación inicial
+        currentEggModel.transform.rotation = initialRotation;
     }
 
     void UpdateEggModel()
     {
-        int eggIndex = Mathf.Clamp(successfulQTEs, 0, eggStages.Count - 1);
+        // Clampear los aciertos
+        int eggIndex = Mathf.Clamp(successfulQTEs, 0, 3);
         SetEggStage(eggIndex);
         Debug.Log($"El huevo ha mejorado a: {currentEggModel.name}");
     }
@@ -316,8 +262,6 @@ public class EggBehaviour : MonoBehaviour
         {
             eggStages[i].SetActive(i == stage);
         }
-
-        // Actualizar el modelo de huevo activo y su rotación inicial
         if (stage < eggStages.Count)
         {
             currentEggModel = eggStages[stage];
@@ -327,8 +271,11 @@ public class EggBehaviour : MonoBehaviour
 
     void HatchEgg()
     {
-        // Ocultar el huevo
-        currentEggModel.SetActive(false);
+        // Ocultar el huevo actual
+        if (currentEggModel != null)
+        {
+            currentEggModel.SetActive(false);
+        }
 
         // Desactivar el collider del huevo
         Collider eggCollider = GetComponent<Collider>();
@@ -337,129 +284,131 @@ public class EggBehaviour : MonoBehaviour
             eggCollider.enabled = false;
         }
 
-        // Determinar el dinosaurio obtenido basado en la rareza del huevo
-        GetRandomDino(successfulQTEs, out obtainedDinoSprite, out obtainedDinoInfo, out obtainedDinoRarity);
+        // Obtener el dinosaurio basado en la rareza según el número de aciertos
+        int eggLevel = Mathf.Clamp(successfulQTEs, 0, 3);
 
-        // Lanzar el cubo correspondiente
+        GetRandomDino(eggLevel, out obtainedDinoSprite, out obtainedDinoInfo, out obtainedDinoRarity);
+
+        // Lanzar el cubo
         LaunchCube();
     }
 
     void GetRandomDino(int eggLevel, out Sprite dinoSprite, out string dinoInfo, out Rarity rarity)
     {
-        float randomValue = Random.Range(0f, 100f);
         dinoSprite = null;
         dinoInfo = "";
         rarity = Rarity.Common;
 
-        // Determinar las probabilidades según el nivel del huevo
+        float randomValue = Random.Range(0f, 100f);
+
         switch (eggLevel)
         {
-            case 0: // Huevo Azul
+            case 0: // Azul
+                // 70% común, 30% raro
                 if (randomValue < 70f)
                 {
-                    // 70% Común
                     dinoSprite = GetRandomSpriteFromList(commonDinos);
                     dinoInfo = "Dinosaurio Común";
                     rarity = Rarity.Common;
                 }
                 else
                 {
-                    // 30% Raro
                     dinoSprite = GetRandomSpriteFromList(rareDinos);
                     dinoInfo = "Dinosaurio Raro";
                     rarity = Rarity.Rare;
                 }
                 break;
-
-            case 1: // Huevo Morado
+            case 1: // Morado
+                // 57% común, 40% raro, 3% shiny común
                 if (randomValue < 57f)
                 {
-                    // 57% Común
                     dinoSprite = GetRandomSpriteFromList(commonDinos);
                     dinoInfo = "Dinosaurio Común";
                     rarity = Rarity.Common;
                 }
                 else if (randomValue < 97f)
                 {
-                    // 40% Raro
                     dinoSprite = GetRandomSpriteFromList(rareDinos);
                     dinoInfo = "Dinosaurio Raro";
                     rarity = Rarity.Rare;
                 }
                 else
                 {
-                    // 3% Shiny Común
                     dinoSprite = GetRandomSpriteFromList(shinyCommonDinos);
                     dinoInfo = "¡Dinosaurio Shiny Común!";
                     rarity = Rarity.ShinyCommon;
                 }
                 break;
-
-            case 2: // Huevo Rojo
+            case 2: // Rojo
+                // 45% común, 45% raro, 7% shiny común, 3% shiny raro
                 if (randomValue < 45f)
                 {
-                    // 45% Común
                     dinoSprite = GetRandomSpriteFromList(commonDinos);
                     dinoInfo = "Dinosaurio Común";
                     rarity = Rarity.Common;
                 }
                 else if (randomValue < 90f)
                 {
-                    // 45% Raro
                     dinoSprite = GetRandomSpriteFromList(rareDinos);
                     dinoInfo = "Dinosaurio Raro";
                     rarity = Rarity.Rare;
                 }
                 else if (randomValue < 97f)
                 {
-                    // 7% Shiny Común
                     dinoSprite = GetRandomSpriteFromList(shinyCommonDinos);
                     dinoInfo = "¡Dinosaurio Shiny Común!";
                     rarity = Rarity.ShinyCommon;
                 }
                 else
                 {
-                    // 3% Shiny Raro
                     dinoSprite = GetRandomSpriteFromList(shinyRareDinos);
                     dinoInfo = "¡Dinosaurio Shiny Raro!";
                     rarity = Rarity.ShinyRare;
                 }
                 break;
-
-            case 3: // Huevo Dorado
+            case 3: // Dorado
+                // 35% común, 45% raro, 12% shiny común, 8% shiny raro
                 if (randomValue < 35f)
                 {
-                    // 35% Común
                     dinoSprite = GetRandomSpriteFromList(commonDinos);
                     dinoInfo = "Dinosaurio Común";
                     rarity = Rarity.Common;
                 }
                 else if (randomValue < 80f)
                 {
-                    // 45% Raro
                     dinoSprite = GetRandomSpriteFromList(rareDinos);
                     dinoInfo = "Dinosaurio Raro";
                     rarity = Rarity.Rare;
                 }
                 else if (randomValue < 92f)
                 {
-                    // 12% Shiny Común
                     dinoSprite = GetRandomSpriteFromList(shinyCommonDinos);
                     dinoInfo = "¡Dinosaurio Shiny Común!";
                     rarity = Rarity.ShinyCommon;
                 }
                 else
                 {
-                    // 8% Shiny Raro
                     dinoSprite = GetRandomSpriteFromList(shinyRareDinos);
                     dinoInfo = "¡Dinosaurio Shiny Raro!";
                     rarity = Rarity.ShinyRare;
                 }
                 break;
-
             default:
-                Debug.LogError("Nivel de huevo desconocido.");
+                Debug.LogError("Nivel de huevo desconocido: " + eggLevel);
+                // Asignar algo por defecto para evitar nulos
+                dinoSprite = GetRandomSpriteFromList(commonDinos);
+                dinoInfo = "Dinosaurio Común";
+                rarity = Rarity.Common;
                 break;
+        }
+
+        if (dinoSprite == null)
+        {
+            Debug.LogError("No se ha obtenido un sprite de dinosaurio válido.");
+            // Asignar uno común por defecto si no se pudo obtener
+            dinoSprite = GetRandomSpriteFromList(commonDinos);
+            dinoInfo = "Dinosaurio Común";
+            rarity = Rarity.Common;
         }
     }
 
@@ -467,36 +416,29 @@ public class EggBehaviour : MonoBehaviour
     {
         if (spriteList == null || spriteList.Count == 0)
         {
-            Debug.LogError("Lista de sprites está vacía o no asignada.");
+            Debug.LogError("Lista de sprites vacía o no asignada.");
             return null;
         }
-
         int index = Random.Range(0, spriteList.Count);
         return spriteList[index];
     }
 
     void LaunchCube()
     {
-        // Instanciar el cubo en la posición del huevo
         GameObject cube = Instantiate(cubePrefab, transform.position, Random.rotation);
-
-        // Configurar el color y efectos del cubo según la rareza
         ConfigureCube(cube, obtainedDinoRarity);
 
-        // Obtener el Rigidbody del cubo
         Rigidbody rb = cube.GetComponent<Rigidbody>();
         if (rb == null)
         {
-            Debug.LogError("El cubo no tiene un componente Rigidbody.");
+            Debug.LogError("El cubo no tiene Rigidbody.");
             return;
         }
 
-        // Aplicar fuerzas para lanzarlo
         rb.useGravity = true;
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        // Calcular la dirección de la fuerza con variación aleatoria
         Vector3 forceDirection = Vector3.up + new Vector3(
             Random.Range(-sidewaysForceVariation, sidewaysForceVariation),
             0f,
@@ -504,21 +446,17 @@ public class EggBehaviour : MonoBehaviour
         );
         forceDirection.Normalize();
 
-        // Aplicar fuerza hacia arriba con variación aleatoria
         float randomUpwardForce = Random.Range(cubeUpwardForce * 0.9f, cubeUpwardForce * 1.1f);
         rb.AddForce(forceDirection * randomUpwardForce, ForceMode.Impulse);
 
-        // Aplicar torque aleatorio
         Vector3 randomTorque = Random.insideUnitSphere * cubeTorqueForce;
         rb.AddTorque(randomTorque, ForceMode.Impulse);
 
-        // Notificar al CamaraControllerGacha que debe seguir al cubo
         if (camaraController != null)
         {
             camaraController.StartFollowingCube(cube.transform);
         }
 
-        // Iniciar coroutine para esperar el tiempo máximo antes de mostrar el dinosaurio
         StartCoroutine(WaitForMaxTimeAndShowDino(cube));
     }
 
@@ -526,50 +464,33 @@ public class EggBehaviour : MonoBehaviour
     {
         Renderer cubeRenderer = cube.GetComponent<Renderer>();
         TrailRenderer trail = cube.GetComponent<TrailRenderer>();
-        ParticleSystem particles = cube.GetComponentInChildren<ParticleSystem>(true); // Incluir objetos inactivos
+        ParticleSystem particles = cube.GetComponentInChildren<ParticleSystem>(true);
 
+        // Configurar según la rareza
         switch (rarity)
         {
             case Rarity.Common:
-                // Cubo blanco con estela blanca
-                if (cubeRenderer != null)
-                {
-                    cubeRenderer.material.color = Color.white;
-                }
+                if (cubeRenderer != null) cubeRenderer.material.color = Color.white;
                 if (trail != null)
                 {
                     trail.startColor = Color.white;
                     trail.endColor = Color.white;
                     trail.enabled = true;
                 }
-                if (particles != null)
-                {
-                    particles.gameObject.SetActive(false);
-                }
+                if (particles != null) particles.gameObject.SetActive(false);
                 break;
             case Rarity.Rare:
-                // Cubo azul con estela azul
-                if (cubeRenderer != null)
-                {
-                    cubeRenderer.material.color = Color.blue;
-                }
+                if (cubeRenderer != null) cubeRenderer.material.color = Color.blue;
                 if (trail != null)
                 {
                     trail.startColor = Color.blue;
                     trail.endColor = Color.blue;
                     trail.enabled = true;
                 }
-                if (particles != null)
-                {
-                    particles.gameObject.SetActive(false);
-                }
+                if (particles != null) particles.gameObject.SetActive(false);
                 break;
             case Rarity.ShinyCommon:
-                // Cubo blanco con estela blanca y partículas brillantes
-                if (cubeRenderer != null)
-                {
-                    cubeRenderer.material.color = Color.white;
-                }
+                if (cubeRenderer != null) cubeRenderer.material.color = Color.white;
                 if (trail != null)
                 {
                     trail.startColor = Color.white;
@@ -579,17 +500,12 @@ public class EggBehaviour : MonoBehaviour
                 if (particles != null)
                 {
                     particles.gameObject.SetActive(true);
-                    // Configurar las partículas para shiny common
                     var main = particles.main;
                     main.startColor = new ParticleSystem.MinMaxGradient(Color.white, Color.cyan);
                 }
                 break;
             case Rarity.ShinyRare:
-                // Cubo azul con estela azul y partículas brillantes
-                if (cubeRenderer != null)
-                {
-                    cubeRenderer.material.color = Color.blue;
-                }
+                if (cubeRenderer != null) cubeRenderer.material.color = Color.blue;
                 if (trail != null)
                 {
                     trail.startColor = Color.blue;
@@ -599,7 +515,6 @@ public class EggBehaviour : MonoBehaviour
                 if (particles != null)
                 {
                     particles.gameObject.SetActive(true);
-                    // Configurar las partículas para shiny rare
                     var main = particles.main;
                     main.startColor = new ParticleSystem.MinMaxGradient(Color.blue, Color.magenta);
                 }
@@ -609,10 +524,8 @@ public class EggBehaviour : MonoBehaviour
 
     IEnumerator WaitForMaxTimeAndShowDino(GameObject cube)
     {
-        // Esperar durante el tiempo máximo especificado
         yield return new WaitForSeconds(maxWaitTime);
 
-        // Mostrar el dinosaurio obtenido
         if (obtainedDinoSprite != null)
         {
             StartCoroutine(DisplayDinoWithScale(obtainedDinoSprite, obtainedDinoInfo));
@@ -622,51 +535,39 @@ public class EggBehaviour : MonoBehaviour
             Debug.LogError("No se ha obtenido un sprite de dinosaurio válido.");
         }
 
-        // Destruir el cubo
         Destroy(cube);
 
-        // Notificar al CamaraControllerGacha que deje de seguir al cubo
         if (camaraController != null)
         {
             camaraController.StopFollowingCube();
         }
 
-        // Esperar 3 segundos antes de regresar al tablero
         yield return new WaitForSeconds(3f);
-
-        // Regresar al tablero
         ReturnToBoard();
     }
 
     IEnumerator DisplayDinoWithScale(Sprite dinoSprite, string dinoInfo)
     {
-        // Activar el display del dinosaurio
         dinoDisplay.gameObject.SetActive(true);
         dinoDisplay.sprite = dinoSprite;
 
-        // Ajustar el tamaño de la imagen al tamaño del sprite, multiplicado por el multiplicador de escala
         RectTransform rectTransform = dinoDisplay.GetComponent<RectTransform>();
         rectTransform.sizeDelta = new Vector2(dinoSprite.rect.width * dinoScaleMultiplier, dinoSprite.rect.height * dinoScaleMultiplier);
 
-        // Restablecer la escala a cero
         dinoDisplay.transform.localScale = Vector3.zero;
 
-        // Animación de escala
         float elapsedTime = 0f;
         while (elapsedTime < dinoScaleDuration)
         {
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / dinoScaleDuration;
-            // Usar una interpolación suave
             float scale = Mathf.SmoothStep(0f, 1f, t);
             dinoDisplay.transform.localScale = new Vector3(scale, scale, scale);
             yield return null;
         }
 
-        // Asegurarse de que la escala final sea exacta
         dinoDisplay.transform.localScale = Vector3.one;
 
-        // Mostrar la información del dinosaurio
         if (dinoInfoText != null)
         {
             dinoInfoText.text = dinoInfo;
@@ -675,18 +576,6 @@ public class EggBehaviour : MonoBehaviour
 
     void ReturnToBoard()
     {
-        // Regresar al tablero sin perder el estado
         SceneManager.LoadScene("Tablero");
     }
 }
-
-// Asegúrate de tener la enumeración Rarity definida en Rarity.cs o en otro lugar
-/*
-public enum Rarity
-{
-    Common,
-    Rare,
-    ShinyCommon,
-    ShinyRare
-}
-*/

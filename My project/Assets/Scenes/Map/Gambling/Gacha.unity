@@ -604,7 +604,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   qteTriggers:
-  - beatsAfterLastTrigger: 3
+  - beatsAfterLastTrigger: 4
     qteType: 2
     customLeftPrefab: {fileID: 5731161360162568145, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
     customRightPrefab: {fileID: 3706431039766217878, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
@@ -2435,8 +2435,8 @@ MonoBehaviour:
   rotationAmount: 15
   rotationSpeed: 4
   rotationPauseDuration: 0.2
-  moveDistance: 1
-  moveDuration: 1
+  aggressiveRotationDuration: 1
+  aggressiveRotationDegrees: 30
   cubePrefab: {fileID: 5252764213435580731, guid: 219666d389fd06245bffbca083a54ff3, type: 3}
   cubeUpwardForce: 12
   cubeTorqueForce: 1000
@@ -2468,7 +2468,7 @@ MonoBehaviour:
   maxWaitTime: 5
   qteManager: {fileID: 489408612}
   beatManager: {fileID: 208765814}
-  maxQTEs: 3
+  maxQTEs: 4
   qteCanvasGroup: {fileID: 166910040}
 --- !u!4 &2076600329
 Transform:

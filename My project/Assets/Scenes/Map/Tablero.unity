@@ -937,11 +937,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeTypeScenesList:
   - nodeType: 2
-    sceneNames:
-    - 
+    sceneNames: []
   - nodeType: 3
-    sceneNames:
-    - Gacha
+    sceneNames: []
   - nodeType: 4
     sceneNames: []
   - nodeType: 5
@@ -952,7 +950,7 @@ MonoBehaviour:
     sceneNames: []
   - nodeType: 8
     sceneNames:
-    - 
+    - Gacha
 --- !u!4 &1679504393
 Transform:
   m_ObjectHideFlags: 0
