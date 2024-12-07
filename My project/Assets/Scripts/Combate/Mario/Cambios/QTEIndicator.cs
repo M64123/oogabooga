@@ -1,79 +1,84 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class QTEIndicator : MonoBehaviour
 {
-    private KeyCode qteKey;
+    private RectTransform rectTransform;
+    private RectTransform referenceImage;
     private float activeZoneWidth;
-    private RectTransform referenceImage; // Imagen de referencia para la zona activa
-    private RectTransform rectTransform; // Transform del propio QTEIndicator
-    private Vector2 startPosition;
+    private bool isLeftSide;
 
-    private bool hasPassedZone = false;
-
-    public void Setup(KeyCode key, float zoneWidth, Vector2 startPosition, RectTransform referenceImage)
+    public void Setup(KeyCode key, float activeWidth, RectTransform spawnPoint, RectTransform target, bool leftSide)
     {
-        this.qteKey = key;
-        this.activeZoneWidth = zoneWidth;
-        this.startPosition = startPosition;
-        this.referenceImage = referenceImage;
-
         rectTransform = GetComponent<RectTransform>();
-
-        if (rectTransform != null)
+        if (rectTransform == null)
         {
-            rectTransform.anchoredPosition = startPosition;
+            Debug.LogError("RectTransform no encontrado en el QTEIndicator.");
+            return;
         }
-        else
+
+        rectTransform.anchoredPosition = spawnPoint.anchoredPosition;
+        isLeftSide = leftSide;
+        referenceImage = target;
+        activeZoneWidth = activeWidth;
+
+        if (referenceImage == null)
         {
-            Debug.LogError("El QTEIndicator no tiene un RectTransform.");
+            Debug.LogError("referenceImage no está asignado en Setup.");
         }
     }
 
     void Update()
     {
-        if (rectTransform == null || referenceImage == null) return;
-
-        // Mover el QTE de izquierda a derecha
-        rectTransform.anchoredPosition += Vector2.right * Time.deltaTime * 200f;
-
-        // Detectar si ha pasado la zona activa
-        if (!hasPassedZone && rectTransform.anchoredPosition.x >= referenceImage.anchoredPosition.x)
+        if (rectTransform == null || referenceImage == null)
         {
-            hasPassedZone = true;
-            Debug.Log("Has fallado pringao");
-            QTEManagerCombat.Instance.OnQTEFail(this);
+            return;
         }
 
-        // Detectar si el jugador pulsa la tecla en el momento correcto y es el QTE más cercano en la zona
-        if (Input.GetKeyDown(qteKey) && IsInActiveZone() && IsFirstInActiveZone())
+        float moveSpeed = 300f * Time.deltaTime;
+
+        // Movimiento hacia el centro
+        if (isLeftSide)
         {
-            Debug.Log("¡QTE Acierto!");
-            QTEManagerCombat.Instance.OnQTESuccess(this);
+            rectTransform.anchoredPosition += new Vector2(moveSpeed, 0f);
         }
+        else
+        {
+            rectTransform.anchoredPosition -= new Vector2(moveSpeed, 0f);
+        }
+
+        // Verificar si alcanzó la referencia
+        if (HasReachedReference())
+        {
+            if (QTEManagerCombat.Instance != null)
+            {
+                QTEManagerCombat.Instance.OnQTEFail(this);
+            }
+        }
+    }
+
+    public bool HasReachedReference()
+    {
+        if (referenceImage == null)
+        {
+            Debug.LogError("referenceImage es null en HasReachedReference.");
+            return false;
+        }
+
+        float distance = Mathf.Abs(rectTransform.anchoredPosition.x - referenceImage.anchoredPosition.x);
+        return distance < 1f; // Un margen pequeño para verificar que alcanzó el centro
     }
 
     public bool IsInActiveZone()
     {
-        if (referenceImage == null) return false;
+        if (referenceImage == null)
+        {
+            Debug.LogError("referenceImage es null en IsInActiveZone.");
+            return false;
+        }
 
-        float indicatorX = rectTransform.anchoredPosition.x;
-        float activeZoneStart = referenceImage.anchoredPosition.x - activeZoneWidth / 2;
-        float activeZoneEnd = referenceImage.anchoredPosition.x + activeZoneWidth / 2;
-
-        return indicatorX >= activeZoneStart && indicatorX <= activeZoneEnd;
-    }
-
-    public bool IsFirstInActiveZone()
-    {
-        // Verificar si es el primer QTE en la zona activa
-        return QTEManagerCombat.Instance.GetFirstQTEInActiveZone() == this;
-    }
-
-    public Vector2 GetPosition()
-    {
-        return rectTransform.anchoredPosition;
+        float distance = Mathf.Abs(rectTransform.anchoredPosition.x - referenceImage.anchoredPosition.x);
+        return distance <= activeZoneWidth / 2f;
     }
 }

@@ -78,7 +78,7 @@ public class PlatformMover : MonoBehaviour
     private Transform GetFirstDinoOnPlatform()
     {
         // Obtener el primer dinosaurio en los slots de la grid
-        foreach (Transform slot in combatGrid.gridSlots)
+        foreach (Transform slot in combatGrid.GetGridSlots())
         {
             if (slot.childCount > 0) // Si el slot tiene un dino
             {

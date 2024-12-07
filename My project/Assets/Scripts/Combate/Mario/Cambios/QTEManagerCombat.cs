@@ -9,35 +9,33 @@ public class QTEManagerCombat : MonoBehaviour
     public static QTEManagerCombat Instance { get; private set; }
 
     [Header("QTE Settings")]
-    public KeyCode qteKey = KeyCode.Space; // La tecla que el jugador debe presionar
-    public GameObject qteIndicatorPrefab; // Prefab del indicador QTE (asegúrate de que tenga un RectTransform)
-    public RectTransform qteBarTransform; // Transform de la barra QTE (debe ser un RectTransform)
-    public List<RectTransform> qteSpawnPoints; // Puntos desde los que pueden nacer los QTE (debe ser RectTransform para elementos de UI)
-    public RectTransform referenceImage; // Imagen de referencia para detectar la zona de éxito
-    public float activeZoneWidth = 100f; // Ancho de la zona de activación para el QTE
-    public int requiredPressCount = 3; // Cantidad de pulsaciones requeridas
+    public KeyCode qteKey = KeyCode.Space;
+    public GameObject qteIndicatorPrefab;
+    public RectTransform qteBarTransform;
+    public RectTransform referenceImage;
+    public RectTransform leftSpawnPoint;
+    public RectTransform rightSpawnPoint;
+    public float activeZoneWidth = 100f;
+
+    [Header("QTE Appearance Probabilities")]
+    [Range(0, 100)] public int doubleQTEProbability = 10; // 10% para QTE dobles
+    [Range(0, 100)] public int tripleQTEProbability = 5;  // 5% para QTE triples
 
     [Header("QTE Events")]
-    public UnityEvent onQTESuccess; // Evento que se dispara en éxito
-    public UnityEvent onQTEFail;    // Evento que se dispara en fallo
+    public UnityEvent onQTESuccess;
+    public UnityEvent onQTEFail;
 
     [Header("Streak Settings")]
-    public int currentStreak = 0; // Contador de racha
-    public int maxStreak = 5; // Máxima racha para cambiar feedback visual
-    public Image streakIndicator; // Imagen para reflejar el cambio visual de la racha
-    public List<Sprite> streakSprites; // Lista de Sprites para cada racha
+    public int currentStreak = 0;
+    public int maxStreak = 5;
+    public Image streakIndicator;
+    public List<Sprite> streakSprites;
 
-    [Header("Audio Feedback")]
-    public AudioClip successClip;
-    public AudioClip failClip;
-    private AudioSource audioSource;
-
-    private List<QTEIndicator> activeQTEs = new List<QTEIndicator>(); // Lista para manejar QTEs activos
+    private List<Pair<QTEIndicator>> activeQTEPairs = new List<Pair<QTEIndicator>>();
     private bool isQTEInProgress = false;
 
     void Awake()
     {
-        // Implementación del Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(this.gameObject);
@@ -48,14 +46,6 @@ public class QTEManagerCombat : MonoBehaviour
 
     void Start()
     {
-        // Inicializar AudioSource para feedback auditivo
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
-
-        // Suscribirse a los intervalos del BeatManager
         if (BeatManagerCombat.Instance != null)
         {
             foreach (Interval interval in BeatManagerCombat.Instance.intervals)
@@ -67,109 +57,121 @@ public class QTEManagerCombat : MonoBehaviour
         {
             Debug.LogError("No se encontró BeatManager en la escena.");
         }
+
+        onQTESuccess.AddListener(NotifyActiveDino);
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(qteKey))
+        {
+            ProcessQTEHit();
+        }
+    }
+
+    void ProcessQTEHit()
+    {
+        foreach (var pair in activeQTEPairs)
+        {
+            if (pair.Left.IsInActiveZone() && pair.Right.IsInActiveZone())
+            {
+                OnQTESuccess(pair);
+                return;
+            }
+        }
     }
 
     public void HandleBeat()
     {
         if (isQTEInProgress) return;
 
-        // Generar el número de QTEs basado en probabilidades
-        int qteCount = GetRandomQTECount();
-
-        // Activar los QTEs basados en la cantidad requerida
-        StartCoroutine(ActivateQTEs(qteCount));
+        int count = DetermineQTECount();
+        StartCoroutine(ActivateQTEPair(count));
     }
 
-    int GetRandomQTECount()
+    int DetermineQTECount()
     {
-        float randomValue = Random.value; // Genera un número aleatorio entre 0 y 1
-
-        if (randomValue < 0.7f)
+        int randomValue = Random.Range(0, 100);
+        if (randomValue < tripleQTEProbability)
         {
-            // 70% de probabilidad para un solo QTE
-            return 1;
+            return 3; // QTE triple
         }
-        else if (randomValue < 0.9f)
+        else if (randomValue < doubleQTEProbability + tripleQTEProbability)
         {
-            // 20% de probabilidad para dos QTEs
-            return 2;
+            return 2; // QTE doble
         }
-        else
-        {
-            // 10% de probabilidad para tres QTEs
-            return 3;
-        }
+        return 1; // QTE individual
     }
 
-    IEnumerator ActivateQTEs(int count)
+    IEnumerator ActivateQTEPair(int count)
     {
         isQTEInProgress = true;
 
-        // Crear múltiples QTEs si la cantidad de pulsaciones es mayor a 1
         for (int i = 0; i < count; i++)
         {
-            GameObject qteIndicatorObject = Instantiate(qteIndicatorPrefab, qteBarTransform);
-            QTEIndicator qteIndicator = qteIndicatorObject.GetComponent<QTEIndicator>();
+            GameObject leftQTEObject = Instantiate(qteIndicatorPrefab, qteBarTransform);
+            GameObject rightQTEObject = Instantiate(qteIndicatorPrefab, qteBarTransform);
 
-            if (qteIndicator != null)
+            QTEIndicator leftQTE = leftQTEObject.GetComponent<QTEIndicator>();
+            QTEIndicator rightQTE = rightQTEObject.GetComponent<QTEIndicator>();
+
+            if (leftQTE != null && rightQTE != null)
             {
-                // Elegir un punto de nacimiento aleatorio de la lista de puntos de inicio disponibles
-                RectTransform chosenSpawnPoint = qteSpawnPoints[Random.Range(0, qteSpawnPoints.Count)];
+                leftQTE.Setup(qteKey, activeZoneWidth, leftSpawnPoint, referenceImage, true);
+                rightQTE.Setup(qteKey, activeZoneWidth, rightSpawnPoint, referenceImage, false);
 
-                // Usar la posición de la UI para RectTransform
-                Vector2 startPosition = chosenSpawnPoint.anchoredPosition;
-
-                // Configurar el indicador con los parámetros necesarios
-                qteIndicator.Setup(qteKey, activeZoneWidth, startPosition, referenceImage);
-                activeQTEs.Add(qteIndicator);
+                activeQTEPairs.Add(new Pair<QTEIndicator>(leftQTE, rightQTE));
             }
             else
             {
                 Debug.LogError("El prefab de QTEIndicator no tiene el componente QTEIndicator.");
             }
 
-            // Retraso entre la creación de los QTEs para simular la separación visual
             yield return new WaitForSeconds(0.15f);
         }
 
         isQTEInProgress = false;
     }
 
-    public void OnQTESuccess(QTEIndicator qteIndicator)
+    public void OnQTESuccess(Pair<QTEIndicator> pair)
     {
+        if (activeQTEPairs.Contains(pair))
+        {
+            activeQTEPairs.Remove(pair);
+            Destroy(pair.Left.gameObject);
+            Destroy(pair.Right.gameObject);
+        }
+
         currentStreak++;
         UpdateStreakIndicator();
 
         onQTESuccess.Invoke();
-        if (successClip != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(successClip);
-        }
-
-        if (currentStreak >= maxStreak)
-        {
-            Debug.Log("¡Ataque Potenciado!");
-        }
-
-        // Eliminar el QTEIndicator exitoso de la lista
-        activeQTEs.Remove(qteIndicator);
-        Destroy(qteIndicator.gameObject);
     }
 
     public void OnQTEFail(QTEIndicator qteIndicator)
     {
+        Pair<QTEIndicator> pairToRemove = null;
+
+        foreach (var pair in activeQTEPairs)
+        {
+            if (pair.Left == qteIndicator || pair.Right == qteIndicator)
+            {
+                pairToRemove = pair;
+                break;
+            }
+        }
+
+        if (pairToRemove != null)
+        {
+            activeQTEPairs.Remove(pairToRemove);
+            Destroy(pairToRemove.Left.gameObject);
+            Destroy(pairToRemove.Right.gameObject);
+        }
+
         currentStreak = 0;
         UpdateStreakIndicator();
 
         onQTEFail.Invoke();
-        if (failClip != null && audioSource != null)
-        {
-            audioSource.PlayOneShot(failClip);
-        }
-
-        // Eliminar el QTEIndicator fallido de la lista
-        activeQTEs.Remove(qteIndicator);
-        Destroy(qteIndicator.gameObject);
     }
 
     void UpdateStreakIndicator()
@@ -190,20 +192,28 @@ public class QTEManagerCombat : MonoBehaviour
         }
     }
 
-    public QTEIndicator GetFirstQTEInActiveZone()
+    void NotifyActiveDino()
     {
-        // Filtrar los QTEIndicators que están en la zona activa y retornar el más cercano
-        QTEIndicator firstQTE = null;
-        foreach (var qte in activeQTEs)
+        DinoCombat activeDino = Combatgrid.Instance.GetFirstSlotDino();
+        if (activeDino != null)
         {
-            if (qte.IsInActiveZone())
-            {
-                if (firstQTE == null || qte.GetPosition().x < firstQTE.GetPosition().x)
-                {
-                    firstQTE = qte;
-                }
-            }
+            activeDino.ExecuteAttack();
         }
-        return firstQTE;
+        else
+        {
+            Debug.LogWarning("No se encontró dinosaurio activo en el primer slot.");
+        }
+    }
+
+    public class Pair<T>
+    {
+        public T Left { get; }
+        public T Right { get; }
+
+        public Pair(T left, T right)
+        {
+            Left = left;
+            Right = right;
+        }
     }
 }
