@@ -360,7 +360,7 @@ MonoBehaviour:
   platform: {fileID: 1409453631}
   enemyDino: {fileID: 765458398}
   platformSpeed: 12
-  backgroundSpeedFactor: 0.5
+  backgroundSpeedFactor: 3.16
   backgrounds:
   - {fileID: 2020832400}
   startButton: {fileID: 1141150534}
@@ -2093,7 +2093,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 1149855063293818544, guid: ba8f6b08de0aafb4a84d2d7211ada65b, type: 3}
   gridParent: {fileID: 1214999420}
   initialSlots: 3
-  slotSpacing: 0.6
+  slotSpacing: 0.36
   slotScale: {x: 0.11, y: 0.15, z: 1}
 --- !u!4 &1142378882
 Transform:
