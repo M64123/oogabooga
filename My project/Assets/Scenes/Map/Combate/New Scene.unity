@@ -1119,7 +1119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf5e90d2c687d942818a91103161353, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 20
+  maxHealth: 800
 --- !u!65 &765458403
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1858,7 +1858,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 1149855063293818544, guid: ba8f6b08de0aafb4a84d2d7211ada65b, type: 3}
   gridParent: {fileID: 1214999420}
   initialSlots: 3
-  slotSpacing: -2.13
+  slotSpacing: -5.15
   slotScale: {x: 0.11, y: 0.15, z: 1}
 --- !u!4 &1142378882
 Transform:
