@@ -1,4 +1,5 @@
 // EggBehaviour.cs
+
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
@@ -8,22 +9,22 @@ using UnityEngine.SceneManagement;
 public class EggBehaviour : MonoBehaviour
 {
     [Header("Egg Models")]
-    public List<GameObject> eggStages; // 0=Azul, 1=Morado, 2=Rojo, 3=Dorado
+    // 0=Azul, 1=Morado, 2=Rojo, 3=Dorado
+    public List<GameObject> eggStages;
 
     [Header("Egg Animation")]
-    public float rotationAmount = 15f; // Grados de inclinación para la animación QTE
-    public float rotationSpeed = 5f;   // Velocidad de inclinación para la animación QTE
-    public float rotationPauseDuration = 0.2f; // Pausa entre inclinaciones
-
+    public float rotationAmount = 15f;
+    public float rotationSpeed = 5f;
+    public float rotationPauseDuration = 0.2f;
     [Tooltip("Duración de la rotación agresiva final antes de eclosionar.")]
     public float aggressiveRotationDuration = 1f;
     [Tooltip("Grados de rotación para la rotación agresiva final.")]
     public float aggressiveRotationDegrees = 30f;
 
     [Header("Cube Settings")]
-    public GameObject cubePrefab;           // Prefab del cubo
-    public float cubeUpwardForce = 7f;      // Fuerza hacia arriba aplicada al cubo
-    public float cubeTorqueForce = 1000f;   // Fuerza de torque aplicada al cubo
+    public GameObject cubePrefab;
+    public float cubeUpwardForce = 7f;
+    public float cubeTorqueForce = 1000f;
     public float sidewaysForceVariation = 0.1f;
 
     [Header("Dinosaur Display")]
@@ -38,6 +39,16 @@ public class EggBehaviour : MonoBehaviour
     public List<Sprite> shinyCommonDinos;
     public List<Sprite> shinyRareDinos;
 
+    [Header("Dinosaur IDs")]
+    [Tooltip("IDs correspondientes a los commonDinos, en el mismo orden.")]
+    public List<string> commonDinoIDs;
+    [Tooltip("IDs correspondientes a los rareDinos, en el mismo orden.")]
+    public List<string> rareDinoIDs;
+    [Tooltip("IDs correspondientes a los shinyCommonDinos, en el mismo orden.")]
+    public List<string> shinyCommonDinoIDs;
+    [Tooltip("IDs correspondientes a los shinyRareDinos, en el mismo orden.")]
+    public List<string> shinyRareDinoIDs;
+
     [Header("Timing Settings")]
     public float maxWaitTime = 5f;
 
@@ -50,8 +61,8 @@ public class EggBehaviour : MonoBehaviour
     [Tooltip("CanvasGroup del QTECanvas para hacer fade out.")]
     public CanvasGroup qteCanvasGroup;
 
-    private int successfulQTEs = 0; // QTEs exitosos
-    private int currentQTEAttempt = 0; // Intentos totales (acierto o fallo)
+    private int successfulQTEs = 0;
+    private int currentQTEAttempt = 0;
     private bool isAnimating = false;
     private bool isHatching = false;
     private GameObject currentEggModel;
@@ -60,14 +71,29 @@ public class EggBehaviour : MonoBehaviour
     private Sprite obtainedDinoSprite;
     private string obtainedDinoInfo;
     private Rarity obtainedDinoRarity;
+    private string obtainedDinoID;
+    private string obtainedDinoName;
 
     private CamaraControllerGacha camaraController;
 
+    // Lista de nombres tribales (100 nombres)
+    private static string[] tribalNames = new string[100]
+    {
+        "Amani","Zahir","Leilani","Kian","Naya","Kai","Zara","Idris","Amara","Malik",
+        "Suri","Rohan","Kalani","Taj","Eshe","Zane","Nyah","Kira","Jamal","Yasmin",
+        "Kairo","Saffron","Omari","Ayana","Zaki","Nala","Tariq","Keanu","Zola","Rashid",
+        "Alina","Nazir","Kiara","Malikah","Zarae","Kiani","Sura","Amir","Anaya","Zaneh",
+        "Leila","Kamal","Amira","Zain","Laila","Kamil","Inaya","Farid","Nia","Jamal",
+        "Sanaa","Razi","Amaya","Tariqah","Kalila","Zaid","Malaika","Nadir","Safiya","Rahim",
+        "Aisha","Karim","Zora","Hakim","Samira","Idrisah","Liyana","Faris","Nadiya","Zahirah",
+        "Amaniha","Kamran","Kiana","Raheem","Ayda","Jamil","Anisa","Tahir","Zahra","Nasir",
+        "Elara","Haris","Layla","Iman","Zayn","Amirah","Azaan","Farah","Ishaan","Samara",
+        "Kahlil","Amari","Zaira","Kamari","Aziza","Hamza","Sade","Nabil","Alaya","Suriya"
+    };
+
     void Start()
     {
-        // Inicializar el primer huevo (Azul)
         SetEggStage(0);
-
         currentEggModel = eggStages[0];
         initialRotation = currentEggModel.transform.rotation;
 
@@ -91,7 +117,7 @@ public class EggBehaviour : MonoBehaviour
         }
         else
         {
-            Debug.LogError("QTEManager no asignado.");
+            Debug.LogError("QTEManager no asignado en EggBehaviour.");
         }
 
         if (qteCanvasGroup != null)
@@ -103,6 +129,10 @@ public class EggBehaviour : MonoBehaviour
         {
             Debug.LogWarning("qteCanvasGroup no asignado en EggBehaviour.");
         }
+
+        // Asegúrate de que las listas de sprites e IDs estén asignadas en el inspector
+        // commonDinos con commonDinoIDs, rareDinos con rareDinoIDs, etc.
+        // Cada lista de IDs debe tener la misma cantidad de elementos que su lista de sprites correspondiente.
     }
 
     void OnDestroy()
@@ -124,7 +154,6 @@ public class EggBehaviour : MonoBehaviour
 
         if (currentQTEAttempt >= maxQTEs)
         {
-            // Terminar secuencia QTE
             StartCoroutine(EndQTESequence());
         }
         else
@@ -148,7 +177,7 @@ public class EggBehaviour : MonoBehaviour
         else
         {
             StartCoroutine(EggQTERoutine());
-            // No mejora el huevo porque falló el QTE
+            // No mejora el huevo por fallo
         }
     }
 
@@ -156,11 +185,14 @@ public class EggBehaviour : MonoBehaviour
     {
         isHatching = true;
 
-        // Desvincular eventos QTE
-        qteManager.onQTESuccess.RemoveListener(OnQTESuccess);
-        qteManager.onQTEFail.RemoveListener(OnQTEFail);
+        // Quitar eventos QTE
+        if (qteManager != null)
+        {
+            qteManager.onQTESuccess.RemoveListener(OnQTESuccess);
+            qteManager.onQTEFail.RemoveListener(OnQTEFail);
+        }
 
-        // Fade out del QTECanvas
+        // Fade out QTECanvas
         if (qteCanvasGroup != null)
         {
             float duration = 1f;
@@ -176,7 +208,7 @@ public class EggBehaviour : MonoBehaviour
             qteCanvasGroup.gameObject.SetActive(false);
         }
 
-        // Rotar agresivamente de izq a derecha antes de eclosionar
+        // Rotar agresivamente antes de eclosionar
         yield return StartCoroutine(RotateEggAggressively());
 
         // Eclosionar
@@ -232,25 +264,20 @@ public class EggBehaviour : MonoBehaviour
 
     IEnumerator RotateEggAggressively()
     {
-        // Rotar el huevo agresivamente en el eje Z de izq a der
         float elapsed = 0f;
         Quaternion startRot = currentEggModel.transform.rotation;
         while (elapsed < aggressiveRotationDuration)
         {
             elapsed += Time.deltaTime;
-            // Oscilar la rotación usando Mathf.Sin
             float angle = Mathf.Sin(elapsed * 20f) * aggressiveRotationDegrees;
             currentEggModel.transform.rotation = startRot * Quaternion.Euler(0, 0, angle);
             yield return null;
         }
-
-        // Regresar a rotación inicial
         currentEggModel.transform.rotation = initialRotation;
     }
 
     void UpdateEggModel()
     {
-        // Clampear los aciertos
         int eggIndex = Mathf.Clamp(successfulQTEs, 0, 3);
         SetEggStage(eggIndex);
         Debug.Log($"El huevo ha mejorado a: {currentEggModel.name}");
@@ -271,35 +298,45 @@ public class EggBehaviour : MonoBehaviour
 
     void HatchEgg()
     {
-        // Ocultar el huevo actual
         if (currentEggModel != null)
         {
             currentEggModel.SetActive(false);
         }
 
-        // Desactivar el collider del huevo
         Collider eggCollider = GetComponent<Collider>();
         if (eggCollider != null)
         {
             eggCollider.enabled = false;
         }
 
-        // Obtener el dinosaurio basado en la rareza según el número de aciertos
         int eggLevel = Mathf.Clamp(successfulQTEs, 0, 3);
 
-        GetRandomDino(eggLevel, out obtainedDinoSprite, out obtainedDinoInfo, out obtainedDinoRarity);
+        GetRandomDino(eggLevel, out obtainedDinoSprite, out obtainedDinoInfo, out obtainedDinoRarity, out obtainedDinoID);
 
-        // Lanzar el cubo
+        // Generar nombre para el dino
+        obtainedDinoName = GetRandomTribalName();
+
+        // Guardar el dino en el GameManager
+        GameManager.Instance.AddDinosaur(obtainedDinoID, obtainedDinoName, obtainedDinoRarity);
+
         LaunchCube();
     }
 
-    void GetRandomDino(int eggLevel, out Sprite dinoSprite, out string dinoInfo, out Rarity rarity)
+    void GetRandomDino(int eggLevel, out Sprite dinoSprite, out string dinoInfo, out Rarity rarity, out string dinoID)
     {
         dinoSprite = null;
         dinoInfo = "";
         rarity = Rarity.Common;
+        dinoID = "";
 
         float randomValue = Random.Range(0f, 100f);
+
+        // Función auxiliar para obtener dino e ID de una lista y su lista de IDs
+        (string chosenID, Sprite chosenSprite) GetFromList(List<string> idList, List<Sprite> spriteList)
+        {
+            int idx = Random.Range(0, spriteList.Count);
+            return (idList[idx], spriteList[idx]);
+        }
 
         switch (eggLevel)
         {
@@ -307,13 +344,17 @@ public class EggBehaviour : MonoBehaviour
                 // 70% común, 30% raro
                 if (randomValue < 70f)
                 {
-                    dinoSprite = GetRandomSpriteFromList(commonDinos);
+                    var result = GetFromList(commonDinoIDs, commonDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "Dinosaurio Común";
                     rarity = Rarity.Common;
                 }
                 else
                 {
-                    dinoSprite = GetRandomSpriteFromList(rareDinos);
+                    var result = GetFromList(rareDinoIDs, rareDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "Dinosaurio Raro";
                     rarity = Rarity.Rare;
                 }
@@ -322,19 +363,25 @@ public class EggBehaviour : MonoBehaviour
                 // 57% común, 40% raro, 3% shiny común
                 if (randomValue < 57f)
                 {
-                    dinoSprite = GetRandomSpriteFromList(commonDinos);
+                    var result = GetFromList(commonDinoIDs, commonDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "Dinosaurio Común";
                     rarity = Rarity.Common;
                 }
                 else if (randomValue < 97f)
                 {
-                    dinoSprite = GetRandomSpriteFromList(rareDinos);
+                    var result = GetFromList(rareDinoIDs, rareDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "Dinosaurio Raro";
                     rarity = Rarity.Rare;
                 }
                 else
                 {
-                    dinoSprite = GetRandomSpriteFromList(shinyCommonDinos);
+                    var result = GetFromList(shinyCommonDinoIDs, shinyCommonDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "¡Dinosaurio Shiny Común!";
                     rarity = Rarity.ShinyCommon;
                 }
@@ -343,25 +390,33 @@ public class EggBehaviour : MonoBehaviour
                 // 45% común, 45% raro, 7% shiny común, 3% shiny raro
                 if (randomValue < 45f)
                 {
-                    dinoSprite = GetRandomSpriteFromList(commonDinos);
+                    var result = GetFromList(commonDinoIDs, commonDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "Dinosaurio Común";
                     rarity = Rarity.Common;
                 }
                 else if (randomValue < 90f)
                 {
-                    dinoSprite = GetRandomSpriteFromList(rareDinos);
+                    var result = GetFromList(rareDinoIDs, rareDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "Dinosaurio Raro";
                     rarity = Rarity.Rare;
                 }
                 else if (randomValue < 97f)
                 {
-                    dinoSprite = GetRandomSpriteFromList(shinyCommonDinos);
+                    var result = GetFromList(shinyCommonDinoIDs, shinyCommonDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "¡Dinosaurio Shiny Común!";
                     rarity = Rarity.ShinyCommon;
                 }
                 else
                 {
-                    dinoSprite = GetRandomSpriteFromList(shinyRareDinos);
+                    var result = GetFromList(shinyRareDinoIDs, shinyRareDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "¡Dinosaurio Shiny Raro!";
                     rarity = Rarity.ShinyRare;
                 }
@@ -370,35 +425,51 @@ public class EggBehaviour : MonoBehaviour
                 // 35% común, 45% raro, 12% shiny común, 8% shiny raro
                 if (randomValue < 35f)
                 {
-                    dinoSprite = GetRandomSpriteFromList(commonDinos);
+                    var result = GetFromList(commonDinoIDs, commonDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "Dinosaurio Común";
                     rarity = Rarity.Common;
                 }
                 else if (randomValue < 80f)
                 {
-                    dinoSprite = GetRandomSpriteFromList(rareDinos);
+                    var result = GetFromList(rareDinoIDs, rareDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "Dinosaurio Raro";
                     rarity = Rarity.Rare;
                 }
                 else if (randomValue < 92f)
                 {
-                    dinoSprite = GetRandomSpriteFromList(shinyCommonDinos);
+                    var result = GetFromList(shinyCommonDinoIDs, shinyCommonDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "¡Dinosaurio Shiny Común!";
                     rarity = Rarity.ShinyCommon;
                 }
                 else
                 {
-                    dinoSprite = GetRandomSpriteFromList(shinyRareDinos);
+                    var result = GetFromList(shinyRareDinoIDs, shinyRareDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
                     dinoInfo = "¡Dinosaurio Shiny Raro!";
                     rarity = Rarity.ShinyRare;
                 }
                 break;
             default:
                 Debug.LogError("Nivel de huevo desconocido: " + eggLevel);
-                // Asignar algo por defecto para evitar nulos
-                dinoSprite = GetRandomSpriteFromList(commonDinos);
-                dinoInfo = "Dinosaurio Común";
-                rarity = Rarity.Common;
+                if (commonDinos.Count > 0 && commonDinoIDs.Count == commonDinos.Count)
+                {
+                    var result = GetFromList(commonDinoIDs, commonDinos);
+                    dinoID = result.chosenID;
+                    dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Común";
+                    rarity = Rarity.Common;
+                }
+                else
+                {
+                    Debug.LogError("No se ha obtenido un dino por defecto.");
+                }
                 break;
         }
 
@@ -406,21 +477,20 @@ public class EggBehaviour : MonoBehaviour
         {
             Debug.LogError("No se ha obtenido un sprite de dinosaurio válido.");
             // Asignar uno común por defecto si no se pudo obtener
-            dinoSprite = GetRandomSpriteFromList(commonDinos);
-            dinoInfo = "Dinosaurio Común";
-            rarity = Rarity.Common;
+            if (commonDinos.Count > 0 && commonDinoIDs.Count == commonDinos.Count)
+            {
+                dinoSprite = commonDinos[0];
+                dinoID = commonDinoIDs[0];
+                dinoInfo = "Dinosaurio Común";
+                rarity = Rarity.Common;
+            }
         }
     }
 
-    Sprite GetRandomSpriteFromList(List<Sprite> spriteList)
+    string GetRandomTribalName()
     {
-        if (spriteList == null || spriteList.Count == 0)
-        {
-            Debug.LogError("Lista de sprites vacía o no asignada.");
-            return null;
-        }
-        int index = Random.Range(0, spriteList.Count);
-        return spriteList[index];
+        int idx = Random.Range(0, tribalNames.Length);
+        return tribalNames[idx];
     }
 
     void LaunchCube()
@@ -466,7 +536,6 @@ public class EggBehaviour : MonoBehaviour
         TrailRenderer trail = cube.GetComponent<TrailRenderer>();
         ParticleSystem particles = cube.GetComponentInChildren<ParticleSystem>(true);
 
-        // Configurar según la rareza
         switch (rarity)
         {
             case Rarity.Common:

@@ -685,6 +685,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerDinosaurs: []
+  playerDinosaurInfos: []
 --- !u!4 &1234952351
 Transform:
   m_ObjectHideFlags: 0

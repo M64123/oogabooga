@@ -2465,6 +2465,26 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 2218895020baf544fbce5c2d3bf5922c, type: 3}
   - {fileID: 21300000, guid: 023ae0a6cc0fe294fa1a424a773efc65, type: 3}
   - {fileID: 21300000, guid: 12b517213e7e5a648ac85a24ec47c0d9, type: 3}
+  commonDinoIDs:
+  - 1
+  - 2
+  - 3
+  - 4
+  rareDinoIDs:
+  - 5
+  - 6
+  - 7
+  - 8
+  shinyCommonDinoIDs:
+  - 9
+  - 10
+  - 11
+  - 12
+  shinyRareDinoIDs:
+  - 13
+  - 14
+  - 15
+  - 16
   maxWaitTime: 5
   qteManager: {fileID: 489408612}
   beatManager: {fileID: 208765814}
