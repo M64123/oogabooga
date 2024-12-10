@@ -1,5 +1,3 @@
-// GameManager.cs
-
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -8,13 +6,9 @@ public class GameManager : MonoBehaviour
     private static GameManager _instance;
     public static GameManager Instance { get { return _instance; } }
 
-    // Lista para almacenar los datos de todos los nodos (no modificar)
     private List<MapNodeData> savedMapData = new List<MapNodeData>();
-
-    // ID del nodo actual donde se encuentra el jugador (no modificar)
     private string currentPlayerNodeID = "";
 
-    // Lista original de dinosaurios como GameObjects (no borrar)
     public List<GameObject> playerDinosaurs = new List<GameObject>();
 
     [System.Serializable]
@@ -24,20 +18,22 @@ public class GameManager : MonoBehaviour
         public string dinoName;
         public Rarity rarity;
         public int level = 1;
+        public bool isAlive = true;
     }
 
-    // Diccionario interno para acceso rápido por ID
     private Dictionary<string, DinoData> playerDinoDictionary = new Dictionary<string, DinoData>();
 
-    // Lista serializable para ver los dinos en el Inspector
-    // Esta lista se mantendrá sincronizada con el diccionario
-    public List<DinoData> playerDinoList = new List<DinoData>();
+    [Header("Dino Prefabs Mapping")]
+    public List<string> dinoIDs;
+    public List<GameObject> dinoPrefabs;
 
     public List<MapNodeData> boardState
     {
         get { return savedMapData; }
         set { savedMapData = value; }
     }
+
+    public List<DinoData> playerDinoList = new List<DinoData>();
 
     void Awake()
     {
@@ -79,71 +75,55 @@ public class GameManager : MonoBehaviour
         return currentPlayerNodeID;
     }
 
-    // Método original para añadir dinosaurios como GameObject
     public void AddDinosaur(GameObject newDino)
     {
         if (newDino != null)
         {
             playerDinosaurs.Add(newDino);
-            Debug.Log($"Dinosaurio añadido (GameObject): {newDino.name}. Total: {playerDinosaurs.Count}");
+            Debug.Log($"Dino (GameObject) añadido: {newDino.name}. Total: {playerDinosaurs.Count}");
         }
         else
         {
-            Debug.LogError("Intento de añadir un dinosaurio nulo (GameObject).");
+            Debug.LogError("Intento de añadir un dino nulo (GameObject).");
         }
     }
 
-    // Método original para guardar un dino como GameObject
     public void SaveDinosaur(GameObject dino)
     {
         AddDinosaur(dino);
-        // No usamos esta forma ahora, pero se mantiene por compatibilidad
     }
 
-    /// <summary>
-    /// Añade o actualiza un dinosaurio por ID.
-    /// Si ya existe, sube de nivel.
-    /// Si no existe, lo crea nivel 1.
-    /// Actualiza la lista playerDinoList para verlo en el inspector.
-    /// </summary>
     public void AddDinosaur(string dinoID, string dinoName, Rarity rarity)
     {
         if (string.IsNullOrEmpty(dinoID))
         {
-            Debug.LogError("dinoID es nulo o vacío, no se puede añadir el dino.");
+            Debug.LogError("dinoID vacío, no se puede añadir.");
             return;
         }
 
-        if (playerDinoDictionary.ContainsKey(dinoID))
+        DinoData dinoData;
+        if (playerDinoDictionary.TryGetValue(dinoID, out dinoData))
         {
-            DinoData existingDino = playerDinoDictionary[dinoID];
-            existingDino.level++;
-
-            // Actualizar en la lista
-            UpdateDinoInList(dinoID, existingDino);
-
-            Debug.Log($"Dino con ID {dinoID} ya existe. Nivel incrementado a {existingDino.level}.");
+            dinoData.level++;
+            UpdateDinoInList(dinoID, dinoData);
+            Debug.Log($"Dino {dinoID} existe. Nivel subido a {dinoData.level}");
         }
         else
         {
-            DinoData newDinoData = new DinoData
+            dinoData = new DinoData
             {
                 dinoID = dinoID,
                 dinoName = dinoName,
                 rarity = rarity,
-                level = 1
+                level = 1,
+                isAlive = true
             };
-
-            playerDinoDictionary.Add(dinoID, newDinoData);
-            playerDinoList.Add(newDinoData); // Añadir a la lista para verlo en el inspector
-
-            Debug.Log($"Dino con ID {dinoID} añadido por primera vez. Nivel {newDinoData.level}.");
+            playerDinoDictionary.Add(dinoID, dinoData);
+            playerDinoList.Add(dinoData);
+            Debug.Log($"Dino {dinoID} añadido con nivel {dinoData.level}.");
         }
     }
 
-    /// <summary>
-    /// Actualiza la información de un dino en la lista playerDinoList para reflejar cambios del diccionario.
-    /// </summary>
     private void UpdateDinoInList(string dinoID, DinoData updatedData)
     {
         for (int i = 0; i < playerDinoList.Count; i++)
@@ -154,13 +134,39 @@ public class GameManager : MonoBehaviour
                 return;
             }
         }
-
-        // Si no se encontró, agregarlo (no debería pasar si el dino ya existía)
         playerDinoList.Add(updatedData);
     }
 
     public Dictionary<string, DinoData> GetAllPlayerDinos()
     {
         return playerDinoDictionary;
+    }
+
+    public GameObject GetDinoPrefabByID(string dID)
+    {
+        for (int i = 0; i < dinoIDs.Count; i++)
+        {
+            if (dinoIDs[i] == dID)
+            {
+                return dinoPrefabs[i];
+            }
+        }
+        Debug.LogError("No se encontró prefab para " + dID);
+        return null;
+    }
+
+    public void MarkDinoAsDead(string dinoID)
+    {
+        if (playerDinoDictionary.ContainsKey(dinoID))
+        {
+            var d = playerDinoDictionary[dinoID];
+            d.isAlive = false;
+            UpdateDinoInList(dinoID, d);
+            Debug.Log($"Dino {dinoID} marcado como muerto.");
+        }
+        else
+        {
+            Debug.LogError($"No se encontró el dino {dinoID} para marcarlo como muerto.");
+        }
     }
 }

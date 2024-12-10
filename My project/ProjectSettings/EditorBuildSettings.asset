@@ -17,4 +17,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Map/Gambling/Gacha.unity
     guid: 16de82990378d8d4698d2a718aea2fc2
+  - enabled: 1
+    path: Assets/Scenes/Map/DeadDinoShowcase.unity
+    guid: 40e8002f015f2594f9154acaf2b78564
+  - enabled: 1
+    path: Assets/Scenes/Map/DinoShowcase.unity
+    guid: 75b07b07bd36ad6429d208a2d188938f
+  - enabled: 1
+    path: Assets/Scenes/Map/Coinflip/Coinflip.unity
+    guid: e558a4eb2a9bb6c49baac8379c8d8397
   m_configObjects: {}

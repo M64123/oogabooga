@@ -2,9 +2,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
-public class DinoShowcaseManager : MonoBehaviour
+public class DeadDinoShowcaseManager : MonoBehaviour
 {
-    [Header("Area de Spawn (Vivos)")]
+    [Header("Area de Spawn (Muertos)")]
     public Collider spawnArea;
     public string boardSceneName = "Tablero";
 
@@ -19,7 +19,7 @@ public class DinoShowcaseManager : MonoBehaviour
         foreach (var kvp in dinos)
         {
             var dinoData = kvp.Value;
-            if (dinoData.isAlive)
+            if (!dinoData.isAlive) // Solo los muertos
             {
                 GameObject prefab = GameManager.Instance.GetDinoPrefabByID(dinoData.dinoID);
                 if (prefab != null)
@@ -27,8 +27,9 @@ public class DinoShowcaseManager : MonoBehaviour
                     Vector3 randomPos = GetRandomPositionInsideCollider(spawnArea);
                     GameObject dinoObj = Instantiate(prefab, randomPos, Quaternion.identity);
 
-                    UnitIdleMovement idleMov = dinoObj.AddComponent<UnitIdleMovement>();
-                    idleMov.boxAreaTransform = spawnArea.transform;
+                    // Para dinos muertos, podrías no añadir UnitIdleMovement o añadirlo sin moverse:
+                    // Si quieres que no se muevan, no agregues UnitIdleMovement.
+                    // dinoObj no se mueve.
                 }
             }
         }

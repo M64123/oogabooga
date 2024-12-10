@@ -13,19 +13,25 @@ public class NodeSceneManager : MonoBehaviour
 
     public List<NodeTypeScenes> nodeTypeScenesList = new List<NodeTypeScenes>();
 
+    [Header("Main Board Scene")]
+    [Tooltip("Nombre de la escena principal del tablero.")]
+    public string boardSceneName = "Tablero";
+
+    [Header("Dino Scenes")]
+    [Tooltip("Nombre de la escena donde se muestran los dinos vivos.")]
+    public string dinoShowcaseSceneName = "DinoShowcase";
+    [Tooltip("Nombre de la escena donde se muestran los dinos muertos.")]
+    public string deadDinoShowcaseSceneName = "DeadDinoShowcase";
+
     // Singleton instance
     public static NodeSceneManager Instance;
 
-
-
-
     void Awake()
     {
-        // Configurar el patrón Singleton
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Opcional si deseas que persista entre escenas
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -33,7 +39,6 @@ public class NodeSceneManager : MonoBehaviour
         }
     }
 
-    // Método para obtener una escena aleatoria basada en el NodeType
     public string GetRandomSceneName(NodeType nodeType)
     {
         foreach (var nts in nodeTypeScenesList)
@@ -54,5 +59,41 @@ public class NodeSceneManager : MonoBehaviour
         }
         Debug.LogWarning($"No se encontró una entrada para el tipo de nodo {nodeType}.");
         return null;
+    }
+
+    public void LoadBoardScene()
+    {
+        if (!string.IsNullOrEmpty(boardSceneName))
+        {
+            SceneManager.LoadScene(boardSceneName);
+        }
+        else
+        {
+            Debug.LogError("boardSceneName no está asignado.");
+        }
+    }
+
+    public void LoadDinoShowcaseScene()
+    {
+        if (!string.IsNullOrEmpty(dinoShowcaseSceneName))
+        {
+            SceneManager.LoadScene(dinoShowcaseSceneName);
+        }
+        else
+        {
+            Debug.LogError("dinoShowcaseSceneName no está asignado.");
+        }
+    }
+
+    public void LoadDeadDinoShowcaseScene()
+    {
+        if (!string.IsNullOrEmpty(deadDinoShowcaseSceneName))
+        {
+            SceneManager.LoadScene(deadDinoShowcaseSceneName);
+        }
+        else
+        {
+            Debug.LogError("deadDinoShowcaseSceneName no está asignado.");
+        }
     }
 }
