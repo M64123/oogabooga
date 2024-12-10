@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2471724551982220281}
   - component: {fileID: 5111395814208798576}
+  - component: {fileID: 6336946078016879846}
   m_Layer: 0
   m_Name: Parasauralania
   m_TagString: Untagged
@@ -84,3 +85,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &6336946078016879846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505492561041779944}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae77f7ff7f8c4a9418535b6e8f24fe85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iD: 2
+  name: Parasauralania
+  level: 1
+  _class: {fileID: 0}
+  spawnPointHability: {fileID: 0}
+  statsBase: {fileID: 11400000, guid: 774c9345f73b89f428fd72f72244dc64, type: 2}
+  claseDino: {fileID: 11400000, guid: d5d6e027a93f840408fc88af32da6717, type: 2}
+  idUnico: 

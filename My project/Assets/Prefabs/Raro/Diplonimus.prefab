@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 862753614826227978}
   - component: {fileID: 6337303008477690293}
+  - component: {fileID: -3791016498182296059}
   m_Layer: 0
   m_Name: Diplonimus
   m_TagString: Untagged
@@ -84,3 +85,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &-3791016498182296059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4795268639566585085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae77f7ff7f8c4a9418535b6e8f24fe85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iD: 4
+  name: Dilophovenator
+  level: 1
+  _class: {fileID: 0}
+  spawnPointHability: {fileID: 0}
+  statsBase: {fileID: 11400000, guid: 2c3f17fde47ef8347a87e14acff8cb04, type: 2}
+  claseDino: {fileID: 11400000, guid: 6039d69a62119314fbf39c35f0751b10, type: 2}
+  idUnico: 

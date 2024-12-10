@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2110554404567003099}
   - component: {fileID: 8343394291888697675}
+  - component: {fileID: -989090779239402457}
   m_Layer: 0
   m_Name: ShinyDiplonimus
   m_TagString: Untagged
@@ -84,3 +85,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &-989090779239402457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2541556159553838145}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae77f7ff7f8c4a9418535b6e8f24fe85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iD: 10
+  name: 
+  level: 1
+  _class: {fileID: 0}
+  spawnPointHability: {fileID: 0}
+  statsBase: {fileID: 11400000, guid: 327cd4a823227f049bfa501e970aa2be, type: 2}
+  claseDino: {fileID: 11400000, guid: ce3d2defff9ddd34da98c8fee795e01b, type: 2}
+  idUnico: 

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5736146972256566230}
   - component: {fileID: 3867432495402402232}
+  - component: {fileID: -4167717761886985730}
   m_Layer: 0
   m_Name: ParasauralaniaShiny
   m_TagString: Untagged
@@ -84,3 +85,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &-4167717761886985730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1806238593215662730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae77f7ff7f8c4a9418535b6e8f24fe85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iD: 7
+  name: 
+  level: 1
+  _class: {fileID: 0}
+  spawnPointHability: {fileID: 0}
+  statsBase: {fileID: 11400000, guid: f9d3c8256e9f18d438ff568fa8aa90c8, type: 2}
+  claseDino: {fileID: 11400000, guid: 5a37413f57acdfd4f99c098b8439c48b, type: 2}
+  idUnico: 

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3066430044673071179}
   - component: {fileID: 6136473727550696292}
+  - component: {fileID: -2387695067210141363}
   m_Layer: 0
   m_Name: Iguanovaranus
   m_TagString: Untagged
@@ -84,3 +85,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &-2387695067210141363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6296288910205104644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae77f7ff7f8c4a9418535b6e8f24fe85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iD: 1
+  name: IguanoVarus
+  level: 1
+  _class: {fileID: 0}
+  spawnPointHability: {fileID: 0}
+  statsBase: {fileID: 11400000, guid: 10e04722c82be614cb68f590c8ff08c9, type: 2}
+  claseDino: {fileID: 11400000, guid: d5d6e027a93f840408fc88af32da6717, type: 2}
+  idUnico: 
