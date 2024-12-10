@@ -99,7 +99,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   iD: 1
   name: IguanoVarus
-  level: 1
+  level: 2
   _class: {fileID: 0}
   spawnPointHability: {fileID: 0}
   statsBase: {fileID: 11400000, guid: 10e04722c82be614cb68f590c8ff08c9, type: 2}

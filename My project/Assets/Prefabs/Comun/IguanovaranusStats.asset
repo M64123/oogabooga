@@ -16,5 +16,30 @@ MonoBehaviour:
   ataqueBase: 20
   defensaBase: 10
   velocidadBase: 5
-  attributes: []
+  attributes:
+  - attribute: {fileID: 11400000, guid: 155916f7f760364478c6f642b9028c43, type: 2}
+    progression:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 1.75887
+        outSlope: 1.75887
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 0.50231934
+        value: 1.8835144
+        inSlope: 1.75887
+        outSlope: 1.75887
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
   resources: []
