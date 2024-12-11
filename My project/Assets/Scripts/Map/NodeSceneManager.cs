@@ -13,24 +13,20 @@ public class NodeSceneManager : MonoBehaviour
 
     public List<NodeTypeScenes> nodeTypeScenesList = new List<NodeTypeScenes>();
 
-    // Estas dos escenas son las que muestran los dinos vivos y muertos
-    [Header("Dino Scenes")]
-    public string dinoShowcaseSceneName = "DinoShowcase";       // Asignar el nombre real de la escena en el Inspector
-    public string deadDinoShowcaseSceneName = "DeadDinoShowcase"; // Asignar el nombre real de la escena en el Inspector
-
-    // Escena principal (tablero)
-    [Header("Board Scene")]
-    public string boardSceneName = "Tablero"; // Asignar el nombre real de la escena del tablero en el Inspector
-
     // Singleton instance
     public static NodeSceneManager Instance;
 
+    [Header("Scene Names")]
+    public string boardSceneName = "Tablero"; // Nombre exacto de la escena del tablero
+    public string gachaSceneName = "Gacha";   // Nombre exacto de la escena del gacha
+
     void Awake()
     {
+        // Configurar el patrón Singleton
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Persistir entre escenas
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -38,7 +34,7 @@ public class NodeSceneManager : MonoBehaviour
         }
     }
 
-    // Método para obtener una escena aleatoria basada en el NodeType (como antes)
+    // Método para obtener una escena aleatoria basada en el NodeType
     public string GetRandomSceneName(NodeType nodeType)
     {
         foreach (var nts in nodeTypeScenesList)
@@ -61,42 +57,15 @@ public class NodeSceneManager : MonoBehaviour
         return null;
     }
 
-    // Función para cargar la escena del tablero
+    // Cargar la escena del tablero
     public void LoadBoardScene()
     {
-        if (!string.IsNullOrEmpty(boardSceneName))
-        {
-            SceneManager.LoadScene(boardSceneName);
-        }
-        else
-        {
-            Debug.LogError("No se ha asignado la escena del tablero en el Inspector.");
-        }
+        SceneManager.LoadScene(boardSceneName);
     }
 
-    // Función para cargar la escena DinoShowcase (dinos vivos)
-    public void LoadDinoShowcaseScene()
+    // Cargar la escena de Gacha
+    public void LoadGachaScene()
     {
-        if (!string.IsNullOrEmpty(dinoShowcaseSceneName))
-        {
-            SceneManager.LoadScene(dinoShowcaseSceneName);
-        }
-        else
-        {
-            Debug.LogError("No se ha asignado la escena DinoShowcase en el Inspector.");
-        }
-    }
-
-    // Función para cargar la escena DeadDinoShowcase (dinos muertos)
-    public void LoadDeadDinoShowcaseScene()
-    {
-        if (!string.IsNullOrEmpty(deadDinoShowcaseSceneName))
-        {
-            SceneManager.LoadScene(deadDinoShowcaseSceneName);
-        }
-        else
-        {
-            Debug.LogError("No se ha asignado la escena DeadDinoShowcase en el Inspector.");
-        }
+        SceneManager.LoadScene(gachaSceneName);
     }
 }

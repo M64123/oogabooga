@@ -41,14 +41,7 @@ public class QTEManager : MonoBehaviour
 
     void Awake()
     {
-        // Implementación del Singleton
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this.gameObject);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(this.gameObject);
+
     }
 
     void Start()

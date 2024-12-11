@@ -1254,9 +1254,9 @@ MonoBehaviour:
   - nodeType: 8
     sceneNames:
     - Gacha
-  boardSceneName: Tablero
   dinoShowcaseSceneName: DinoShowcase
   deadDinoShowcaseSceneName: DeadDinoShowcase
+  boardSceneName: Tablero
 --- !u!4 &1679504393
 Transform:
   m_ObjectHideFlags: 0
