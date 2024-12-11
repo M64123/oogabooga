@@ -48,7 +48,7 @@ public class QTEManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(this.gameObject);
+        
     }
 
     void Start()

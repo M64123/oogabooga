@@ -21,6 +21,9 @@ EditorBuildSettings:
     path: Assets/Scenes/Map/DeadDinoShowcase.unity
     guid: 40e8002f015f2594f9154acaf2b78564
   - enabled: 1
+    path: Assets/Scenes/Map/Combate/New Scene.unity
+    guid: ad56d8ff12170e8429e897c66811ca9f
+  - enabled: 1
     path: Assets/Scenes/Map/DinoShowcase.unity
     guid: 75b07b07bd36ad6429d208a2d188938f
   - enabled: 1

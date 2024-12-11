@@ -3,9 +3,21 @@ using UnityEngine;
 [System.Serializable]
 public class DinosaurDefinition
 {
-    public int dinoID;           // El ID único del dinosaurio
-    public GameObject dinoPrefab; // Prefab asociado a este ID
-    public string dinoName;      // Opcional: nombre del dino
-    public Rarity rarity;        // Opcional: rareza del dino
-    // Aquí puedes añadir más campos según lo que necesites
+    public int dinoID;             // ID único del dinosaurio
+    public GameObject dinoPrefab;  // Prefab asociado al dinosaurio
+    public string dinoName;        // Nombre del dinosaurio
+    public Rarity rarity;          // Rareza del dinosaurio
+
+    // Campos adicionales para definir el dinosaurio
+    public DinoStats statsBase;    // Estadísticas base
+    public DinoClass dinoClass;    // Clase del dinosaurio
+}
+
+// Enumeración para definir la rareza del dinosaurio
+public enum Rarity
+{
+    Common,
+    Rare,
+    ShinyCommon,
+    ShinyRare
 }

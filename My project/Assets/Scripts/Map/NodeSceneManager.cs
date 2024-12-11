@@ -1,6 +1,7 @@
 using UnityEngine;
-using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class NodeSceneManager : MonoBehaviour
 {
@@ -13,24 +14,24 @@ public class NodeSceneManager : MonoBehaviour
 
     public List<NodeTypeScenes> nodeTypeScenesList = new List<NodeTypeScenes>();
 
-    // Estas dos escenas son las que muestran los dinos vivos y muertos
     [Header("Dino Scenes")]
-    public string dinoShowcaseSceneName = "DinoShowcase";       // Asignar el nombre real de la escena en el Inspector
-    public string deadDinoShowcaseSceneName = "DeadDinoShowcase"; // Asignar el nombre real de la escena en el Inspector
+    public string dinoShowcaseSceneName = "DinoShowcase";
+    public string deadDinoShowcaseSceneName = "DeadDinoShowcase";
 
-    // Escena principal (tablero)
     [Header("Board Scene")]
-    public string boardSceneName = "Tablero"; // Asignar el nombre real de la escena del tablero en el Inspector
+    public string boardSceneName = "Tablero";
 
-    // Singleton instance
+    private Button buttonLoadDinoShowcase; // Botón para cargar DinoShowcase
+    private Button buttonLoadBoardScene;  // Botón para cargar Tablero
+
     public static NodeSceneManager Instance;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Persistir entre escenas
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -38,7 +39,90 @@ public class NodeSceneManager : MonoBehaviour
         }
     }
 
-    // Método para obtener una escena aleatoria basada en el NodeType (como antes)
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == boardSceneName)
+        {
+            Debug.Log("Escena del tablero cargada. Configurando botones...");
+            SetupButtons(); // Configurar los botones dinámicamente
+        }
+    }
+
+    private void SetupButtons()
+    {
+        // Buscar botones en la escena actual
+        buttonLoadDinoShowcase = GameObject.Find("ButtonLoadDinoShowcase")?.GetComponent<Button>();
+        buttonLoadBoardScene = GameObject.Find("ButtonLoadBoardScene")?.GetComponent<Button>();
+
+        if (buttonLoadDinoShowcase != null)
+        {
+            buttonLoadDinoShowcase.onClick.RemoveAllListeners();
+            buttonLoadDinoShowcase.onClick.AddListener(LoadDinoShowcaseScene);
+            Debug.Log("Botón DinoShowcase configurado correctamente.");
+        }
+        else
+        {
+            Debug.LogWarning("Botón DinoShowcase no encontrado en la escena del tablero.");
+        }
+
+        if (buttonLoadBoardScene != null)
+        {
+            buttonLoadBoardScene.onClick.RemoveAllListeners();
+            buttonLoadBoardScene.onClick.AddListener(LoadBoardScene);
+            Debug.Log("Botón Tablero configurado correctamente.");
+        }
+        else
+        {
+            Debug.LogWarning("Botón Tablero no encontrado en la escena del tablero.");
+        }
+    }
+
+    public void LoadBoardScene()
+    {
+        if (!string.IsNullOrEmpty(boardSceneName))
+        {
+            SceneManager.LoadScene(boardSceneName);
+        }
+        else
+        {
+            Debug.LogError("No se ha asignado la escena del tablero en el Inspector.");
+        }
+    }
+
+    public void LoadDinoShowcaseScene()
+    {
+        if (!string.IsNullOrEmpty(dinoShowcaseSceneName))
+        {
+            SceneManager.LoadScene(dinoShowcaseSceneName);
+        }
+        else
+        {
+            Debug.LogError("No se ha asignado la escena DinoShowcase en el Inspector.");
+        }
+    }
+
+    public void LoadDeadDinoShowcaseScene()
+    {
+        if (!string.IsNullOrEmpty(deadDinoShowcaseSceneName))
+        {
+            SceneManager.LoadScene(deadDinoShowcaseSceneName);
+        }
+        else
+        {
+            Debug.LogError("No se ha asignado la escena DeadDinoShowcase en el Inspector.");
+        }
+    }
+
     public string GetRandomSceneName(NodeType nodeType)
     {
         foreach (var nts in nodeTypeScenesList)
@@ -59,44 +143,5 @@ public class NodeSceneManager : MonoBehaviour
         }
         Debug.LogWarning($"No se encontró una entrada para el tipo de nodo {nodeType}.");
         return null;
-    }
-
-    // Función para cargar la escena del tablero
-    public void LoadBoardScene()
-    {
-        if (!string.IsNullOrEmpty(boardSceneName))
-        {
-            SceneManager.LoadScene(boardSceneName);
-        }
-        else
-        {
-            Debug.LogError("No se ha asignado la escena del tablero en el Inspector.");
-        }
-    }
-
-    // Función para cargar la escena DinoShowcase (dinos vivos)
-    public void LoadDinoShowcaseScene()
-    {
-        if (!string.IsNullOrEmpty(dinoShowcaseSceneName))
-        {
-            SceneManager.LoadScene(dinoShowcaseSceneName);
-        }
-        else
-        {
-            Debug.LogError("No se ha asignado la escena DinoShowcase en el Inspector.");
-        }
-    }
-
-    // Función para cargar la escena DeadDinoShowcase (dinos muertos)
-    public void LoadDeadDinoShowcaseScene()
-    {
-        if (!string.IsNullOrEmpty(deadDinoShowcaseSceneName))
-        {
-            SceneManager.LoadScene(deadDinoShowcaseSceneName);
-        }
-        else
-        {
-            Debug.LogError("No se ha asignado la escena DeadDinoShowcase en el Inspector.");
-        }
     }
 }
