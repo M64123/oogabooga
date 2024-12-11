@@ -14,9 +14,11 @@ GameObject:
   - component: {fileID: 5003165361731400154}
   - component: {fileID: -5345807728630104960}
   - component: {fileID: 6881988282307526327}
+  - component: {fileID: -7329067799719007020}
+  - component: {fileID: -4651844790011504879}
   m_Layer: 0
   m_Name: Dromeoraptor
-  m_TagString: Untagged
+  m_TagString: ally
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -173,3 +175,35 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-7329067799719007020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473553162318934826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae77f7ff7f8c4a9418535b6e8f24fe85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  iD: 3
+  name: 
+  level: 1
+  _class: {fileID: 0}
+  spawnPointHability: {fileID: 0}
+  statsBase: {fileID: 11400000, guid: 10e04722c82be614cb68f590c8ff08c9, type: 2}
+  claseDino: {fileID: 11400000, guid: d5d6e027a93f840408fc88af32da6717, type: 2}
+  idUnico: 
+--- !u!114 &-4651844790011504879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1473553162318934826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46ba389f2f0a54a47b28a2ceddb335ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

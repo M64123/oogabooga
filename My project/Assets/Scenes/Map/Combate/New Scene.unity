@@ -305,9 +305,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46ba389f2f0a54a47b28a2ceddb335ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 175141467}
-  damage: 10
-  targetHealth: {fileID: 765458402}
 --- !u!95 &175141467
 Animator:
   serializedVersion: 5
@@ -967,22 +964,24 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 6296288910205104644, guid: 9407f6674cebede4e97f0bf8db1d00eb, type: 3}
+      propertyPath: m_TagString
+      value: enemy
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5483060646370524379, guid: 9407f6674cebede4e97f0bf8db1d00eb, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6296288910205104644, guid: 9407f6674cebede4e97f0bf8db1d00eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 765458401}
-    - targetCorrespondingSourceObject: {fileID: 6296288910205104644, guid: 9407f6674cebede4e97f0bf8db1d00eb, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 765458400}
     - targetCorrespondingSourceObject: {fileID: 6296288910205104644, guid: 9407f6674cebede4e97f0bf8db1d00eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 765458402}
+      addedObject: {fileID: 765458403}
     - targetCorrespondingSourceObject: {fileID: 6296288910205104644, guid: 9407f6674cebede4e97f0bf8db1d00eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 765458403}
+      addedObject: {fileID: 765458404}
   m_SourcePrefab: {fileID: 100100000, guid: 9407f6674cebede4e97f0bf8db1d00eb, type: 3}
 --- !u!1 &518691712
 GameObject:
@@ -1243,36 +1242,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &765458401
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 146337045}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b10e3e53ae25f174ead0c1eaa2d18aef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animator: {fileID: 765458400}
-  damage: 80
-  attackInterval: 2
-  attackChance: 0.05
-  playerHealth: {fileID: 1272606982}
---- !u!114 &765458402
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 146337045}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cf5e90d2c687d942818a91103161353, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 800
 --- !u!65 &765458403
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1294,6 +1263,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 12.799999, y: 6.4, z: 0.2}
   m_Center: {x: -0.0000076293945, y: 0.00000023841858, z: 0}
+--- !u!114 &765458404
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 146337045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15a2ad84a65ecc34e9a81e774bfd9a80, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackDamage: 10
+  attackProbability: 0.05
+  animator: {fileID: 765458400}
+  vidaMaxima: 4000
 --- !u!1001 &954289531
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2388,9 +2373,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46ba389f2f0a54a47b28a2ceddb335ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animator: {fileID: 1272606980}
-  damage: 10
-  targetHealth: {fileID: 765458402}
 --- !u!114 &1272606982
 MonoBehaviour:
   m_ObjectHideFlags: 0

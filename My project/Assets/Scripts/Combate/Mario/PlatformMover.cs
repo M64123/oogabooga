@@ -49,6 +49,9 @@ public class PlatformMover : MonoBehaviour
         // Iniciar el movimiento
         isMoving = true;
 
+        // Notificar a los aliados y enemigos que el combate ha iniciado
+        NotifyCombatStart();
+
         // Ocultar el botón de inicio
         startButton.gameObject.SetActive(false);
     }
@@ -98,4 +101,28 @@ public class PlatformMover : MonoBehaviour
         Debug.Log("Plataforma detenida: el primer dinosaurio alcanzó al enemigo.");
     }
 
+    private void NotifyCombatStart()
+    {
+        // Notificar a todos los aliados
+        GameObject[] allies = GameObject.FindGameObjectsWithTag("ally");
+        foreach (GameObject ally in allies)
+        {
+            DinoCombat dinoCombat = ally.GetComponent<DinoCombat>();
+            if (dinoCombat != null)
+            {
+                dinoCombat.StartCombat();
+            }
+        }
+
+        // Notificar al enemigo
+        GameObject enemy = GameObject.FindGameObjectWithTag("enemy");
+        if (enemy != null)
+        {
+            EnemyCombatController enemyCombat = enemy.GetComponent<EnemyCombatController>();
+            if (enemyCombat != null)
+            {
+                enemyCombat.StartCombat();
+            }
+        }
+    }
 }

@@ -15,9 +15,10 @@ GameObject:
   - component: {fileID: -3117792897026311962}
   - component: {fileID: -8189350997254662679}
   - component: {fileID: 1746660731312531102}
+  - component: {fileID: 5483060646370524379}
   m_Layer: 0
   m_Name: Iguanovaranus
-  m_TagString: Untagged
+  m_TagString: ally
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -194,3 +195,15 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5483060646370524379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6296288910205104644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46ba389f2f0a54a47b28a2ceddb335ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

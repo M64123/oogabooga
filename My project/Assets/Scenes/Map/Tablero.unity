@@ -1333,8 +1333,7 @@ MonoBehaviour:
   - nodeType: 5
     sceneNames: []
   - nodeType: 6
-    sceneNames:
-    - Coinflip
+    sceneNames: []
   - nodeType: 7
     sceneNames: []
   - nodeType: 8

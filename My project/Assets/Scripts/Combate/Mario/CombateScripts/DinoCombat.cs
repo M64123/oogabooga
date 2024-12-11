@@ -1,33 +1,71 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class DinoCombat : MonoBehaviour
 {
-    public Animator animator;          // Animator para las animaciones
-    public int damage = 10;            // Daño que este dinosaurio inflige
-    public HealthSystem targetHealth;    // Salud del objetivo
+    private Animator animator;
+    private int vidaActual;
+    private int ataqueFinal;
+    private Dinosaurio dinosaurio;
+
+    void Start()
+    {
+        animator = GetComponent<Animator>();
+        dinosaurio = GetComponent<Dinosaurio>();
+
+        if (dinosaurio != null)
+        {
+            vidaActual = dinosaurio.statsBase.vidaBase;
+            ataqueFinal = dinosaurio.statsBase.ataqueBase;
+        }
+        else
+        {
+            Debug.LogError("El componente Dinosaurio no está asignado al GameObject.");
+            return; // Salir del método si falta el componente
+        }
+    }
+
+    public void StartCombat()
+    {
+        Debug.Log($"{name} está listo para combatir.");
+        // Puedes agregar lógica adicional para iniciar combate aquí si es necesario
+    }
 
     public void ExecuteAttack()
     {
+        // Activar la animación de ataque
         if (animator != null)
         {
-            Debug.Log($"{gameObject.name}: Iniciando animación de ataque.");
-            animator.SetTrigger("Attack"); // Activar la animación de ataque
-        }
-        else
-        {
-            Debug.LogWarning($"{gameObject.name}: No se asignó Animator.");
+            animator.SetTrigger("Attack");
         }
 
-        if (targetHealth != null)
+        // Buscar al enemigo en la escena
+        EnemyCombatController enemy = FindObjectOfType<EnemyCombatController>();
+        if (enemy != null)
         {
-            targetHealth.TakeDamage(damage); // Infligir daño al objetivo
-            Debug.Log($"Infligido {damage} de daño al objetivo.");
+            // Aplicar daño al enemigo
+            enemy.TakeDamage(ataqueFinal);
+            Debug.Log($"{name} atacó al enemigo causando {ataqueFinal} de daño.");
         }
         else
         {
-            Debug.LogWarning($"{gameObject.name}: No se asignó un objetivo para el ataque.");
+            Debug.LogWarning("No se encontró un enemigo en la escena.");
         }
+    }
+
+    public void TakeDamage(float damage)
+    {
+        vidaActual -= Mathf.RoundToInt(damage);
+        Debug.Log($"{name} recibió {damage} de daño. Vida restante: {vidaActual}");
+
+        if (vidaActual <= 0)
+        {
+            HandleDeath();
+        }
+    }
+
+    private void HandleDeath()
+    {
+        Debug.Log($"{name} ha sido derrotado.");
+        Destroy(gameObject); // Elimina el GameObject del dinosaurio
     }
 }

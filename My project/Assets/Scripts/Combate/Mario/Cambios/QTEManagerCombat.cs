@@ -193,17 +193,18 @@ public class QTEManagerCombat : MonoBehaviour
     }
 
     void NotifyActiveDino()
+{
+    DinoCombat activeDino = Combatgrid.Instance.GetFirstSlotDino();
+    if (activeDino != null)
     {
-        DinoCombat activeDino = Combatgrid.Instance.GetFirstSlotDino();
-        if (activeDino != null)
-        {
-            activeDino.ExecuteAttack();
-        }
-        else
-        {
-            Debug.LogWarning("No se encontró dinosaurio activo en el primer slot.");
-        }
+        activeDino.ExecuteAttack(); // Ejecuta el ataque
+        Debug.Log($"{activeDino.name} realizó un ataque tras acertar el QTE.");
     }
+    else
+    {
+        Debug.LogWarning("No se encontró dinosaurio activo en el primer slot.");
+    }
+}
 
     public class Pair<T>
     {
