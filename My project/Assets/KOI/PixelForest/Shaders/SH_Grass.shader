@@ -52,9 +52,6 @@ Shader "KOI/Grass"
             // Calculate the gradient factor based on the height of the vertex
             float heightFactor = saturate(worldPos.y); // Adjust this to control the gradient effect
 
-            // TODO: Activate this and change wind algorithm
-            // v.normal = float3(0, 1, 0); // Set the normal to the up direction (0, 1, 0
-
             // Calculate the wind effect
             float windFactor = sin(_Time.y * _WindSpeed + dot(worldPos.xy, float2(1, 0))) * _WindStrength *
                 heightFactor;

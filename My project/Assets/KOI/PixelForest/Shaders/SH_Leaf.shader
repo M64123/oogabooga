@@ -54,13 +54,13 @@ Shader "KOI/Leaf"
             f = f * f * (3.0 - 2.0 * f);
 
             float n = dot(i, float3(1.0, 57.0, 113.0));
-            return lerp(lerp(lerp( frac(sin(n + dot(float3(0.0, 0.0, 0.0), float3(1.0, 57.0, 113.0))) * 43758.5453), 
+            return lerp(lerp(lerp( frac(sin(n + dot(float3(0.0, 0.0, 0.0), float3(1.0, 57.0, 113.0))) * 43758.5453),
                                     frac(sin(n + dot(float3(1.0, 0.0, 0.0), float3(1.0, 57.0, 113.0))) * 43758.5453), f.x),
-                                lerp( frac(sin(n + dot(float3(0.0, 1.0, 0.0), float3(1.0, 57.0, 113.0))) * 43758.5453), 
+                                lerp( frac(sin(n + dot(float3(0.0, 1.0, 0.0), float3(1.0, 57.0, 113.0))) * 43758.5453),
                                     frac(sin(n + dot(float3(1.0, 1.0, 0.0), float3(1.0, 57.0, 113.0))) * 43758.5453), f.x), f.y),
-                            lerp(lerp( frac(sin(n + dot(float3(0.0, 0.0, 1.0), float3(1.0, 57.0, 113.0))) * 43758.5453), 
+                            lerp(lerp( frac(sin(n + dot(float3(0.0, 0.0, 1.0), float3(1.0, 57.0, 113.0))) * 43758.5453),
                                     frac(sin(n + dot(float3(1.0, 0.0, 1.0), float3(1.0, 57.0, 113.0))) * 43758.5453), f.x),
-                                lerp( frac(sin(n + dot(float3(0.0, 1.0, 1.0), float3(1.0, 57.0, 113.0))) * 43758.5453), 
+                                lerp( frac(sin(n + dot(float3(0.0, 1.0, 1.0), float3(1.0, 57.0, 113.0))) * 43758.5453),
                                     frac(sin(n + dot(float3(1.0, 1.0, 1.0), float3(1.0, 57.0, 113.0))) * 43758.5453), f.x), f.y), f.z);
         }
 
