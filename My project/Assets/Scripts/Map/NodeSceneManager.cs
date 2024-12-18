@@ -22,7 +22,7 @@ public class NodeSceneManager : MonoBehaviour
     public string boardSceneName = "Tablero";
 
     private Button buttonLoadDinoShowcase; // Botón para cargar DinoShowcase
-    private Button buttonLoadBoardScene;  // Botón para cargar Tablero
+    private Button buttonLoadBoardScene;   // Botón para cargar Tablero
 
     public static NodeSceneManager Instance;
 
@@ -143,5 +143,18 @@ public class NodeSceneManager : MonoBehaviour
         }
         Debug.LogWarning($"No se encontró una entrada para el tipo de nodo {nodeType}.");
         return null;
+    }
+
+    // Nuevo método para cargar escena por nombre
+    public void LoadSceneByName(string sceneName)
+    {
+        if (!string.IsNullOrEmpty(sceneName))
+        {
+            SceneManager.LoadScene(sceneName);
+        }
+        else
+        {
+            Debug.LogWarning("El nombre de la escena está vacío o no asignado.");
+        }
     }
 }

@@ -5,14 +5,14 @@ public class CamaraControllerGacha : MonoBehaviour
 {
     [Header("Configuración de Interacción con el Huevo")]
     public Transform eggTransform;
-    public float shakeIntensity = 0.1f;     // Intensidad del temblor
-    public float shakeDuration = 0.2f;      // Duración del temblor
-    public float moveForwardAmount = 0.5f;  // Distancia hacia adelante al hacer clic en el huevo
+    public float shakeIntensity = 0.1f;
+    public float shakeDuration = 0.2f;
+    public float moveForwardAmount = 0.5f;
 
     [Header("Configuración de Seguimiento del Cubo")]
     public Vector3 cubeFollowOffset = new Vector3(0f, 2f, -5f);
-    public float followSmoothTime = 0.5f; // Tiempo de suavizado para SmoothDamp
-    public float lookAtSmoothTime = 0.2f; // Tiempo de suavizado para rotación
+    public float followSmoothTime = 0.5f;
+    public float lookAtSmoothTime = 0.2f;
 
     private Vector3 originalPosition;
     private Quaternion originalRotation;
@@ -20,18 +20,129 @@ public class CamaraControllerGacha : MonoBehaviour
     private Transform cubeTransform;
 
     private Vector3 currentVelocity = Vector3.zero;
-    private Vector3 currentAngularVelocity = Vector3.zero;
 
     private bool isShaking = false;
 
+    [Header("Countdown Zoom Settings (Antes de QTE)")]
+    public BeatManager beatManager; // Asignar
+    public EggBehaviour eggBehaviour; // Asignar
+    [Tooltip("Número de acercamientos antes de iniciar QTE")]
+    public int countdownSteps = 3;
+    [Tooltip("Beats entre cada mini-zoom.")]
+    public int beatsPerCountdownStep = 1;
+    [Tooltip("Incremento de zoom en cada paso de countdown")]
+    public float countdownZoomIncrement = 0.5f;
+    [Tooltip("Duración del zoom+shake para cada acercamiento")]
+    public float countdownZoomDuration = 0.2f;
+    [Tooltip("Magnitud del camera shake durante el zoom de countdown")]
+    public float countdownShakeMagnitude = 0.2f;
+
+    private int currentCountdownStep = 0;
+    private int beatsSinceLastZoom = 0;
+    private bool isCountdownZooming = false;
+
+    [Header("QTE Success Feedback")]
+    public float qteSuccessShakeDuration = 0.2f;
+    public float qteSuccessShakeMagnitude = 0.1f;
+
     void Start()
     {
-        // Guardar la posición y rotación original de la cámara
         originalPosition = transform.position;
         originalRotation = transform.rotation;
+
+        // Suscribirse a onBeat para los zooms
+        if (beatManager != null)
+        {
+            beatManager.onBeat.AddListener(OnBeatReceivedForCountdown);
+        }
     }
 
-    // Llamado desde 'EggBehaviour' cuando el huevo es clicado
+    void LateUpdate()
+    {
+        if (isFollowingCube && cubeTransform != null)
+        {
+            Vector3 desiredPosition = cubeTransform.position + cubeFollowOffset;
+            transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref currentVelocity, followSmoothTime);
+
+            Vector3 direction = cubeTransform.position - transform.position;
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime / lookAtSmoothTime);
+        }
+    }
+
+    void OnBeatReceivedForCountdown()
+    {
+        // Hasta completar los 3 zooms no iniciamos QTE
+        if (currentCountdownStep < countdownSteps && !isCountdownZooming)
+        {
+            beatsSinceLastZoom++;
+            if (beatsSinceLastZoom >= beatsPerCountdownStep && eggTransform != null)
+            {
+                StartCoroutine(PerformCountdownZoomStep());
+            }
+        }
+    }
+
+    IEnumerator PerformCountdownZoomStep()
+    {
+        isCountdownZooming = true;
+        beatsSinceLastZoom = 0;
+        currentCountdownStep++;
+
+        Vector3 directionToEgg = (eggTransform.position - transform.position).normalized;
+        Vector3 startPos = transform.position;
+        Vector3 endPos = transform.position + directionToEgg * countdownZoomIncrement;
+
+        float elapsed = 0f;
+        while (elapsed < countdownZoomDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / countdownZoomDuration);
+
+            Vector3 basePos = Vector3.Lerp(startPos, endPos, t);
+            float x = Random.Range(-1f, 1f) * countdownShakeMagnitude;
+            float y = Random.Range(-1f, 1f) * countdownShakeMagnitude;
+
+            transform.position = new Vector3(basePos.x + x, basePos.y + y, basePos.z);
+
+            yield return null;
+        }
+
+        transform.position = endPos;
+
+        isCountdownZooming = false;
+
+        if (currentCountdownStep == countdownSteps)
+        {
+            // Ya completamos los 3 zoom/shakes, ahora sí permitir QTE
+            if (eggBehaviour != null)
+            {
+                eggBehaviour.AllowQTEStart();
+            }
+        }
+    }
+
+    public void QTESuccessFeedback()
+    {
+        StartCoroutine(QTESuccessFeedbackRoutine());
+    }
+
+    IEnumerator QTESuccessFeedbackRoutine()
+    {
+        float elapsed = 0f;
+        Vector3 originalPos = transform.position;
+        while (elapsed < qteSuccessShakeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float x = Random.Range(-1f, 1f) * qteSuccessShakeMagnitude;
+            float y = Random.Range(-1f, 1f) * qteSuccessShakeMagnitude;
+            transform.position = new Vector3(originalPos.x + x, originalPos.y + y, originalPos.z);
+            yield return null;
+        }
+
+        transform.position = originalPos;
+    }
+
     public void OnEggClicked()
     {
         if (!isShaking)
@@ -40,7 +151,6 @@ public class CamaraControllerGacha : MonoBehaviour
         }
     }
 
-    // Llamado desde 'EggBehaviour' cuando el cubo es lanzado
     public void StartFollowingCube(Transform cube)
     {
         cubeTransform = cube;
@@ -67,20 +177,15 @@ public class CamaraControllerGacha : MonoBehaviour
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / shakeDuration;
 
-            // Mover la cámara hacia adelante
             transform.position = Vector3.Lerp(startPosition, targetPosition, t);
 
-            // Aplicar un pequeño temblor
             Vector3 shakeOffset = Random.insideUnitSphere * shakeIntensity * (1f - t);
             transform.position += shakeOffset;
 
             yield return null;
         }
 
-        // Asegurarse de que la cámara esté en la posición final correcta
         transform.position = targetPosition;
-
-        // Actualizar la posición original para futuros movimientos
         originalPosition = transform.position;
 
         isShaking = false;
@@ -88,7 +193,7 @@ public class CamaraControllerGacha : MonoBehaviour
 
     IEnumerator RestoreCameraPosition()
     {
-        float duration = 1f; // Duración de la transición de regreso
+        float duration = 1f;
         float elapsedTime = 0f;
 
         Vector3 startPosition = transform.position;
@@ -105,23 +210,7 @@ public class CamaraControllerGacha : MonoBehaviour
             yield return null;
         }
 
-        // Asegurar la posición y rotación final
         transform.position = originalPosition;
         transform.rotation = originalRotation;
-    }
-
-    void LateUpdate()
-    {
-        if (isFollowingCube && cubeTransform != null)
-        {
-            // Seguir al cubo con un offset y transición suave usando SmoothDamp
-            Vector3 desiredPosition = cubeTransform.position + cubeFollowOffset;
-            transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref currentVelocity, followSmoothTime);
-
-            // Rotación suave hacia el cubo
-            Vector3 direction = cubeTransform.position - transform.position;
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime / lookAtSmoothTime);
-        }
     }
 }

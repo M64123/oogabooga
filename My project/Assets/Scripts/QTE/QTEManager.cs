@@ -9,71 +9,55 @@ public class QTEManager : MonoBehaviour
     public static QTEManager Instance { get; private set; }
 
     [Header("QTE Settings")]
-    public KeyCode qteKey = KeyCode.Space; // La tecla que el jugador debe presionar
-    public GameObject qteIndicatorLeftPrefab; // Prefab del indicador izquierdo
-    public GameObject qteIndicatorRightPrefab; // Prefab del indicador derecho
-    public Transform qteBarTransform; // Transform de la barra QTE
+    public KeyCode qteKey = KeyCode.Space;
+    public GameObject qteIndicatorLeftPrefab;
+    public GameObject qteIndicatorRightPrefab;
+    public Transform qteBarTransform;
 
     [Header("QTE Events")]
-    public UnityEvent onQTESuccess; // Evento que se dispara en éxito
-    public UnityEvent onQTEFail;    // Evento que se dispara en fallo
+    public UnityEvent onQTESuccess;
+    public UnityEvent onQTEFail;
 
     [Header("Audio Feedback")]
     public AudioClip successClip;
     public AudioClip failClip;
     private AudioSource audioSource;
 
-    private string currentSceneName;
-
-    private bool isQTEActive = true; // Activado por defecto
-    private float beatCounter = 0f; // Contador de beats acumulados
+    public bool isQTEActive = false; // Controlado externamente (por EggBehaviour)
 
     [Header("QTE Detection Settings")]
     [Range(10f, 100f)]
-    [Tooltip("Distancia máxima permitida desde el centro para considerar un QTE exitoso.")]
-    public float successThreshold = 50f; // Valor por defecto aumentado para facilitar el éxito
+    public float successThreshold = 50f;
 
     [Header("QTE Center")]
-    public RectTransform qteCenterRectTransform; // Asigna el RectTransform del QTECenter desde el Inspector
+    public RectTransform qteCenterRectTransform;
 
-    private bool isQTEInProgress = false; // Variable para evitar múltiples QTEs simultáneos
-    private bool wasLastQTESuccessful = false; // Flag para saber si el último QTE fue exitoso
+    private bool isQTEInProgress = false;
+    private bool wasLastQTESuccessful = false;
+    private float beatCounter = 0f; // Para contar beats acumulados
 
     void Awake()
     {
-        // Implementación del Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(this.gameObject);
             return;
         }
         Instance = this;
-        
     }
 
     void Start()
     {
-        currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-        CheckSceneActivation();
-
-        // Inicializar AudioSource para feedback auditivo
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
         }
 
-        // Verificar que qteCenterRectTransform esté asignado
         if (qteCenterRectTransform == null)
         {
             Debug.LogError("QTECenter RectTransform no está asignado en el Inspector.");
         }
-    }
-
-    void CheckSceneActivation()
-    {
-        // Puedes implementar lógica adicional para activar/desactivar QTEs basados en la escena
-        isQTEActive = true; // Por simplicidad, siempre activo. Ajusta según tus necesidades.
     }
 
     public void HandleBeat()
@@ -81,16 +65,19 @@ public class QTEManager : MonoBehaviour
         if (!isQTEActive)
             return;
 
+        // Sumar un beat al contador
         beatCounter += 1f;
 
+        // Comprobar si algún trigger debe activarse
         foreach (QTETrigger trigger in BeatManager.Instance.qteTriggers)
         {
             if (beatCounter >= trigger.beatsAfterLastTrigger)
             {
-                if (!isQTEInProgress) // Evitar múltiples QTEs simultáneos
+                if (!isQTEInProgress)
                 {
                     StartCoroutine(ActivateQTE(trigger));
                     trigger.onQTEActivated.Invoke();
+                    // Restablecer el contador restando el valor del trigger
                     beatCounter -= trigger.beatsAfterLastTrigger;
                 }
             }
@@ -128,7 +115,8 @@ public class QTEManager : MonoBehaviour
 
         if (qteCenterRectTransform == null)
         {
-            Debug.LogError("QTECenter RectTransform no está asignado. Abortando QTE.");
+            Debug.LogError("QTECenter RectTransform no asignado. Abortando QTE.");
+            isQTEInProgress = false;
             yield break;
         }
 
@@ -223,7 +211,7 @@ public class QTEManager : MonoBehaviour
             rightNear = distanceRight <= successThreshold;
         }
 
-        wasLastQTESuccessful = leftNear && rightNear;
+        wasLastQTESuccessful = (indicatorLeft == null || leftNear) && (indicatorRight == null || rightNear);
         return wasLastQTESuccessful;
     }
 

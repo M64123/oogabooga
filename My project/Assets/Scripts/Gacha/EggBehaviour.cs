@@ -1,5 +1,3 @@
-// EggBehaviour.cs
-
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
@@ -9,7 +7,6 @@ using UnityEngine.SceneManagement;
 public class EggBehaviour : MonoBehaviour
 {
     [Header("Egg Models")]
-    // 0=Azul, 1=Morado, 2=Rojo, 3=Dorado
     public List<GameObject> eggStages;
 
     [Header("Egg Animation")]
@@ -40,13 +37,9 @@ public class EggBehaviour : MonoBehaviour
     public List<Sprite> shinyRareDinos;
 
     [Header("Dinosaur IDs")]
-    [Tooltip("IDs correspondientes a los commonDinos, en el mismo orden.")]
     public List<string> commonDinoIDs;
-    [Tooltip("IDs correspondientes a los rareDinos, en el mismo orden.")]
     public List<string> rareDinoIDs;
-    [Tooltip("IDs correspondientes a los shinyCommonDinos, en el mismo orden.")]
     public List<string> shinyCommonDinoIDs;
-    [Tooltip("IDs correspondientes a los shinyRareDinos, en el mismo orden.")]
     public List<string> shinyRareDinoIDs;
 
     [Header("Timing Settings")]
@@ -58,7 +51,6 @@ public class EggBehaviour : MonoBehaviour
     public int maxQTEs = 4; // 4 QTEs totales
 
     [Header("QTE Canvas Settings")]
-    [Tooltip("CanvasGroup del QTECanvas para hacer fade out.")]
     public CanvasGroup qteCanvasGroup;
 
     private int successfulQTEs = 0;
@@ -76,7 +68,7 @@ public class EggBehaviour : MonoBehaviour
 
     private CamaraControllerGacha camaraController;
 
-    // Lista de nombres tribales (100 nombres)
+    // Nombres tribales
     private static string[] tribalNames = new string[100]
     {
         "Amani","Zahir","Leilani","Kian","Naya","Kai","Zara","Idris","Amara","Malik",
@@ -90,6 +82,9 @@ public class EggBehaviour : MonoBehaviour
         "Elara","Haris","Layla","Iman","Zayn","Amirah","Azaan","Farah","Ishaan","Samara",
         "Kahlil","Amari","Zaira","Kamari","Aziza","Hamza","Sade","Nabil","Alaya","Suriya"
     };
+
+    // Flag para permitir el inicio de QTE sólo tras los 3 zooms
+    private bool qteStartAllowed = false;
 
     void Start()
     {
@@ -114,6 +109,8 @@ public class EggBehaviour : MonoBehaviour
         {
             qteManager.onQTESuccess.AddListener(OnQTESuccess);
             qteManager.onQTEFail.AddListener(OnQTEFail);
+            // Desactivar QTE hasta que se permitan tras los 3 zooms
+            qteManager.isQTEActive = false;
         }
         else
         {
@@ -130,9 +127,8 @@ public class EggBehaviour : MonoBehaviour
             Debug.LogWarning("qteCanvasGroup no asignado en EggBehaviour.");
         }
 
-        // Asegúrate de que las listas de sprites e IDs estén asignadas en el inspector
-        // commonDinos con commonDinoIDs, rareDinos con rareDinoIDs, etc.
-        // Cada lista de IDs debe tener la misma cantidad de elementos que su lista de sprites correspondiente.
+        // Esperamos a que la camara haga 3 zoom in. La lógica de zoom está en CamaraControllerGacha.
+        // Cuando la cámara termine, llamará a AllowQTEStart().
     }
 
     void OnDestroy()
@@ -144,6 +140,16 @@ public class EggBehaviour : MonoBehaviour
         }
     }
 
+    // Llamado por la cámara cuando acaba los 3 zoom+shake
+    public void AllowQTEStart()
+    {
+        qteStartAllowed = true;
+        if (qteManager != null)
+        {
+            qteManager.isQTEActive = true;
+        }
+    }
+
     public void OnQTESuccess()
     {
         if (isAnimating || isHatching) return;
@@ -151,6 +157,12 @@ public class EggBehaviour : MonoBehaviour
         successfulQTEs++;
         currentQTEAttempt++;
         Debug.Log($"QTE Exitoso. Total exitosos: {successfulQTEs}");
+
+        // Camera shake en cada QTE éxito
+        if (camaraController != null)
+        {
+            camaraController.QTESuccessFeedback();
+        }
 
         if (currentQTEAttempt >= maxQTEs)
         {
@@ -313,10 +325,8 @@ public class EggBehaviour : MonoBehaviour
 
         GetRandomDino(eggLevel, out obtainedDinoSprite, out obtainedDinoInfo, out obtainedDinoRarity, out obtainedDinoID);
 
-        // Generar nombre para el dino
         obtainedDinoName = GetRandomTribalName();
 
-        // Guardar el dino en el GameManager
         GameManager.Instance.AddDinosaur(obtainedDinoID, obtainedDinoName, obtainedDinoRarity);
 
         LaunchCube();
@@ -331,7 +341,6 @@ public class EggBehaviour : MonoBehaviour
 
         float randomValue = Random.Range(0f, 100f);
 
-        // Función auxiliar para obtener dino e ID de una lista y su lista de IDs
         (string chosenID, Sprite chosenSprite) GetFromList(List<string> idList, List<Sprite> spriteList)
         {
             int idx = Random.Range(0, spriteList.Count);
@@ -340,120 +349,90 @@ public class EggBehaviour : MonoBehaviour
 
         switch (eggLevel)
         {
-            case 0: // Azul
-                // 70% común, 30% raro
+            case 0:
                 if (randomValue < 70f)
                 {
                     var result = GetFromList(commonDinoIDs, commonDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "Dinosaurio Común";
-                    rarity = Rarity.Common;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Común"; rarity = Rarity.Common;
                 }
                 else
                 {
                     var result = GetFromList(rareDinoIDs, rareDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "Dinosaurio Raro";
-                    rarity = Rarity.Rare;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Raro"; rarity = Rarity.Rare;
                 }
                 break;
-            case 1: // Morado
-                // 57% común, 40% raro, 3% shiny común
+            case 1:
                 if (randomValue < 57f)
                 {
                     var result = GetFromList(commonDinoIDs, commonDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "Dinosaurio Común";
-                    rarity = Rarity.Common;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Común"; rarity = Rarity.Common;
                 }
                 else if (randomValue < 97f)
                 {
                     var result = GetFromList(rareDinoIDs, rareDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "Dinosaurio Raro";
-                    rarity = Rarity.Rare;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Raro"; rarity = Rarity.Rare;
                 }
                 else
                 {
                     var result = GetFromList(shinyCommonDinoIDs, shinyCommonDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "¡Dinosaurio Shiny Común!";
-                    rarity = Rarity.ShinyCommon;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "¡Dinosaurio Shiny Común!"; rarity = Rarity.ShinyCommon;
                 }
                 break;
-            case 2: // Rojo
-                // 45% común, 45% raro, 7% shiny común, 3% shiny raro
+            case 2:
                 if (randomValue < 45f)
                 {
                     var result = GetFromList(commonDinoIDs, commonDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "Dinosaurio Común";
-                    rarity = Rarity.Common;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Común"; rarity = Rarity.Common;
                 }
                 else if (randomValue < 90f)
                 {
                     var result = GetFromList(rareDinoIDs, rareDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "Dinosaurio Raro";
-                    rarity = Rarity.Rare;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Raro"; rarity = Rarity.Rare;
                 }
                 else if (randomValue < 97f)
                 {
                     var result = GetFromList(shinyCommonDinoIDs, shinyCommonDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "¡Dinosaurio Shiny Común!";
-                    rarity = Rarity.ShinyCommon;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "¡Dinosaurio Shiny Común!"; rarity = Rarity.ShinyCommon;
                 }
                 else
                 {
                     var result = GetFromList(shinyRareDinoIDs, shinyRareDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "¡Dinosaurio Shiny Raro!";
-                    rarity = Rarity.ShinyRare;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "¡Dinosaurio Shiny Raro!"; rarity = Rarity.ShinyRare;
                 }
                 break;
-            case 3: // Dorado
-                // 35% común, 45% raro, 12% shiny común, 8% shiny raro
+            case 3:
                 if (randomValue < 35f)
                 {
                     var result = GetFromList(commonDinoIDs, commonDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "Dinosaurio Común";
-                    rarity = Rarity.Common;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Común"; rarity = Rarity.Common;
                 }
                 else if (randomValue < 80f)
                 {
                     var result = GetFromList(rareDinoIDs, rareDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "Dinosaurio Raro";
-                    rarity = Rarity.Rare;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Raro"; rarity = Rarity.Rare;
                 }
                 else if (randomValue < 92f)
                 {
                     var result = GetFromList(shinyCommonDinoIDs, shinyCommonDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "¡Dinosaurio Shiny Común!";
-                    rarity = Rarity.ShinyCommon;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "¡Dinosaurio Shiny Común!"; rarity = Rarity.ShinyCommon;
                 }
                 else
                 {
                     var result = GetFromList(shinyRareDinoIDs, shinyRareDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "¡Dinosaurio Shiny Raro!";
-                    rarity = Rarity.ShinyRare;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "¡Dinosaurio Shiny Raro!"; rarity = Rarity.ShinyRare;
                 }
                 break;
             default:
@@ -461,10 +440,8 @@ public class EggBehaviour : MonoBehaviour
                 if (commonDinos.Count > 0 && commonDinoIDs.Count == commonDinos.Count)
                 {
                     var result = GetFromList(commonDinoIDs, commonDinos);
-                    dinoID = result.chosenID;
-                    dinoSprite = result.chosenSprite;
-                    dinoInfo = "Dinosaurio Común";
-                    rarity = Rarity.Common;
+                    dinoID = result.chosenID; dinoSprite = result.chosenSprite;
+                    dinoInfo = "Dinosaurio Común"; rarity = Rarity.Common;
                 }
                 else
                 {
@@ -476,7 +453,6 @@ public class EggBehaviour : MonoBehaviour
         if (dinoSprite == null)
         {
             Debug.LogError("No se ha obtenido un sprite de dinosaurio válido.");
-            // Asignar uno común por defecto si no se pudo obtener
             if (commonDinos.Count > 0 && commonDinoIDs.Count == commonDinos.Count)
             {
                 dinoSprite = commonDinos[0];

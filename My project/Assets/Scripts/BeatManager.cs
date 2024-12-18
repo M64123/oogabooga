@@ -51,7 +51,6 @@ public class BeatManager : MonoBehaviour
             return;
         }
         Instance = this;
-        
     }
 
     private void Start()

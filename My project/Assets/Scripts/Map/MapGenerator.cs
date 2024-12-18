@@ -3,17 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 
-/// <summary>
-/// Esta clase genera un mapa de nodos siguiendo ciertas reglas.
-/// Se han aplicado mejoras para mayor modularidad, configurabilidad y mantenimiento:
-/// - Exposición de "nodesPerLevel", "bossLevels" y "gachaLevels" en el inspector para mayor flexibilidad.
-/// - Reducción del código hardcodeado, facilitando la edición de la estructura desde el inspector.
-/// - Reorganización de partes del código en métodos privados para mayor claridad.
-/// - Eliminación de tipos de nodos no utilizados (Revivir, Mana_Tamaño, GAMBLING) y adaptación a los nuevos requerimientos:
-///   Solo se usan: Inicio, GACHA, Boss, Combate (malo), CoinFlip (bueno), Random (neutral).
-/// - Separación más clara de la lógica de asignación de tipos de nodos.
-/// Manteniendo compatibilidad con el GameManager y la lógica actual.
-/// </summary>
+
 public class MapGenerator : MonoBehaviour
 {
     [System.Serializable]

@@ -1,4 +1,3 @@
-// CoinFlip.cs
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
@@ -10,11 +9,17 @@ public class CoinFlip : MonoBehaviour
     private bool thrown = false;
 
     [Header("Force Settings")]
-    public float upwardForce = 5f; // Fuerza inicial de 5
+    public float upwardForce = 5f; // Fuerza inicial configurable
 
     [Header("Result")]
     public string coinSide; // "Cara" o "Cruz"
     public Text resultText; // Asigna el elemento de texto en el inspector (opcional)
+
+    [Header("Scene Settings")]
+    [Tooltip("Nombre de la escena a cargar si el resultado es Cara")]
+    public string caraSceneName;
+    [Tooltip("Nombre de la escena a cargar si el resultado es Cruz")]
+    public string cruzSceneName;
 
     public bool IsThrown
     {
@@ -51,11 +56,11 @@ public class CoinFlip : MonoBehaviour
             // Aplicar una rotación inicial aleatoria
             transform.rotation = Random.rotation;
 
-            // Aplicar fuerza hacia arriba con la fuerza acumulada
+            // Aplicar fuerza hacia arriba
             rb.AddForce(Vector3.up * upwardForce, ForceMode.Impulse);
 
             // Aplicar torque aleatorio
-            Vector3 randomTorque = Random.insideUnitSphere * upwardForce * 100f; // Ajusta el multiplicador según sea necesario
+            Vector3 randomTorque = Random.insideUnitSphere * upwardForce * 100f;
             rb.AddTorque(randomTorque, ForceMode.Impulse);
 
             if (resultText != null)
@@ -120,5 +125,27 @@ public class CoinFlip : MonoBehaviour
         }
 
         Debug.Log("Resultado: " + coinSide);
+
+        // Cargar la escena correspondiente usando el NodeSceneManager, si está presente
+        NodeSceneManager nsm = NodeSceneManager.Instance;
+        if (nsm != null)
+        {
+            if (coinSide == "Cara" && !string.IsNullOrEmpty(caraSceneName))
+            {
+                nsm.LoadSceneByName(caraSceneName);
+            }
+            else if (coinSide == "Cruz" && !string.IsNullOrEmpty(cruzSceneName))
+            {
+                nsm.LoadSceneByName(cruzSceneName);
+            }
+            else
+            {
+                Debug.LogWarning("No se asignaron nombres de escena para el resultado " + coinSide);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No se encontró un NodeSceneManager en la escena. Asigna uno o revisa su instancia.");
+        }
     }
 }

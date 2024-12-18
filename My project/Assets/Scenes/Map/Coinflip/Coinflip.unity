@@ -724,6 +724,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   coinTransform: {fileID: 2133938687}
+  beatManager: {fileID: 1823555041}
+  qteManager: {fileID: 471650806}
   initialPosition: {x: 0, y: 7, z: -8}
   finalPosition: {x: 0, y: 10, z: 0}
   initialEulerAngles: {x: 30, y: 0, z: 0}
@@ -731,6 +733,13 @@ MonoBehaviour:
   movementDuration: 2
   followOffsetY: 4
   curveHeight: -5
+  useCountdownZoom: 1
+  countdownSteps: 3
+  countdownZoomIncrement: 0.5
+  beatsPerCountdownStep: 1
+  qteSuccessShakeDuration: 0.2
+  qteSuccessShakeMagnitude: 0.1
+  qteSuccessZoomIncrement: 0.2
 --- !u!4 &415964713 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7626558915870486504, guid: 10ff271e34a7bc8428a43e51011767db, type: 3}
@@ -932,6 +941,9 @@ MonoBehaviour:
   coinFlip: {fileID: 2133938684}
   qteCanvasGroup: {fileID: 1263349638}
   beatManager: {fileID: 1823555041}
+  coinFlipCameraController: {fileID: 369648255}
+  maxQTEs: 6
+  delayQTEStart: 1
 --- !u!4 &471650807
 Transform:
   m_ObjectHideFlags: 0
@@ -3327,6 +3339,8 @@ MonoBehaviour:
   upwardForce: 5
   coinSide: 
   resultText: {fileID: 0}
+  caraSceneName: Gacha
+  cruzSceneName: New Scene
 --- !u!4 &2133938687 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e71c10cce23d0874b8fc621e8a856aec, type: 3}
