@@ -6,10 +6,12 @@ public class QTEIndicator : MonoBehaviour
 {
     private RectTransform rectTransform;
     private RectTransform referenceImage;
-    private float activeZoneWidth;
+    private float okZoneWidth;
+    private float goodZoneWidth;
+    private float excellentZoneWidth;
     private bool isLeftSide;
 
-    public void Setup(KeyCode key, float activeWidth, RectTransform spawnPoint, RectTransform target, bool leftSide)
+    public void Setup(KeyCode key, float okWidth, float goodWidth, float excellentWidth, RectTransform spawnPoint, RectTransform target, bool leftSide)
     {
         rectTransform = GetComponent<RectTransform>();
         if (rectTransform == null)
@@ -21,7 +23,9 @@ public class QTEIndicator : MonoBehaviour
         rectTransform.anchoredPosition = spawnPoint.anchoredPosition;
         isLeftSide = leftSide;
         referenceImage = target;
-        activeZoneWidth = activeWidth;
+        okZoneWidth = okWidth;
+        goodZoneWidth = goodWidth;
+        excellentZoneWidth = excellentWidth;
 
         if (referenceImage == null)
         {
@@ -67,7 +71,7 @@ public class QTEIndicator : MonoBehaviour
         }
 
         float distance = Mathf.Abs(rectTransform.anchoredPosition.x - referenceImage.anchoredPosition.x);
-        return distance < 1f; // Un margen pequeño para verificar que alcanzó el centro
+        return distance < .4f; // Un margen pequeño para verificar que alcanzó el centro
     }
 
     public bool IsInActiveZone()
@@ -79,6 +83,50 @@ public class QTEIndicator : MonoBehaviour
         }
 
         float distance = Mathf.Abs(rectTransform.anchoredPosition.x - referenceImage.anchoredPosition.x);
-        return distance <= activeZoneWidth / 2f;
+        return distance <= okZoneWidth / 2f; // Compatibilidad con lógica previa
+    }
+
+    public string GetAccuracyZone()
+    {
+        if (referenceImage == null)
+        {
+            Debug.LogError("referenceImage es null en GetAccuracyZone.");
+            return null;
+        }
+
+        float distance = Mathf.Abs(rectTransform.anchoredPosition.x - referenceImage.anchoredPosition.x);
+
+        if (distance <= excellentZoneWidth / 2f)
+        {
+            return "EXCELLENT";
+        }
+        else if (distance <= goodZoneWidth / 2f)
+        {
+            return "GOOD";
+        }
+        else if (distance <= okZoneWidth / 2f)
+        {
+            return "OK";
+        }
+        return "FAIL";
+    }
+
+    void OnDrawGizmos()
+    {
+        if (referenceImage == null) return;
+
+        Vector3 center = referenceImage.position;
+
+        // OK Zone
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(center, new Vector3(okZoneWidth, 20, 0));
+
+        // GOOD Zone
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(center, new Vector3(goodZoneWidth, 20, 0));
+
+        // EXCELLENT Zone
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(center, new Vector3(excellentZoneWidth, 20, 0));
     }
 }

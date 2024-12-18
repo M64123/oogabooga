@@ -15,7 +15,13 @@ public class QTEManagerCombat : MonoBehaviour
     public RectTransform referenceImage;
     public RectTransform leftSpawnPoint;
     public RectTransform rightSpawnPoint;
-    public float activeZoneWidth = 100f;
+    public float okZoneWidth = 100f;
+    public float goodZoneWidth = 75f;
+    public float excellentZoneWidth = 50f;
+
+    public GameObject okPrefab;
+    public GameObject goodPrefab;
+    public GameObject excellentPrefab;
 
     [Header("QTE Appearance Probabilities")]
     [Range(0, 100)] public int doubleQTEProbability = 10; // 10% para QTE dobles
@@ -73,11 +79,56 @@ public class QTEManagerCombat : MonoBehaviour
     {
         foreach (var pair in activeQTEPairs)
         {
-            if (pair.Left.IsInActiveZone() && pair.Right.IsInActiveZone())
+            string leftZone = pair.Left.GetAccuracyZone();
+            string rightZone = pair.Right.GetAccuracyZone();
+
+            if (leftZone != "FAIL" && rightZone != "FAIL")
             {
+                string resultZone = GetHighestAccuracy(leftZone, rightZone);
+                SpawnAccuracyPrefab(resultZone);
                 OnQTESuccess(pair);
                 return;
             }
+        }
+    }
+
+    string GetHighestAccuracy(string leftZone, string rightZone)
+    {
+        if (leftZone == "EXCELLENT" || rightZone == "EXCELLENT")
+            return "EXCELLENT";
+        if (leftZone == "GOOD" || rightZone == "GOOD")
+            return "GOOD";
+        return "OK";
+    }
+
+    void SpawnAccuracyPrefab(string zone)
+    {
+        GameObject prefabToSpawn = null;
+
+        switch (zone)
+        {
+            case "EXCELLENT":
+                prefabToSpawn = excellentPrefab;
+                break;
+            case "GOOD":
+                prefabToSpawn = goodPrefab;
+                break;
+            case "OK":
+                prefabToSpawn = okPrefab;
+                break;
+        }
+
+        if (prefabToSpawn != null)
+        {
+            GameObject instance = Instantiate(prefabToSpawn);
+
+            // Asegúrate de que el prefab está en el canvas
+            instance.transform.SetParent(referenceImage.root, false);
+
+            // Ajusta la posición local relativa al canvas
+            instance.transform.localPosition = referenceImage.localPosition;
+
+            Debug.Log($"Prefab {zone} instanciado en posición {referenceImage.localPosition}");
         }
     }
 
@@ -117,8 +168,8 @@ public class QTEManagerCombat : MonoBehaviour
 
             if (leftQTE != null && rightQTE != null)
             {
-                leftQTE.Setup(qteKey, activeZoneWidth, leftSpawnPoint, referenceImage, true);
-                rightQTE.Setup(qteKey, activeZoneWidth, rightSpawnPoint, referenceImage, false);
+                leftQTE.Setup(qteKey, okZoneWidth, goodZoneWidth, excellentZoneWidth, leftSpawnPoint, referenceImage, true);
+                rightQTE.Setup(qteKey, okZoneWidth, goodZoneWidth, excellentZoneWidth, rightSpawnPoint, referenceImage, false);
 
                 activeQTEPairs.Add(new Pair<QTEIndicator>(leftQTE, rightQTE));
             }
@@ -193,18 +244,18 @@ public class QTEManagerCombat : MonoBehaviour
     }
 
     void NotifyActiveDino()
-{
-    DinoCombat activeDino = Combatgrid.Instance.GetFirstSlotDino();
-    if (activeDino != null)
     {
-        activeDino.ExecuteAttack(); // Ejecuta el ataque
-        Debug.Log($"{activeDino.name} realizó un ataque tras acertar el QTE.");
+        DinoCombat activeDino = Combatgrid.Instance.GetFirstSlotDino();
+        if (activeDino != null)
+        {
+            activeDino.ExecuteAttack();
+            Debug.Log($"{activeDino.name} realizó un ataque tras acertar el QTE.");
+        }
+        else
+        {
+            Debug.LogWarning("No se encontró dinosaurio activo en el primer slot.");
+        }
     }
-    else
-    {
-        Debug.LogWarning("No se encontró dinosaurio activo en el primer slot.");
-    }
-}
 
     public class Pair<T>
     {
