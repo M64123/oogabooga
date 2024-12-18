@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dbb6e9597679be49a94efcb15bdbb39, type: 3}
   m_Name: IguanovaranusStats
   m_EditorClassIdentifier: 
-  vidaBase: 400
-  ataqueBase: 20
+  vidaBase: 80
+  ataqueBase: 10
   defensaBase: 10
   velocidadBase: 5
   attributes: []

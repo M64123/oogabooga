@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Parasauralania Shiny
   m_EditorClassIdentifier: 
   vidaBase: 100
-  ataqueBase: 20
+  ataqueBase: 5
   defensaBase: 10
   velocidadBase: 5
   attributes: []

@@ -108,7 +108,7 @@ MonoBehaviour:
   _class: {fileID: 0}
   spawnPointHability: {fileID: 0}
   statsBase: {fileID: 11400000, guid: f9d3c8256e9f18d438ff568fa8aa90c8, type: 2}
-  claseDino: {fileID: 11400000, guid: 5a37413f57acdfd4f99c098b8439c48b, type: 2}
+  claseDino: {fileID: 11400000, guid: 6039d69a62119314fbf39c35f0751b10, type: 2}
   idUnico: 
 --- !u!95 &5637995563342940349
 Animator:
