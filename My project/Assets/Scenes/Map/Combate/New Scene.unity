@@ -599,7 +599,7 @@ GameObject:
   - component: {fileID: 364131855}
   - component: {fileID: 364131854}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: DinoShowCase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -685,12 +685,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 364131852}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -16.49, y: -2.3, z: -9.66}
-  m_LocalScale: {x: 2.6904, y: 1, z: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.78926784, y: -0.15999985, z: -9.66}
+  m_LocalScale: {x: 0.14756401, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1409453631}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &399289730
 GameObject:
@@ -904,6 +904,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1409453631}
     m_Modifications:
+    - target: {fileID: -8189350997254662679, guid: 9407f6674cebede4e97f0bf8db1d00eb, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3066430044673071179, guid: 9407f6674cebede4e97f0bf8db1d00eb, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.0348671
@@ -1275,8 +1279,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15a2ad84a65ecc34e9a81e774bfd9a80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackDamage: 10
-  attackProbability: 0.05
+  attackDamage: 50
+  attackProbability: 0.1
   animator: {fileID: 765458400}
   vidaMaxima: 4000
 --- !u!1001 &954289531
@@ -2712,6 +2716,7 @@ Transform:
   m_LocalScale: {x: 18.232086, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 364131857}
   - {fileID: 765458398}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3713,5 +3718,4 @@ SceneRoots:
   - {fileID: 168393879}
   - {fileID: 2020832400}
   - {fileID: 1098804250}
-  - {fileID: 364131857}
   - {fileID: 627619881}

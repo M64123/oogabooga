@@ -3,17 +3,17 @@ using System.Collections;
 
 public class EnemyCombatController : MonoBehaviour
 {
-    public float attackDamage = 10f; // Daño por ataque
-    public float attackProbability = 0.7f; // Probabilidad de éxito del ataque
-    public Animator animator; // Referencia al Animator del enemigo
-    public float vidaMaxima = 100f; // Vida inicial del enemigo
-    private float vidaActual; // Vida actual del enemigo
-    private bool combatStarted = false; // Bandera para saber si el combate ha iniciado
-    private bool hasAttemptedAttack = false; // Bandera para evitar múltiples intentos por pulso
+    public float attackDamage = 10f;           // Daño por ataque
+    public float attackProbability = 0.7f;     // Probabilidad de éxito del ataque
+    public Animator animator;                  // Referencia al Animator del enemigo
+    public float vidaMaxima = 100f;            // Vida inicial del enemigo
+    private float vidaActual;                  // Vida actual del enemigo
+    private bool combatStarted = false;        // Bandera para saber si el combate ha iniciado
+    private bool hasAttemptedAttack = false;   // Bandera para evitar múltiples intentos por pulso
 
     void Start()
     {
-        vidaActual = vidaMaxima; // Inicializar la vida al iniciar
+        vidaActual = vidaMaxima; // Inicializar la vida
     }
 
     public void StartCombat()
@@ -38,15 +38,16 @@ public class EnemyCombatController : MonoBehaviour
     {
         if (!combatStarted || hasAttemptedAttack) return;
 
-        DinoCombat nearestDino = FindNearestDino();
-        if (nearestDino != null)
+        DinoCombat firstSlotDino = Combatgrid.Instance.GetFirstSlotDino();
+
+        if (firstSlotDino != null)
         {
-            hasAttemptedAttack = true; // Marcar que ya se intentó atacar en este pulso
-            AttemptAttack(nearestDino);
+            hasAttemptedAttack = true; // Marcar que ya se intentó atacar
+            AttemptAttack(firstSlotDino);
         }
         else
         {
-            Debug.LogWarning("No se encontraron dinosaurios aliados cercanos.");
+            Debug.LogWarning("No hay dinosaurio en el primer slot.");
         }
 
         // Reiniciar la bandera después de un breve intervalo
@@ -56,25 +57,6 @@ public class EnemyCombatController : MonoBehaviour
     private void ResetAttackFlag()
     {
         hasAttemptedAttack = false;
-    }
-
-    private DinoCombat FindNearestDino()
-    {
-        GameObject[] dinos = GameObject.FindGameObjectsWithTag("ally");
-        GameObject nearestDino = null;
-        float shortestDistance = float.MaxValue;
-
-        foreach (GameObject dino in dinos)
-        {
-            float distance = Vector3.Distance(transform.position, dino.transform.position);
-            if (distance < shortestDistance)
-            {
-                shortestDistance = distance;
-                nearestDino = dino;
-            }
-        }
-
-        return nearestDino != null ? nearestDino.GetComponent<DinoCombat>() : null;
     }
 
     private void AttemptAttack(DinoCombat target)
