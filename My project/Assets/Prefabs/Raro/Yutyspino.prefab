@@ -15,11 +15,10 @@ GameObject:
   - component: {fileID: 4815237708199700045}
   - component: {fileID: 7418335373601213228}
   - component: {fileID: 4284845594347888688}
-  - component: {fileID: 5749196869393669289}
   - component: {fileID: -5437598754586910971}
   m_Layer: 0
   m_Name: Yutyspino
-  m_TagString: Untagged
+  m_TagString: ally
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -196,26 +195,6 @@ MonoBehaviour:
   combatGrid: {fileID: 0}
   returnSpeed: 5
   maxParabolaHeight: 2
---- !u!114 &5749196869393669289
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4334216420295160574}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae77f7ff7f8c4a9418535b6e8f24fe85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iD: 0
-  name: 
-  level: 1
-  _class: {fileID: 0}
-  spawnPointHability: {fileID: 0}
-  statsBase: {fileID: 11400000, guid: 8dd332ea7b298384981851cb76a274d0, type: 2}
-  claseDino: {fileID: 11400000, guid: 5a37413f57acdfd4f99c098b8439c48b, type: 2}
-  idUnico: 
 --- !u!114 &-5437598754586910971
 MonoBehaviour:
   m_ObjectHideFlags: 0

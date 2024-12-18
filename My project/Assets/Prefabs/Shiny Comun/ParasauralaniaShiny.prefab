@@ -12,14 +12,13 @@ GameObject:
   - component: {fileID: 3867432495402402232}
   - component: {fileID: -4167717761886985730}
   - component: {fileID: 5637995563342940349}
-  - component: {fileID: 2592011706909291547}
   - component: {fileID: 253357306410189436}
   - component: {fileID: 6894226324336855570}
   - component: {fileID: 3765183899028483480}
   - component: {fileID: -3449992127325382970}
   m_Layer: 0
   m_Name: ParasauralaniaShiny
-  m_TagString: Untagged
+  m_TagString: ally
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -132,26 +131,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &2592011706909291547
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1806238593215662730}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae77f7ff7f8c4a9418535b6e8f24fe85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iD: 0
-  name: 
-  level: 1
-  _class: {fileID: 0}
-  spawnPointHability: {fileID: 0}
-  statsBase: {fileID: 11400000, guid: 78ba9ce00de580342b29cff69e2b11be, type: 2}
-  claseDino: {fileID: 11400000, guid: 6039d69a62119314fbf39c35f0751b10, type: 2}
-  idUnico: 
 --- !u!114 &253357306410189436
 MonoBehaviour:
   m_ObjectHideFlags: 0

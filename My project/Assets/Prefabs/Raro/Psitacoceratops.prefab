@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2291549385955702461}
   - component: {fileID: 3170817041107630428}
-  - component: {fileID: -2397094322849224232}
   - component: {fileID: 220792472150975794}
   - component: {fileID: 9039702137976475445}
   - component: {fileID: 8058024926250187378}
@@ -19,7 +18,7 @@ GameObject:
   - component: {fileID: -7026222859201675014}
   m_Layer: 0
   m_Name: Psitacoceratops
-  m_TagString: Untagged
+  m_TagString: ally
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -91,26 +90,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &-2397094322849224232
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1844590841213851647}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae77f7ff7f8c4a9418535b6e8f24fe85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iD: 5
-  name: Dilophovenator
-  level: 1
-  _class: {fileID: 0}
-  spawnPointHability: {fileID: 0}
-  statsBase: {fileID: 11400000, guid: 8dd332ea7b298384981851cb76a274d0, type: 2}
-  claseDino: {fileID: 11400000, guid: 6039d69a62119314fbf39c35f0751b10, type: 2}
-  idUnico: 
 --- !u!95 &220792472150975794
 Animator:
   serializedVersion: 5

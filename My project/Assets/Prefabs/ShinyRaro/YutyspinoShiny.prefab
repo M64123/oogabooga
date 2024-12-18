@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: -5764783788724969199}
   m_Layer: 0
   m_Name: YutyspinoShiny
-  m_TagString: Untagged
+  m_TagString: ally
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
