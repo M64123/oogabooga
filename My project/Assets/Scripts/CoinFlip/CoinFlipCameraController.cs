@@ -4,9 +4,9 @@ using System.Collections;
 public class CoinFlipCameraController : MonoBehaviour
 {
     [Header("References")]
-    public Transform coinTransform; // Asignar en el Inspector
-    public BeatManager beatManager; // Asignar el BeatManager en el Inspector
-    public CoinFlipQTEManager qteManager; // Asignar en el Inspector
+    public Transform coinTransform;
+    public BeatManager beatManager;
+    public CoinFlipQTEManager qteManager;
 
     [Header("Initial-Final Movement")]
     public Vector3 initialPosition;
@@ -24,15 +24,10 @@ public class CoinFlipCameraController : MonoBehaviour
     private CoinFlip coinFlip;
 
     [Header("Countdown Zoom Settings")]
-    [Tooltip("Número de acercamientos antes de iniciar QTE")]
     public int countdownSteps = 3;
-    [Tooltip("Incremento de zoom en cada paso de countdown")]
     public float countdownZoomIncrement = 0.5f;
-    [Tooltip("Beats entre cada mini-zoom. Ej: 1 significa un zoom por beat.")]
     public int beatsPerCountdownStep = 1;
-    [Tooltip("Duración del zoom+shake para cada acercamiento previo al QTE")]
     public float countdownZoomDuration = 0.2f;
-    [Tooltip("Magnitud del camera shake durante el zoom de countdown")]
     public float countdownShakeMagnitude = 0.2f;
 
     private int currentCountdownStep = 0;
@@ -40,18 +35,14 @@ public class CoinFlipCameraController : MonoBehaviour
     private bool isCountdownZooming = false;
 
     [Header("QTE Success Feedback")]
-    [Tooltip("Duración del screen shake tras un QTE exitoso")]
     public float qteSuccessShakeDuration = 0.2f;
-    [Tooltip("Magnitud del screen shake tras un QTE exitoso")]
     public float qteSuccessShakeMagnitude = 0.1f;
-    [Tooltip("Incremento de zoom tras un QTE exitoso")]
     public float qteSuccessZoomIncrement = 0.2f;
 
     void Start()
     {
         initialRotation = Quaternion.Euler(initialEulerAngles);
         finalRotation = Quaternion.Euler(finalEulerAngles);
-
         transform.position = initialPosition;
         transform.rotation = initialRotation;
 
@@ -97,12 +88,10 @@ public class CoinFlipCameraController : MonoBehaviour
     IEnumerator MoveCameraAlongCurve()
     {
         float elapsedTime = 0f;
-
         while (elapsedTime < movementDuration)
         {
             elapsedTime = Time.time - movementStartTime;
             float t = Mathf.Clamp01(elapsedTime / movementDuration);
-
             float smoothT = Mathf.SmoothStep(0f, 1f, t);
 
             Vector3 newPosition = CalculateCurvePosition(smoothT);
@@ -110,7 +99,6 @@ public class CoinFlipCameraController : MonoBehaviour
 
             transform.position = newPosition;
             transform.rotation = newRotation;
-
             yield return null;
         }
 
@@ -121,7 +109,6 @@ public class CoinFlipCameraController : MonoBehaviour
     Vector3 CalculateCurvePosition(float t)
     {
         Vector3 controlPoint = (initialPosition + finalPosition) / 2 + Vector3.up * curveHeight;
-
         Vector3 position = Mathf.Pow(1 - t, 2) * initialPosition
                          + 2 * (1 - t) * t * controlPoint
                          + Mathf.Pow(t, 2) * finalPosition;
@@ -152,14 +139,12 @@ public class CoinFlipCameraController : MonoBehaviour
         Vector3 endPos = transform.position + directionToCoin * countdownZoomIncrement;
 
         float elapsed = 0f;
-        // Durante el zoom, también aplicamos shake
         while (elapsed < countdownZoomDuration)
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / countdownZoomDuration);
-            // Interpolamos posición hacia el endPos
+
             Vector3 basePos = Vector3.Lerp(startPos, endPos, t);
-            // Añadimos shake agresivo
             float x = Random.Range(-1f, 1f) * countdownShakeMagnitude;
             float y = Random.Range(-1f, 1f) * countdownShakeMagnitude;
             transform.position = new Vector3(basePos.x + x, basePos.y + y, basePos.z);
@@ -167,14 +152,13 @@ public class CoinFlipCameraController : MonoBehaviour
             yield return null;
         }
 
-        // Tras terminar el zoom+shake, dejar la cámara exactamente en endPos
         transform.position = endPos;
 
         isCountdownZooming = false;
 
         if (currentCountdownStep == countdownSteps)
         {
-            // Ya completamos los 3 zoom/shakes
+            // Después de 3 zoom in, permitir QTE
             if (qteManager != null)
             {
                 qteManager.AllowQTEStart();
@@ -189,7 +173,7 @@ public class CoinFlipCameraController : MonoBehaviour
 
     IEnumerator QTESuccessFeedbackRoutine()
     {
-        // Zoom leve hacia la moneda (suave)
+        // Pequeño zoom tras QTE success
         if (coinTransform != null && qteSuccessZoomIncrement != 0f)
         {
             Vector3 directionToCoin = (coinTransform.position - transform.position).normalized;
@@ -207,7 +191,7 @@ public class CoinFlipCameraController : MonoBehaviour
             }
         }
 
-        // Screen shake tras el zoom
+        // Shake
         float shakeElapsed = 0f;
         Vector3 finalOriginalPos = transform.position;
         while (shakeElapsed < qteSuccessShakeDuration)

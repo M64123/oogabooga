@@ -10,9 +10,9 @@ public class CoinFlipQTEManager : MonoBehaviour
     public CanvasGroup qteCanvasGroup;
     public BeatManager beatManager;
     public CoinFlipCameraController coinFlipCameraController;
+    public QTEManager qteManager; // Asegurar que se asigne en el Inspector
 
     [Header("QTE Settings")]
-    [Tooltip("Número máximo de QTEs exitosos necesarios")]
     public int maxQTEs = 6;
 
     private int successfulQTEs = 0;
@@ -21,32 +21,42 @@ public class CoinFlipQTEManager : MonoBehaviour
 
     void Start()
     {
-        // No iniciamos la secuencia de QTE aquí, ahora esperamos a la cámara.
-        // Antes, llamábamos StartQTESequence() aquí. Ahora no lo hacemos.
-        // Los QTE no iniciarán hasta que la cámara haya hecho sus 3 mini zooms.
+        // No inicia QTE aquí, se esperará a AllowQTEStart() tras los 3 zooms
+        if (qteCanvasGroup != null)
+        {
+            qteCanvasGroup.gameObject.SetActive(true);
+            qteCanvasGroup.alpha = 1f;
+        }
     }
 
-    // Este método lo llamará la cámara una vez haya hecho los 3 mini zooms.
     public void AllowQTEStart()
     {
         if (coinFlip == null)
         {
-            Debug.LogError("CoinFlip no está asignado en CoinFlipQTEManager.");
+            Debug.LogError("CoinFlip no asignado en CoinFlipQTEManager.");
             return;
         }
 
         if (beatManager == null)
         {
-            Debug.LogError("BeatManager no está asignado en CoinFlipQTEManager.");
+            Debug.LogError("BeatManager no asignado en CoinFlipQTEManager.");
             return;
         }
 
         if (coinFlipCameraController == null)
         {
-            Debug.LogError("CoinFlipCameraController no está asignado en CoinFlipQTEManager.");
+            Debug.LogError("CoinFlipCameraController no asignado en CoinFlipQTEManager.");
             return;
         }
 
+        if (qteManager == null)
+        {
+            Debug.LogError("QTEManager no asignado en CoinFlipQTEManager.");
+            return;
+        }
+
+        // Habilitar QTE
+        qteManager.isQTEActive = true;
         StartQTESequence();
     }
 
@@ -55,14 +65,6 @@ public class CoinFlipQTEManager : MonoBehaviour
         qteSequenceActive = true;
         successfulQTEs = 0;
 
-        // Mostrar el UI de QTE si existe
-        if (qteCanvasGroup != null)
-        {
-            qteCanvasGroup.alpha = 1f;
-            qteCanvasGroup.gameObject.SetActive(true);
-        }
-
-        // Limpiar cualquier QTETrigger existente en BeatManager
         beatManager.qteTriggers.Clear();
         coinFlipQTETriggers.Clear();
 
@@ -82,7 +84,6 @@ public class CoinFlipQTEManager : MonoBehaviour
 
             coinFlipQTETriggers.Add(trigger);
             beatManager.qteTriggers.Add(trigger);
-
             nextBeat = beatsBetweenQTEs;
         }
 
@@ -107,7 +108,6 @@ public class CoinFlipQTEManager : MonoBehaviour
             QTEManager.Instance.onQTESuccess.RemoveListener(OnQTESuccess);
             QTEManager.Instance.onQTEFail.RemoveListener(OnQTEFail);
             beatManager.qteTriggers.Clear();
-
             StartCoroutine(FadeOutQTECanvasAndLaunchCoin());
         }
     }
@@ -120,7 +120,6 @@ public class CoinFlipQTEManager : MonoBehaviour
         QTEManager.Instance.onQTESuccess.RemoveListener(OnQTESuccess);
         QTEManager.Instance.onQTEFail.RemoveListener(OnQTEFail);
         beatManager.qteTriggers.Clear();
-
         StartCoroutine(FadeOutQTECanvasAndLaunchCoin());
     }
 

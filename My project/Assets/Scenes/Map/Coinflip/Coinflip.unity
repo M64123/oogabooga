@@ -733,10 +733,11 @@ MonoBehaviour:
   movementDuration: 2
   followOffsetY: 4
   curveHeight: -5
-  useCountdownZoom: 1
   countdownSteps: 3
   countdownZoomIncrement: 0.5
   beatsPerCountdownStep: 1
+  countdownZoomDuration: 0.2
+  countdownShakeMagnitude: 0.2
   qteSuccessShakeDuration: 0.2
   qteSuccessShakeMagnitude: 0.1
   qteSuccessZoomIncrement: 0.2
@@ -942,8 +943,8 @@ MonoBehaviour:
   qteCanvasGroup: {fileID: 1263349638}
   beatManager: {fileID: 1823555041}
   coinFlipCameraController: {fileID: 369648255}
+  qteManager: {fileID: 899054462}
   maxQTEs: 6
-  delayQTEStart: 1
 --- !u!4 &471650807
 Transform:
   m_ObjectHideFlags: 0
@@ -1643,6 +1644,7 @@ MonoBehaviour:
         m_CallState: 2
   successClip: {fileID: 0}
   failClip: {fileID: 0}
+  isQTEActive: 0
   successThreshold: 60
   qteCenterRectTransform: {fileID: 1778463270}
 --- !u!4 &899054463
@@ -2987,7 +2989,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: c5902cb2398017347849eaf267ad6796, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 7295b92f6e07c7c4b86f2f4fe13d6feb, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
