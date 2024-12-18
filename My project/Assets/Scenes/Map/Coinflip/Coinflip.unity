@@ -232,7 +232,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8055638111951870553, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -200
+      value: -290
       objectReference: {fileID: 0}
     - target: {fileID: 8055638111951870553, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -546,11 +546,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 31b84e548b33bda4d9763d52a7956caa, type: 3}
---- !u!1 &273845721 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5731161360162568145, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
-  m_PrefabInstance: {fileID: 122419832}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &273845722 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8055638111951870553, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
@@ -1434,7 +1429,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6987042134202999264, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -200
+      value: -290
       objectReference: {fileID: 0}
     - target: {fileID: 6987042134202999264, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1609,8 +1604,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   qteKey: 32
-  qteIndicatorLeftPrefab: {fileID: 273845721}
-  qteIndicatorRightPrefab: {fileID: 1730983115}
+  qteIndicatorLeftPrefab: {fileID: 5731161360162568145, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
+  qteIndicatorRightPrefab: {fileID: 3706431039766217878, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
   qteBarTransform: {fileID: 1217539474}
   onQTESuccess:
     m_PersistentCalls:
@@ -1957,14 +1952,14 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1263349637}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -200.00003}
-  m_SizeDelta: {x: 0, y: -401.2786}
+  m_AnchoredPosition: {x: 0, y: -296}
+  m_SizeDelta: {x: 0, y: -603.641}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1217539475
 MonoBehaviour:
@@ -2191,10 +2186,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -2697,11 +2692,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 10ff271e34a7bc8428a43e51011767db, type: 3}
---- !u!1 &1730983115 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3706431039766217878, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
-  m_PrefabInstance: {fileID: 741045339}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &1730983116 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6987042134202999264, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
@@ -2737,14 +2727,14 @@ RectTransform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1778463270}
   m_Father: {fileID: 1263349637}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -200}
+  m_AnchoredPosition: {x: 0, y: -290}
   m_SizeDelta: {x: -895.2821, y: -315.3189}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!50 &1745439044
@@ -2841,7 +2831,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 07eebe1a948e4f741adf45137dadc837, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
