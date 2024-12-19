@@ -4,14 +4,16 @@ using UnityEngine.EventSystems;
 public class DraggableDinoPlatform : MonoBehaviour
 {
     private Vector3 initialPosition;      // Posición inicial del dino
-    private Transform initialParent;     // Parent inicial del dino
-    private Transform closestSlot;       // Slot más cercano
-    private bool isDragging = false;     // Estado del drag
+    private Transform initialParent;      // Parent inicial del dino
+    private Transform closestSlot;        // Slot más cercano
+    private bool isDragging = false;      // Estado del drag
 
-    public float snapThreshold = 2.0f;   // Distancia para snap al slot
-    public Combatgrid combatGrid;        // Referencia a la grid
-    public float returnSpeed = 5.0f;     // Velocidad de retorno
+    public float snapThreshold = 2.0f;    // Distancia para snap al slot
+    public Combatgrid combatGrid;         // Referencia a la grid
+    public float returnSpeed = 5.0f;      // Velocidad de retorno
     public float maxParabolaHeight = 2.0f; // Altura máxima de la parábola
+
+    private PlatformMover platformMover;   // Referencia al PlatformMover
 
     private void Start()
     {
@@ -26,10 +28,21 @@ public class DraggableDinoPlatform : MonoBehaviour
                 Debug.LogError("Combatgrid no encontrado en la escena.");
             }
         }
+
+        platformMover = FindObjectOfType<PlatformMover>();
+        if (platformMover == null)
+        {
+            Debug.LogError("PlatformMover no encontrado en la escena.");
+        }
     }
 
     private void OnMouseDown()
     {
+        if (platformMover != null && platformMover.CombatHasStarted())
+        {
+            return; // No permitir arrastrar si el combate ha comenzado
+        }
+
         isDragging = true;
 
         if (combatGrid != null)
@@ -46,6 +59,11 @@ public class DraggableDinoPlatform : MonoBehaviour
 
     private void OnMouseDrag()
     {
+        if (platformMover != null && platformMover.CombatHasStarted())
+        {
+            return; // No permitir arrastrar si el combate ha comenzado
+        }
+
         Vector3 mouseWorldPosition = GetMouseWorldPosition();
 
         // Limitar el valor de Z
@@ -60,6 +78,11 @@ public class DraggableDinoPlatform : MonoBehaviour
 
     private void OnMouseUp()
     {
+        if (platformMover != null && platformMover.CombatHasStarted())
+        {
+            return; // No permitir arrastrar si el combate ha comenzado
+        }
+
         isDragging = false;
 
         if (closestSlot != null && closestSlot.childCount == 0)

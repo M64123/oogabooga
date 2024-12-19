@@ -14,6 +14,7 @@ public class PlatformMover : MonoBehaviour
     public float stopDistance = 1.0f;     // Distancia mínima para detenerse
 
     private bool isMoving = false;        // Indica si la plataforma está en movimiento
+    private bool combatStarted = false;   // Indica si el combate ha comenzado
 
     private void Start()
     {
@@ -24,8 +25,8 @@ public class PlatformMover : MonoBehaviour
 
     private void Update()
     {
-        // Verificar si hay al menos un slot cubierto para mostrar el botón
-        if (combatGrid.NumberOfOccupiedSlots() > 0 && !isMoving)
+        // Verificar si hay al menos un slot cubierto para mostrar el botón, solo si el combate no ha comenzado
+        if (combatGrid.NumberOfOccupiedSlots() > 0 && !isMoving && !combatStarted)
         {
             startButton.gameObject.SetActive(true);
         }
@@ -43,11 +44,17 @@ public class PlatformMover : MonoBehaviour
 
     private void OnStartButtonClick()
     {
+        if (combatStarted)
+            return; // Evitar que se inicie nuevamente el combate
+
         // Reorganizar los dinosaurios en los primeros slots
         combatGrid.ReorganizeSlots();
 
         // Iniciar el movimiento
         isMoving = true;
+
+        // Establecer que el combate ha comenzado
+        combatStarted = true;
 
         // Notificar a los aliados y enemigos que el combate ha iniciado
         NotifyCombatStart();
@@ -124,5 +131,11 @@ public class PlatformMover : MonoBehaviour
                 enemyCombat.StartCombat();
             }
         }
+    }
+
+    // Método público para verificar si el combate ha comenzado
+    public bool CombatHasStarted()
+    {
+        return combatStarted;
     }
 }
