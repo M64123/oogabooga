@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class EnemyCombatController : MonoBehaviour
 {
@@ -37,6 +38,14 @@ public class EnemyCombatController : MonoBehaviour
     private void OnBeat()
     {
         if (!combatStarted || hasAttemptedAttack) return;
+
+        // Verificar si quedan dinosaurios en los slots
+        if (!Combatgrid.Instance.HasDinosaursInSlots())
+        {
+            Debug.Log("No hay dinosaurios en los slots. Regresando a la escena de título...");
+            ResetGameAndLoadTitle();
+            return;
+        }
 
         DinoCombat firstSlotDino = Combatgrid.Instance.GetFirstSlotDino();
 
@@ -89,11 +98,35 @@ public class EnemyCombatController : MonoBehaviour
             HandleDeath();
         }
     }
+    private void ResetGameAndLoadTitle()
+    {
+        // Eliminar cualquier objeto persistente
+        DestroyPersistentObjects();
+
+        // Cargar la escena de título
+        SceneManager.LoadScene("Titulo");
+    }
+
+    private void DestroyPersistentObjects()
+    {
+        // Destruir cualquier objeto marcado como DontDestroyOnLoad
+        GameObject[] persistentObjects = FindObjectsOfType<GameObject>();
+        foreach (GameObject obj in persistentObjects)
+        {
+            if (obj.scene.rootCount == 0) // Si no pertenece a la escena actual
+            {
+                Destroy(obj);
+            }
+        }
+
+        Debug.Log("Todos los objetos persistentes han sido eliminados.");
+    }
 
     private void HandleDeath()
     {
         Debug.Log("El enemigo ha sido derrotado.");
         Destroy(gameObject); // Eliminar al enemigo
+        ReturnToBoard();
     }
 
     private void OnDestroy()
@@ -106,5 +139,9 @@ public class EnemyCombatController : MonoBehaviour
                 interval.onIntervalTrigger.RemoveListener(OnBeat);
             }
         }
+    }
+    void ReturnToBoard()
+    {
+        SceneManager.LoadScene("Tablero");
     }
 }

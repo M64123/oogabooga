@@ -131,5 +131,16 @@ public class Combatgrid : MonoBehaviour
         }
         return null; // No hay dinos en los slots
     }
+    public bool HasDinosaursInSlots()
+    {
+        foreach (Transform slot in gridSlots)
+        {
+            if (slot.childCount > 0) // Si hay al menos un dinosaurio en un slot
+            {
+                return true;
+            }
+        }
+        return false; // No hay dinosaurios en ningún slot
+    }
 }
 
