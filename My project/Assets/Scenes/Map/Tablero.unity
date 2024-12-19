@@ -1665,7 +1665,8 @@ MonoBehaviour:
     sceneNames:
     - New Scene
   - nodeType: 3
-    sceneNames: []
+    sceneNames:
+    - Titulo
   - nodeType: 4
     sceneNames: []
   - nodeType: 5
