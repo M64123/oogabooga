@@ -1284,6 +1284,8 @@ MonoBehaviour:
   attackDamage: 5
   attackProbability: 0.1
   animator: {fileID: 765458400}
+  combatGrid: {fileID: 1142378881}
+  beatManagerCombat: {fileID: 1253154209}
   vidaMaxima: 500
 --- !u!1001 &954289531
 PrefabInstance:
