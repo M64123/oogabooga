@@ -3,16 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-/// <summary>
-/// AudioController que:
-/// - Reproduce Intro una sola vez (opcional),
-/// - Luego Combate ↔ Defensa indefinidamente,
-/// - Usa PlayScheduled + SetScheduledEndTime en dos AudioSources, sin cortes.
-/// - Transiciones opcionales (si transicionClips tiene algo).
-/// - Si en cada lista hay un solo clip, ese mismo se repetirá en cada turno.
-/// - Se arregla para que NO se detenga tras primera Defensa.
-/// - Se han eliminado todos los Debug.Log excepto los warnings para indicar fallos.
-/// </summary>
+
 public class AudioController : MonoBehaviour
 {
     public static AudioController Instance { get; private set; }
