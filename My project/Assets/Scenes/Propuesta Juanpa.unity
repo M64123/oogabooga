@@ -156,7 +156,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 7295b92f6e07c7c4b86f2f4fe13d6feb, type: 3}
   defensaClips:
   - {fileID: 8300000, guid: aed5f7e7ad4dcb74c86c362fc75209be, type: 3}
-  transicionClips: []
+  transicionClips:
+  - {fileID: 8300000, guid: d047ec1e8e574504dbfc672f892d5b4a, type: 3}
   beatsIntro: 8
   beatsTransicion: 4
   beatsPerSegment: 16
