@@ -156,8 +156,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 7295b92f6e07c7c4b86f2f4fe13d6feb, type: 3}
   defensaClips:
   - {fileID: 8300000, guid: aed5f7e7ad4dcb74c86c362fc75209be, type: 3}
-  transicionClips:
-  - {fileID: 8300000, guid: d047ec1e8e574504dbfc672f892d5b4a, type: 3}
+  transicionClips: []
   beatsIntro: 8
   beatsTransicion: 4
   beatsPerSegment: 16
@@ -281,6 +280,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!1 &1663351462
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1663351464}
+  - component: {fileID: 1663351463}
+  m_Layer: 0
+  m_Name: TaikoQTEManagerObj
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1663351463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1663351462}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6b1d12dd3da5704196c62c09bcafe6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  qteSinglePrefab: {fileID: 5731161360162568145, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
+  qteDualPrefab: {fileID: 3706431039766217878, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
+  qteBarTransform: {fileID: 0}
+  spawnLeadTime: 2
+  perfectMargin: 0.1
+--- !u!4 &1663351464
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1663351462}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.9096204, y: 1.4591707, z: 0.008505493}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1746149326
 GameObject:
   m_ObjectHideFlags: 0
@@ -380,3 +428,4 @@ SceneRoots:
   - {fileID: 1746149329}
   - {fileID: 859437044}
   - {fileID: 645501548}
+  - {fileID: 1663351464}
