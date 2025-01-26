@@ -1,4 +1,3 @@
-// CoinFlipQTEManager.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,31 +6,57 @@ using UnityEngine.Events;
 
 public class CoinFlipQTEManager : MonoBehaviour
 {
-    public CoinFlip coinFlip; // Asignar en el Inspector
-    public CanvasGroup qteCanvasGroup; // Asignar el CanvasGroup del QTE UI en el Inspector
-    public BeatManager beatManager; // Asignar el BeatManager en el Inspector
+    public CoinFlip coinFlip;
+    public CanvasGroup qteCanvasGroup;
+    public BeatManager beatManager;
+    public CoinFlipCameraController coinFlipCameraController;
+    public QTEManager qteManager; // Asegurar que se asigne en el Inspector
+
+    [Header("QTE Settings")]
+    public int maxQTEs = 6;
 
     private int successfulQTEs = 0;
-    private int maxQTEs = 6;
     private bool qteSequenceActive = false;
-
     private List<QTETrigger> coinFlipQTETriggers = new List<QTETrigger>();
 
     void Start()
     {
+        // No inicia QTE aquí, se esperará a AllowQTEStart() tras los 3 zooms
+        if (qteCanvasGroup != null)
+        {
+            qteCanvasGroup.gameObject.SetActive(true);
+            qteCanvasGroup.alpha = 1f;
+        }
+    }
+
+    public void AllowQTEStart()
+    {
         if (coinFlip == null)
         {
-            Debug.LogError("CoinFlip no está asignado en CoinFlipQTEManager.");
+            Debug.LogError("CoinFlip no asignado en CoinFlipQTEManager.");
             return;
         }
 
         if (beatManager == null)
         {
-            Debug.LogError("BeatManager no está asignado en CoinFlipQTEManager.");
+            Debug.LogError("BeatManager no asignado en CoinFlipQTEManager.");
             return;
         }
 
-        // Iniciar la secuencia de QTE
+        if (coinFlipCameraController == null)
+        {
+            Debug.LogError("CoinFlipCameraController no asignado en CoinFlipQTEManager.");
+            return;
+        }
+
+        if (qteManager == null)
+        {
+            Debug.LogError("QTEManager no asignado en CoinFlipQTEManager.");
+            return;
+        }
+
+        // Habilitar QTE
+        qteManager.isQTEActive = true;
         StartQTESequence();
     }
 
@@ -40,11 +65,10 @@ public class CoinFlipQTEManager : MonoBehaviour
         qteSequenceActive = true;
         successfulQTEs = 0;
 
-        // Limpiar cualquier QTETrigger existente en BeatManager
         beatManager.qteTriggers.Clear();
+        coinFlipQTETriggers.Clear();
 
-        // Crear QTETriggers para la secuencia de lanzamiento de moneda
-        float beatsBetweenQTEs = 1f; // Ajusta según sea necesario
+        float beatsBetweenQTEs = 1f;
         float nextBeat = beatsBetweenQTEs;
 
         for (int i = 0; i < maxQTEs; i++)
@@ -60,11 +84,9 @@ public class CoinFlipQTEManager : MonoBehaviour
 
             coinFlipQTETriggers.Add(trigger);
             beatManager.qteTriggers.Add(trigger);
-
-            nextBeat = beatsBetweenQTEs; // Intervalo entre QTEs
+            nextBeat = beatsBetweenQTEs;
         }
 
-        // Suscribirse a los eventos de QTE
         QTEManager.Instance.onQTESuccess.AddListener(OnQTESuccess);
         QTEManager.Instance.onQTEFail.AddListener(OnQTEFail);
     }
@@ -75,24 +97,18 @@ public class CoinFlipQTEManager : MonoBehaviour
 
         successfulQTEs++;
 
+        if (coinFlipCameraController != null)
+        {
+            coinFlipCameraController.QTESuccessFeedback();
+        }
+
         if (successfulQTEs >= maxQTEs)
         {
-            // Completó todos los QTEs exitosamente
             qteSequenceActive = false;
-
-            // Desuscribirse de los eventos de QTE
             QTEManager.Instance.onQTESuccess.RemoveListener(OnQTESuccess);
             QTEManager.Instance.onQTEFail.RemoveListener(OnQTEFail);
-
-            // Limpiar los QTETriggers restantes
             beatManager.qteTriggers.Clear();
-
-            // Iniciar el fade out del Canvas y lanzar la moneda
             StartCoroutine(FadeOutQTECanvasAndLaunchCoin());
-        }
-        else
-        {
-            // Continuar con el siguiente QTE
         }
     }
 
@@ -101,21 +117,14 @@ public class CoinFlipQTEManager : MonoBehaviour
         if (!qteSequenceActive) return;
 
         qteSequenceActive = false;
-
-        // Desuscribirse de los eventos de QTE
         QTEManager.Instance.onQTESuccess.RemoveListener(OnQTESuccess);
         QTEManager.Instance.onQTEFail.RemoveListener(OnQTEFail);
-
-        // Limpiar los QTETriggers restantes
         beatManager.qteTriggers.Clear();
-
-        // Iniciar el fade out del Canvas y lanzar la moneda
         StartCoroutine(FadeOutQTECanvasAndLaunchCoin());
     }
 
     IEnumerator FadeOutQTECanvasAndLaunchCoin()
     {
-        // Fade out del Canvas de QTE
         if (qteCanvasGroup != null)
         {
             float duration = 1f;
@@ -131,10 +140,7 @@ public class CoinFlipQTEManager : MonoBehaviour
             qteCanvasGroup.gameObject.SetActive(false);
         }
 
-        // Calcular la fuerza hacia arriba basada en los QTEs exitosos
         coinFlip.upwardForce = 5f + successfulQTEs * 2f;
-
-        // Lanzar la moneda
         coinFlip.FlipCoin();
     }
 }

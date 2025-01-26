@@ -44,7 +44,13 @@ public class BeatManager : MonoBehaviour
 
     private void Awake()
     {
-
+        // Asegurarse de que solo haya una instancia de BeatManager
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+        Instance = this;
     }
 
     private void Start()

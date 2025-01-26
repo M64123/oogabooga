@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4c23304ce869b943acd7f8ddd8ab840, type: 3}
+  m_Name: Mage
+  m_EditorClassIdentifier: 
+  iD: 4562846
+  name: Mage
+  attributes:
+  - attribute: {fileID: 11400000, guid: c17efd7edcb275b478f5f7472021c768, type: 2}
+    progression:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 60
+        value: 120
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+  - attribute: {fileID: 11400000, guid: 155916f7f760364478c6f642b9028c43, type: 2}
+    progression:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 4
+        outSlope: 4
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 60
+        value: 240
+        inSlope: 4
+        outSlope: 4
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+  resources:
+  - {fileID: 11400000, guid: 31c3820e958edcd49ae04f53c27544bc, type: 2}
+  habilities:
+  - {fileID: 11400000, guid: 852a8e84b0fb4484c9d9df7b43077767, type: 2}
+  - {fileID: 11400000, guid: f08e404da95ab1745b5ab9e449a99b61, type: 2}
+  - {fileID: 11400000, guid: afc0b962767fd9f4a94463080cb3b64e, type: 2}

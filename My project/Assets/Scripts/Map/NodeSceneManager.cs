@@ -1,6 +1,7 @@
 using UnityEngine;
-using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class NodeSceneManager : MonoBehaviour
 {
@@ -13,16 +14,20 @@ public class NodeSceneManager : MonoBehaviour
 
     public List<NodeTypeScenes> nodeTypeScenesList = new List<NodeTypeScenes>();
 
-    // Singleton instance
+    [Header("Dino Scenes")]
+    public string dinoShowcaseSceneName = "DinoShowcase";
+    public string deadDinoShowcaseSceneName = "DeadDinoShowcase";
+
+    [Header("Board Scene")]
+    public string boardSceneName = "Tablero";
+
+    private Button buttonLoadDinoShowcase; // Botón para cargar DinoShowcase
+    private Button buttonLoadBoardScene;   // Botón para cargar Tablero
+
     public static NodeSceneManager Instance;
 
-    [Header("Scene Names")]
-    public string boardSceneName = "Tablero"; // Nombre exacto de la escena del tablero
-    public string gachaSceneName = "Gacha";   // Nombre exacto de la escena del gacha
-
-    void Awake()
+    private void Awake()
     {
-        // Configurar el patrón Singleton
         if (Instance == null)
         {
             Instance = this;
@@ -34,7 +39,90 @@ public class NodeSceneManager : MonoBehaviour
         }
     }
 
-    // Método para obtener una escena aleatoria basada en el NodeType
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == boardSceneName)
+        {
+            Debug.Log("Escena del tablero cargada. Configurando botones...");
+            SetupButtons(); // Configurar los botones dinámicamente
+        }
+    }
+
+    private void SetupButtons()
+    {
+        // Buscar botones en la escena actual
+        buttonLoadDinoShowcase = GameObject.Find("ButtonLoadDinoShowcase")?.GetComponent<Button>();
+        buttonLoadBoardScene = GameObject.Find("ButtonLoadBoardScene")?.GetComponent<Button>();
+
+        if (buttonLoadDinoShowcase != null)
+        {
+            buttonLoadDinoShowcase.onClick.RemoveAllListeners();
+            buttonLoadDinoShowcase.onClick.AddListener(LoadDinoShowcaseScene);
+            Debug.Log("Botón DinoShowcase configurado correctamente.");
+        }
+        else
+        {
+            Debug.LogWarning("Botón DinoShowcase no encontrado en la escena del tablero.");
+        }
+
+        if (buttonLoadBoardScene != null)
+        {
+            buttonLoadBoardScene.onClick.RemoveAllListeners();
+            buttonLoadBoardScene.onClick.AddListener(LoadBoardScene);
+            Debug.Log("Botón Tablero configurado correctamente.");
+        }
+        else
+        {
+            Debug.LogWarning("Botón Tablero no encontrado en la escena del tablero.");
+        }
+    }
+
+    public void LoadBoardScene()
+    {
+        if (!string.IsNullOrEmpty(boardSceneName))
+        {
+            SceneManager.LoadScene(boardSceneName);
+        }
+        else
+        {
+            Debug.LogError("No se ha asignado la escena del tablero en el Inspector.");
+        }
+    }
+
+    public void LoadDinoShowcaseScene()
+    {
+        if (!string.IsNullOrEmpty(dinoShowcaseSceneName))
+        {
+            SceneManager.LoadScene(dinoShowcaseSceneName);
+        }
+        else
+        {
+            Debug.LogError("No se ha asignado la escena DinoShowcase en el Inspector.");
+        }
+    }
+
+    public void LoadDeadDinoShowcaseScene()
+    {
+        if (!string.IsNullOrEmpty(deadDinoShowcaseSceneName))
+        {
+            SceneManager.LoadScene(deadDinoShowcaseSceneName);
+        }
+        else
+        {
+            Debug.LogError("No se ha asignado la escena DeadDinoShowcase en el Inspector.");
+        }
+    }
+
     public string GetRandomSceneName(NodeType nodeType)
     {
         foreach (var nts in nodeTypeScenesList)
@@ -57,15 +145,16 @@ public class NodeSceneManager : MonoBehaviour
         return null;
     }
 
-    // Cargar la escena del tablero
-    public void LoadBoardScene()
+    // Nuevo método para cargar escena por nombre
+    public void LoadSceneByName(string sceneName)
     {
-        SceneManager.LoadScene(boardSceneName);
-    }
-
-    // Cargar la escena de Gacha
-    public void LoadGachaScene()
-    {
-        SceneManager.LoadScene(gachaSceneName);
+        if (!string.IsNullOrEmpty(sceneName))
+        {
+            SceneManager.LoadScene(sceneName);
+        }
+        else
+        {
+            Debug.LogWarning("El nombre de la escena está vacío o no asignado.");
+        }
     }
 }

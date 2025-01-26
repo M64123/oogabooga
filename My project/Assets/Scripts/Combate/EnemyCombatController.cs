@@ -1,83 +1,246 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class EnemyCombatController : MonoBehaviour
 {
-    [Header("Combat Settings")]
-    public float attackDamage = 5f; // Daño que el enemigo hace por ataque
-    public float attackProbability = 0.7f; // Probabilidad de éxito del ataque (ajustable desde el inspector)
+    [Header("Configuraciones de Ataque")]
+    public float attackDamage = 10f;           // Daño por ataque
+    [Range(0f, 1f)]
+    public float attackProbability = 0.7f;     // Probabilidad de éxito del ataque
 
-    private Transform playerTarget;
+    [Header("Referencias")]
+    public Animator animator;                  // Referencia al Animator del enemigo
+    public Combatgrid combatGrid;              // Referencia al Combatgrid
+    public BeatManagerCombat beatManagerCombat; // Referencia al BeatManagerCombat
+
+    [Header("Configuraciones de Vida")]
+    public float vidaMaxima = 100f;            // Vida inicial del enemigo
+    private float vidaActual;                  // Vida actual del enemigo
+
+    private bool combatStarted = false;        // Bandera para saber si el combate ha iniciado
+    private bool hasAttemptedAttack = false;   // Bandera para evitar múltiples intentos por pulso
 
     void Start()
     {
-        // Buscar el jugador con el tag "ally"
-        GameObject player = GameObject.FindGameObjectWithTag("ally");
-        if (player != null)
+        vidaActual = vidaMaxima; // Inicializar la vida
+
+        // Verificar que las referencias estén asignadas
+        if (combatGrid == null)
         {
-            playerTarget = player.transform;
-        }
-        else
-        {
-            Debug.LogError("No se encontró ningún objeto con el tag 'ally'");
+            combatGrid = FindObjectOfType<Combatgrid>();
+            if (combatGrid == null)
+            {
+                Debug.LogError("Combatgrid no asignado ni encontrado en la escena.");
+            }
         }
 
-        // Subscribirse al evento del Interval del BeatManager
-        if (BeatManager.Instance != null)
+        if (beatManagerCombat == null)
         {
-            foreach (Intervals interval in BeatManager.Instance.Intervals) // Cambiado para usar la propiedad pública
+            beatManagerCombat = FindObjectOfType<BeatManagerCombat>();
+            if (beatManagerCombat == null)
             {
-                interval.Trigger.AddListener(HandleAttack); // Cambiado para usar la propiedad pública
+                Debug.LogError("BeatManagerCombat no asignado ni encontrado en la escena.");
+            }
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null)
+            {
+                Debug.LogError("Animator no asignado ni encontrado en el GameObject del enemigo.");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Inicia el combate y suscribe el método OnBeat a los eventos de intervalo.
+    /// </summary>
+    public void StartCombat()
+    {
+        if (combatStarted)
+        {
+            Debug.LogWarning("El combate ya ha sido iniciado.");
+            return;
+        }
+
+        combatStarted = true;
+        Debug.Log("El combate ha comenzado.");
+
+        // Subscribirse al evento de intervalo del BeatManagerCombat
+        if (beatManagerCombat != null)
+        {
+            foreach (var interval in beatManagerCombat.intervals)
+            {
+                interval.onIntervalTrigger.AddListener(OnBeat);
             }
         }
         else
         {
-            Debug.LogError("No se encontró BeatManager en la escena");
+            Debug.LogError("BeatManagerCombat no está asignado. El enemigo no podrá atacar.");
         }
     }
 
-    void HandleAttack()
+    /// <summary>
+    /// Método llamado en cada intervalo del BeatManagerCombat.
+    /// </summary>
+    private void OnBeat()
     {
-        if (playerTarget == null)
+        if (!combatStarted)
+        {
+            Debug.LogWarning("OnBeat llamado pero el combate no ha iniciado.");
             return;
+        }
 
-        // Atacar con una probabilidad del 30% de fallar (ajustable)
+        if (hasAttemptedAttack)
+        {
+            Debug.Log("Ya se ha intentado un ataque en este intervalo.");
+            return;
+        }
+
+        // Verificar si quedan dinosaurios en los slots
+        if (combatGrid != null && !combatGrid.HasDinosaursInSlots())
+        {
+            Debug.Log("No hay dinosaurios en los slots. Regresando a la escena de título...");
+            ResetGameAndLoadTitle();
+            return;
+        }
+
+        // Obtener el dinosaurio en el primer slot
+        DinoCombat firstSlotDino = combatGrid != null ? combatGrid.GetFirstSlotDino() : null;
+
+        if (firstSlotDino != null)
+        {
+            hasAttemptedAttack = true; // Marcar que ya se intentó atacar
+            AttemptAttack(firstSlotDino);
+        }
+        else
+        {
+            Debug.LogWarning("No hay dinosaurio en el primer slot.");
+        }
+
+        // Reiniciar la bandera después de un breve intervalo
+        Invoke(nameof(ResetAttackFlag), 0.1f);
+    }
+
+    /// <summary>
+    /// Reinicia la bandera que permite intentar un nuevo ataque.
+    /// </summary>
+    private void ResetAttackFlag()
+    {
+        hasAttemptedAttack = false;
+    }
+
+    /// <summary>
+    /// Intenta realizar un ataque al dinosaurio objetivo.
+    /// </summary>
+    /// <param name="target">El dinosaurio objetivo del ataque.</param>
+    private void AttemptAttack(DinoCombat target)
+    {
         if (Random.value > attackProbability)
         {
-            Debug.Log("El enemigo falló el ataque");
+            Debug.Log("El enemigo falló el ataque.");
+            return;
+        }
+
+        // Activar animación de ataque
+        if (animator != null)
+        {
+            animator.SetTrigger("Attack");
+            Debug.Log("Animación de ataque activada.");
         }
         else
         {
-            // Realizar el ataque al jugador
-            Attack(playerTarget.gameObject);
+            Debug.LogWarning("Animator no asignado. No se puede reproducir la animación de ataque.");
         }
-    }
 
-    void Attack(GameObject target)
-    {
-        // Intentar obtener el componente Health del objetivo
-        Health targetHealth = target.GetComponent<Health>();
-        if (targetHealth != null)
+        // Aplicar daño al dinosaurio aliado
+        if (target != null)
         {
-            targetHealth.TakeDamage(attackDamage);
-            Debug.Log(target.tag + " recibió " + attackDamage + " de daño del enemigo");
+            Debug.Log($"El enemigo atacó a {target.name} causando {attackDamage} de daño.");
+            target.TakeDamage(attackDamage);
         }
         else
         {
-            Debug.LogError("El objeto " + target.name + " no tiene un componente Health");
+            Debug.LogWarning("El objetivo del ataque es nulo. No se puede aplicar daño.");
         }
     }
 
-    private void OnDestroy()
+    /// <summary>
+    /// Método para que el enemigo reciba daño.
+    /// </summary>
+    /// <param name="damage">Cantidad de daño recibido.</param>
+    public void TakeDamage(float damage)
     {
-        // Desuscribirse de los eventos del BeatManager si el objeto se destruye
-        if (BeatManager.Instance != null)
+        vidaActual -= damage;
+        Debug.Log($"El enemigo recibió {damage} de daño. Vida restante: {vidaActual}");
+
+        if (vidaActual <= 0)
         {
-            foreach (Intervals interval in BeatManager.Instance.Intervals) // Cambiado para usar la propiedad pública
+            HandleDeath();
+        }
+    }
+
+    /// <summary>
+    /// Resetea el juego y carga la escena de título.
+    /// </summary>
+    private void ResetGameAndLoadTitle()
+    {
+        // Eliminar cualquier objeto persistente
+        DestroyPersistentObjects();
+
+        // Cargar la escena de título
+        SceneManager.LoadScene("Titulo");
+    }
+
+    /// <summary>
+    /// Destruye cualquier objeto marcado como DontDestroyOnLoad.
+    /// </summary>
+    private void DestroyPersistentObjects()
+    {
+        // Destruir cualquier objeto marcado como DontDestroyOnLoad
+        GameObject[] persistentObjects = FindObjectsOfType<GameObject>();
+        foreach (GameObject obj in persistentObjects)
+        {
+            if (obj.scene.rootCount == 0) // Si no pertenece a la escena actual
             {
-                interval.Trigger.RemoveListener(HandleAttack); // Cambiado para usar la propiedad pública
+                Destroy(obj);
             }
         }
+
+        Debug.Log("Todos los objetos persistentes han sido eliminados.");
+    }
+
+    /// <summary>
+    /// Maneja la muerte del enemigo.
+    /// </summary>
+    private void HandleDeath()
+    {
+        Debug.Log("El enemigo ha sido derrotado.");
+        Destroy(gameObject); // Eliminar al enemigo
+        ReturnToBoard();
+    }
+
+    /// <summary>
+    /// Desuscribe de los eventos al destruirse el enemigo.
+    /// </summary>
+    private void OnDestroy()
+    {
+        if (beatManagerCombat != null)
+        {
+            foreach (var interval in beatManagerCombat.intervals)
+            {
+                interval.onIntervalTrigger.RemoveListener(OnBeat);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Retorna a la escena del tablero.
+    /// </summary>
+    void ReturnToBoard()
+    {
+        SceneManager.LoadScene("Tablero");
     }
 }
