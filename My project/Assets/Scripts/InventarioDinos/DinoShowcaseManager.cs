@@ -1,61 +1,63 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 public class DinoShowcaseManager : MonoBehaviour
 {
-    public Transform dinosParent; // Para organizar los dinosaurios en la jerarquía
-    public float areaSize = 10f;  // Tamaño del área donde se generarán los dinosaurios
+    [Header("Area de Spawn (Vivos)")]
+    public Collider spawnArea;
+    public string boardSceneName = "Tablero";
 
     void Start()
     {
-        GenerateDinosaurs();
+        SpawnDinos();
     }
 
-    void GenerateDinosaurs()
+    void SpawnDinos()
     {
-        List<GameObject> playerDinos = GameManager.Instance.playerDinosaurs;
-
-        foreach (GameObject dino in playerDinos)
+        var dinos = GameManager.Instance.GetAllPlayerDinos();
+        foreach (var kvp in dinos)
         {
-            // Generar una posición aleatoria dentro del área
-            Vector3 spawnPosition = GetRandomPosition();
-
-            // Instanciar el prefab del dinosaurio
-            GameObject dinoObj = Instantiate(dino, spawnPosition, Quaternion.identity, dinosParent);
-
-            // Añadir el script de movimiento (asegúrate de que el prefab tiene Animator)
-            /*if (dinoObj.GetComponent<UnitIdleMovement>() == null)
+            var dinoData = kvp.Value;
+            if (dinoData.isAlive)
             {
-                dinoObj.AddComponent<UnitIdleMovement>();
+                GameObject prefab = GameManager.Instance.GetDinoPrefabByID(dinoData.dinoID);
+                if (prefab != null)
+                {
+                    Vector3 randomPos = GetRandomPositionInsideCollider(spawnArea);
+                    GameObject dinoObj = Instantiate(prefab, randomPos, Quaternion.identity);
+
+                    UnitIdleMovement idleMov = dinoObj.AddComponent<UnitIdleMovement>();
+                    idleMov.boxAreaTransform = spawnArea.transform;
+                }
             }
-            */
-            // Mostrar el nombre del dinosaurio encima
-            GameObject nameTag = CreateNameTag(dino.name);
-            nameTag.transform.SetParent(dinoObj.transform);
-            nameTag.transform.localPosition = new Vector3(0, 2f, 0); // Ajusta la posición según sea necesario
         }
     }
 
-    Vector3 GetRandomPosition()
+    Vector3 GetRandomPositionInsideCollider(Collider col)
     {
-        float x = Random.Range(-areaSize / 2f, areaSize / 2f);
-        float z = Random.Range(-areaSize / 2f, areaSize / 2f);
-        float y = 0f; // Asumiendo que el terreno está en y = 0
+        BoxCollider box = col as BoxCollider;
+        if (box == null)
+        {
+            Debug.LogError("spawnArea no es BoxCollider.");
+            return col.transform.position;
+        }
 
-        return new Vector3(x, y, z);
+        Vector3 size = box.size;
+        Vector3 center = box.center;
+        Vector3 worldCenter = box.transform.TransformPoint(center);
+        Vector3 halfSize = size * 0.5f;
+        Vector3 randomOffset = new Vector3(
+            Random.Range(-halfSize.x, halfSize.x),
+            Random.Range(-halfSize.y, halfSize.y),
+            Random.Range(-halfSize.z, halfSize.z)
+        );
+        Vector3 randomPos = worldCenter + box.transform.TransformDirection(randomOffset);
+        return randomPos;
     }
 
-    GameObject CreateNameTag(string name)
+    public void OnBackToBoardButton()
     {
-        GameObject nameTag = new GameObject("NameTag");
-        TextMesh textMesh = nameTag.AddComponent<TextMesh>();
-        textMesh.text = name;
-        textMesh.fontSize = 24;
-        textMesh.alignment = TextAlignment.Center;
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.characterSize = 0.1f;
-        textMesh.color = Color.white;
-
-        return nameTag;
+        SceneManager.LoadScene(boardSceneName);
     }
 }
