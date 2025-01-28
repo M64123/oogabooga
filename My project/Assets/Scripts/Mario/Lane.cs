@@ -3,37 +3,63 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Lane : MonoBehaviour
 {
     public Melanchall.DryWetMidi.MusicTheory.NoteName noteRestriction;
     public KeyCode input;
     public GameObject notePrefab;
-    List<Note> notes = new List<Note>();
+    private List<Note> notes = new List<Note>();
     public List<double> timeStamps = new List<double>();
 
-    int spawnIndex = 0;
-    int inputIndex = 0;
+    private int spawnIndex = 0;
+    private int inputIndex = 0;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
     public void SetTimeStamps(Melanchall.DryWetMidi.Interaction.Note[] array)
     {
+        if (array == null || array.Length == 0)
+        {
+            Debug.LogWarning("[Lane] No hay notas compatibles en el archivo MIDI.");
+            return;
+        }
+
         foreach (var note in array)
         {
             if (note.NoteName == noteRestriction)
             {
-                var metricTimeSpan = TimeConverter.ConvertTo<MetricTimeSpan>(note.Time, SongManager.midiFile.GetTempoMap());
-                timeStamps.Add((double)metricTimeSpan.Minutes * 60f + metricTimeSpan.Seconds + (double)metricTimeSpan.Milliseconds / 1000f);
+                var metricTimeSpan = TimeConverter.ConvertTo<MetricTimeSpan>(
+                    note.Time,
+                    SongManager.midiFile.GetTempoMap() // Cambiado de CurrentMidiFile a midiFile
+                );
+
+                timeStamps.Add((double)metricTimeSpan.Minutes * 60f +
+                               metricTimeSpan.Seconds +
+                               (double)metricTimeSpan.Milliseconds / 1000f);
             }
         }
+
+        if (timeStamps.Count == 0)
+        {
+            Debug.LogWarning("[Lane] No se encontraron notas que coincidan con las restricciones.");
+        }
     }
-    // Update is called once per frame
-    void Update()
+    public void ClearNotes()
+    {
+        foreach (var note in notes)
+        {
+            if (note != null)
+            {
+                Destroy(note.gameObject); // Elimina la nota visualmente
+            }
+        }
+        notes.Clear(); // Limpia la lista de notas
+        timeStamps.Clear(); // Limpia los timestamps de la pista anterior
+        spawnIndex = 0; // Reinicia el índice de generación
+        inputIndex = 0; // Reinicia el índice de entrada
+        Debug.Log("[Lane] Notas y estados reiniciados.");
+    }
+
+    private void Update()
     {
         if (spawnIndex < timeStamps.Count)
         {
@@ -57,28 +83,29 @@ public class Lane : MonoBehaviour
                 if (Math.Abs(audioTime - timeStamp) < marginOfError)
                 {
                     Hit();
-                    print($"Hit on {inputIndex} note");
+                    Debug.Log($"Hit on {inputIndex} note");
                     Destroy(notes[inputIndex].gameObject);
                     inputIndex++;
                 }
                 else
                 {
-                    print($"Hit inaccurate on {inputIndex} note with {Math.Abs(audioTime - timeStamp)} delay");
+                    Debug.Log($"Hit inaccurate on {inputIndex} note with {Math.Abs(audioTime - timeStamp)} delay");
                 }
             }
             if (timeStamp + marginOfError <= audioTime)
             {
                 Miss();
-                print($"Missed {inputIndex} note");
+                Debug.Log($"Missed {inputIndex} note");
                 inputIndex++;
             }
         }
-
     }
+
     private void Hit()
     {
         ScoreManager.Hit();
     }
+
     private void Miss()
     {
         ScoreManager.Miss();

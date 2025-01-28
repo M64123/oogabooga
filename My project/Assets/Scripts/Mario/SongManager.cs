@@ -9,113 +9,130 @@ using UnityEngine.Networking;
 public class SongManager : MonoBehaviour
 {
     public static SongManager Instance;
-    public AudioSource audioSource;
-    public Lane[] lanes;
-
-    [Header("Timing Config")]
+    private float GetTiempoPorSección()
+    {
+        // Calcula la duración de la sección (en segundos)
+        return (60f / bpm) * beatsPorCompas * compasesPorSección;
+    }
+    [Header("Duración del Cambio de Pista")]
+    public float bpm = 120f; // Ajusta el BPM de la canción
+    public int beatsPorCompas = 4; // Número de beats por compás (4/4 = 4 beats)
+    public int compasesPorSección = 8; // Número de compases por sección
+    [Header("Audio Configuración")]
+    public AudioSource audioSource; // Reproducción de audio
+    public Lane[] lanes; // Lanes que reciben las notas
     public float songDelayInSeconds;
-    public double marginOfError; // in seconds
+
+    [Header("Errores de Sincronización")]
+    public double marginOfError; // En segundos
     public int inputDelayInMilliseconds;
 
-    [Header("Note Timing")]
+    [Header("Notas")]
     public float noteTime;
     public float noteSpawnY;
     public float noteTapY;
-    public float noteDespawnY
-    {
-        get
-        {
-            return noteTapY - (noteSpawnY - noteTapY);
-        }
-    }
+    public float noteDespawnY => noteTapY - (noteSpawnY - noteTapY);
 
-    [Header("File Locations")]
-    public string fileLocation; // Archivo MIDI genérico (opcional)
-    public string combateMidiFile = "Combate.mid"; // Archivo MIDI para Combate
-    public string defensaMidiFile = "Defensa.mid"; // Archivo MIDI para Defensa
+    [Header("Pistas")]
+    public List<AudioTrack> tracks; // Lista de pistas (audio + MIDI)
+    private int currentTrackIndex = 0; // Índice de la pista actual
+    public static MidiFile midiFile; // Archivo MIDI actual
+    
 
-    public static MidiFile midiFile;
-
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         Instance = this;
 
-        // Suscripción a los eventos del AudioController
-        AudioController audioController = FindObjectOfType<AudioController>();
-        if (audioController != null)
+        if (tracks.Count > 0)
         {
-            audioController.onCombateStart.AddListener(() => LoadAndPlayMidi(combateMidiFile));
-            audioController.onDefensaStart.AddListener(() => LoadAndPlayMidi(defensaMidiFile));
-        }
-
-        // Cargar el archivo MIDI inicial
-        if (Application.streamingAssetsPath.StartsWith("http://") || Application.streamingAssetsPath.StartsWith("https://"))
-        {
-            StartCoroutine(ReadFromWebsite());
-        }
-        else
-        {
-            ReadFromFile();
+            StartTrack(); // Inicia con la primera pista
         }
     }
 
-    private IEnumerator ReadFromWebsite()
+    private void Update()
     {
-        using (UnityWebRequest www = UnityWebRequest.Get(Application.streamingAssetsPath + "/" + fileLocation))
+        // Cambiar de pista cuando termine la actual
+        if (!audioSource.isPlaying && tracks.Count > 1)
         {
-            yield return www.SendWebRequest();
-
-            if (www.result != UnityWebRequest.Result.Success)
-            {
-                Debug.LogError(www.error);
-            }
-            else
-            {
-                byte[] results = www.downloadHandler.data;
-                using (var stream = new MemoryStream(results))
-                {
-                    midiFile = MidiFile.Read(stream);
-                    GetDataFromMidi();
-                }
-            }
+            NextTrack();
         }
     }
 
-    private void ReadFromFile()
+    private void StartTrack()
     {
-        string filePath = Application.streamingAssetsPath + "/" + fileLocation;
-        if (File.Exists(filePath))
+        if (currentTrackIndex < 0 || currentTrackIndex >= tracks.Count)
         {
-            midiFile = MidiFile.Read(filePath);
-            GetDataFromMidi();
+            Debug.LogError("[SongManager] Índice de pista inválido.");
+            return;
         }
-        else
-        {
-            Debug.LogError($"[SongManager] El archivo MIDI '{filePath}' no existe.");
-        }
+
+        // Limpieza completa de notas y estado
+        ResetNotes();
+
+        AudioTrack track = tracks[currentTrackIndex];
+
+        // Configurar el audio
+        audioSource.Stop();
+        audioSource.clip = track.audioClip;
+        audioSource.Play();
+
+        // Leer el archivo MIDI asociado
+        LoadMidiFile(track.midiFileName);
+
+        Debug.Log($"[SongManager] Reproduciendo pista: {track.audioClip.name} con MIDI: {track.midiFileName}");
+
+        // Programar el cambio de pista
+        float tiempoPorSección = GetTiempoPorSección();
+        Invoke(nameof(NextTrack), tiempoPorSección); // Cambiar pista después de la duración calculada
     }
 
-    private void LoadAndPlayMidi(string midiFileName)
+    // Método para limpiar notas y reiniciar estado
+    private void ResetNotes()
     {
-        string filePath = Application.streamingAssetsPath + "/" + midiFileName;
+        // Limpia todas las notas en pantalla
+        foreach (var lane in lanes)
+        {
+            lane.ClearNotes();
+        }
+        Debug.Log("[SongManager] Notas limpiadas al cambiar de pista.");
+    }
+
+    private void NextTrack()
+    {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.Count;
+        StartTrack();
+    }
+
+    private void LoadMidiFile(string midiFileName)
+    {
+        string filePath = Path.Combine(Application.streamingAssetsPath, midiFileName);
+
         if (!File.Exists(filePath))
         {
             Debug.LogError($"[SongManager] El archivo MIDI '{filePath}' no existe.");
             return;
         }
 
-        // Cargar el archivo MIDI
-        midiFile = MidiFile.Read(filePath);
-        Debug.Log($"[SongManager] MIDI cargado: {midiFileName}");
-
-        // Procesar las notas y reproducir la canción
-        GetDataFromMidi();
-        Invoke(nameof(StartSong), songDelayInSeconds);
+        try
+        {
+            midiFile = MidiFile.Read(filePath);
+            Debug.Log($"[SongManager] Archivo MIDI cargado correctamente: {midiFileName}");
+            GetDataFromMidi();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[SongManager] Error al leer el archivo MIDI '{filePath}': {ex.Message}");
+        }
     }
 
-    public void GetDataFromMidi()
+    private void GetDataFromMidi()
     {
+        if (midiFile == null)
+        {
+            Debug.LogError("[SongManager] No hay un archivo MIDI cargado para procesar.");
+            return;
+        }
+
         var notes = midiFile.GetNotes();
         var array = new Melanchall.DryWetMidi.Interaction.Note[notes.Count];
         notes.CopyTo(array, 0);
@@ -124,20 +141,20 @@ public class SongManager : MonoBehaviour
         {
             lane.SetTimeStamps(array);
         }
-    }
 
-    public void StartSong()
-    {
-        audioSource.Play();
+        // Sincroniza el inicio del audio con la generación de notas
+        audioSource.PlayDelayed(songDelayInSeconds);
     }
 
     public static double GetAudioSourceTime()
     {
         return (double)Instance.audioSource.timeSamples / Instance.audioSource.clip.frequency;
     }
+}
 
-    void Update()
-    {
-        // Aquí puedes agregar lógica adicional si es necesario
-    }
+[System.Serializable]
+public class AudioTrack
+{
+    public AudioClip audioClip; // El clip de audio
+    public string midiFileName; // El archivo MIDI asociado
 }
