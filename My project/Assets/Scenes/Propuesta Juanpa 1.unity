@@ -500,6 +500,54 @@ Transform:
   - {fileID: 520614988}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &732185116
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 732185118}
+  - component: {fileID: 732185117}
+  m_Layer: 0
+  m_Name: Lane 4
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &732185117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 732185116}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 897bfd65257ec974a9e342d3b6ef1407, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noteRestriction: 9
+  input: 99
+  notePrefab: {fileID: 4946630328084573790, guid: c210426589f78c746874ae6e8e7bc3f5, type: 3}
+  timeStamps: []
+--- !u!4 &732185118
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 732185116}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.0253696, y: 9.02, z: -0.0958818}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &859437042
 GameObject:
   m_ObjectHideFlags: 0
@@ -625,22 +673,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bpm: 120
   beatsPorCompas: 4
-  "compasesPorSecci\xF3n": 8
+  "compasesPorSecci\xF3n": 16
   audioSource: {fileID: 1159628463}
   lanes:
   - {fileID: 1931841389}
   - {fileID: 1463100376}
-  songDelayInSeconds: 0
-  marginOfError: 0.5
+  - {fileID: 1197700924}
+  - {fileID: 732185117}
+  songDelayInSeconds: 10.94
+  marginOfError: 0.32
   inputDelayInMilliseconds: 0
   noteTime: 1
-  noteSpawnY: 9.43
+  noteSpawnY: 11.25
   noteTapY: -5.01
   tracks:
   - audioClip: {fileID: 8300000, guid: af2ed1c49e2b30647bf4589903edc92f, type: 3}
-    midiFileName: Caca_de_vaca.mid
+    midiFileName: ataque.mid
   - audioClip: {fileID: 8300000, guid: 071843d5ecaf60a438640197fecbe1e7, type: 3}
-    midiFileName: Caca_de_vaca.mid
+    midiFileName: Defensa.mid
 --- !u!4 &860546331
 Transform:
   m_ObjectHideFlags: 0
@@ -826,6 +876,54 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -13.705496, y: 5.4171934, z: -14.008847}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1197700923
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1197700925}
+  - component: {fileID: 1197700924}
+  m_Layer: 0
+  m_Name: Lane 3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1197700924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1197700923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 897bfd65257ec974a9e342d3b6ef1407, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noteRestriction: 5
+  input: 32
+  notePrefab: {fileID: 1461118768672084059, guid: bcd6f5f7da1ac974189c6e66d9896399, type: 3}
+  timeStamps: []
+--- !u!4 &1197700925
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1197700923}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.89, y: 9.02, z: -0.0958818}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1116,7 +1214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 897bfd65257ec974a9e342d3b6ef1407, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  noteRestriction: 9
+  noteRestriction: 4
   input: 99
   notePrefab: {fileID: 4946630328084573790, guid: c210426589f78c746874ae6e8e7bc3f5, type: 3}
   timeStamps: []
@@ -1129,7 +1227,7 @@ Transform:
   m_GameObject: {fileID: 1463100375}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.7746304, y: 0.5336343, z: -0.0958818}
+  m_LocalPosition: {x: 2.0253696, y: 9.02, z: -0.0958818}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1324,7 +1422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 897bfd65257ec974a9e342d3b6ef1407, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  noteRestriction: 11
+  noteRestriction: 0
   input: 32
   notePrefab: {fileID: 1461118768672084059, guid: bcd6f5f7da1ac974189c6e66d9896399, type: 3}
   timeStamps: []
@@ -1337,7 +1435,7 @@ Transform:
   m_GameObject: {fileID: 1931841388}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.7746304, y: 0.5336343, z: -0.0958818}
+  m_LocalPosition: {x: -1.89, y: 9.02, z: -0.0958818}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1456,6 +1554,8 @@ SceneRoots:
   - {fileID: 278893421}
   - {fileID: 1931841390}
   - {fileID: 1463100377}
+  - {fileID: 1197700925}
+  - {fileID: 732185118}
   - {fileID: 673605467}
   - {fileID: 1073861795}
   - {fileID: 1266795595}
