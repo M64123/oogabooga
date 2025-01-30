@@ -4,42 +4,23 @@ using UnityEngine;
 using UnityEngine.Events;
 
 /// <summary>
-/// AudioController que:
-/// - Usa 2 AudioSources para reproducir Intro/Combate/Defensa/Transición,
-/// - Cada sección (Intro, Combate, Defensa, Transición) dura EXACTAMENTE X beats (definidos en Inspector),
-/// - Alterna Combate ↔ Defensa indefinidamente tras la Intro (si existe),
-/// - Emplea AudioMidiPair (AudioClip + MIDI) para cada sección. Al reproducir uno, se llama a TaikoMIDIManager con el MIDI correspondiente.
+/// AudioController con una LISTA de Canciones. 
+/// Escoge UNA Cancion al inicio, reproduce sus secciones en orden cíclico (Ataque/Defensa), 
+/// usando Intro y Transición si existen. 
+/// Cada sección forzada a X beats, y llama a GuitarHeroMIDIManager para QTE.
 /// </summary>
 public class AudioController : MonoBehaviour
 {
     public static AudioController Instance { get; private set; }
 
-    [Header("Intro (opcional)")]
-    public List<AudioMidiPair> introPairs;
+    [Header("Lista de Canciones")]
+    public List<Cancion> canciones;
 
-    [Header("Combate (pares audio + midi)")]
-    public List<AudioMidiPair> combatePairs;
-
-    [Header("Defensa (pares audio + midi)")]
-    public List<AudioMidiPair> defensaPairs;
-
-    [Header("Transicion (opcional)")]
-    public List<AudioMidiPair> transicionPairs;
-
-    [Header("Configuración de Beats")]
-    [Tooltip("BPM global para calcular duraciones (60 / bpm).")]
+    [Header("Configuración de Beats (forzados)")]
     public float bpm = 120f;
-
-    [Tooltip("Beats que dura la Intro (si existe).")]
     public int beatsIntro = 8;
-
-    [Tooltip("Beats que dura la Transición (si existe).")]
     public int beatsTransicion = 4;
-
-    [Tooltip("Beats que dura Combate.")]
-    public int beatsCombate = 16;
-
-    [Tooltip("Beats que dura Defensa.")]
+    public int beatsAtaque = 16;
     public int beatsDefensa = 16;
 
     [Header("Volumen General")]
@@ -47,25 +28,29 @@ public class AudioController : MonoBehaviour
     public float volume = 1f;
 
     [Header("MIDI Manager (para QTE)")]
-    public TaikoMIDIManager midiManager;
+    public GuitarHeroMIDIManager midiManager;
 
     [Header("Eventos (opcional)")]
     public UnityEvent onSongStart;
 
-    // ----------------------------------------------------------------------
     // Internos
     private AudioSource sourceA;
     private AudioSource sourceB;
     private bool lastUsedSourceA = false;
 
-    private enum MusicState { None, Intro, Combate, Defensa, Transicion }
+    private enum MusicState { None, Intro, Ataque, Defensa, Transicion }
     private MusicState currentState = MusicState.None;
 
     private double currentSectionEndDSP = 0.0;
     private bool hasStarted = false;
     private bool nextSectionScheduled = false;
-
     private const float LOOKAHEAD = 0.2f;
+
+    // Cancion actual elegida
+    private Cancion currentCancion;
+    // Índices para avanzar en la lista de ataque/defensa
+    private int ataqueIndex = 0;
+    private int defensaIndex = 0;
 
     private void Awake()
     {
@@ -78,6 +63,7 @@ public class AudioController : MonoBehaviour
 
         sourceA = gameObject.AddComponent<AudioSource>();
         sourceB = gameObject.AddComponent<AudioSource>();
+
         sourceA.playOnAwake = false;
         sourceB.playOnAwake = false;
 
@@ -116,74 +102,67 @@ public class AudioController : MonoBehaviour
         Debug.Log("[AudioController] StartMusic => iniciamos con beats forzados");
         onSongStart.Invoke();
 
+        if (canciones == null || canciones.Count == 0)
+        {
+            Debug.LogWarning("[AudioController] No hay canciones => no suena nada.");
+            return;
+        }
+
+        // Elegir una cancion al azar
+        currentCancion = PickRandomCancion();
+        ataqueIndex = 0;
+        defensaIndex = 0;
+
         double dspStart = AudioSettings.dspTime;
 
-        // Intro
-        if (introPairs != null && introPairs.Count > 0)
+        // Si tiene Intro
+        if (currentCancion.introPair != null && currentCancion.introPair.audioClip != null)
         {
             currentState = MusicState.Intro;
-            AudioMidiPair pair = GetRandomPair(introPairs);
-            if (pair.audioClip == null)
-            {
-                Debug.LogWarning("[AudioController] Intro pair sin audio => voy a Combate directo");
-                GoToCombateDirect(dspStart);
-                return;
-            }
 
             double secPerBeat = 60.0 / bpm;
-            double introDurSec = beatsIntro * secPerBeat;
-            double dspEnd = dspStart + introDurSec;
+            double introDur = beatsIntro * secPerBeat;
+            double dspEnd = dspStart + introDur;
 
-            PlayScheduled(pair.audioClip, dspStart, dspEnd);
+            PlayScheduled(currentCancion.introPair, dspStart, dspEnd);
             currentSectionEndDSP = dspEnd;
 
-            Debug.Log($"[AudioController] Intro => '{pair.audioClip.name}', {beatsIntro} beats, {dspStart:F2}-{dspEnd:F2}");
-
-            // MIDI
-            if (midiManager != null && pair.midiFile != null)
-            {
-                midiManager.ParseAndGenerateQTEs(pair.midiFile, dspStart, dspEnd, true);
-            }
+            Debug.Log($"[AudioController] Intro => '{currentCancion.introPair.audioClip.name}', {beatsIntro} beats, {dspStart:F2}-{dspEnd:F2}");
+            CallMIDIManager(currentCancion.introPair, dspStart, dspEnd, true);
         }
         else
         {
-            GoToCombateDirect(dspStart);
+            // Sin intro => Ataque directo
+            GoToAtaqueDirect(dspStart);
         }
 
         nextSectionScheduled = false;
     }
 
-    private void GoToCombateDirect(double dspStart)
+    private void GoToAtaqueDirect(double dspStart)
     {
-        currentState = MusicState.Combate;
+        currentState = MusicState.Ataque;
 
-        AudioMidiPair pair = GetRandomPair(combatePairs);
-        if (pair == null || pair.audioClip == null)
+        AudioMidiPair pair = GetNextAtaquePair();
+        if (pair == null)
         {
-            Debug.LogWarning("[AudioController] No Combate pairs => no se reproduce nada.");
+            Debug.LogWarning("[AudioController] No clips de Ataque => no suena nada.");
             return;
         }
 
         double secPerBeat = 60.0 / bpm;
-        double segDur = beatsCombate * secPerBeat;
+        double segDur = beatsAtaque * secPerBeat;
         double dspEnd = dspStart + segDur;
 
-        PlayScheduled(pair.audioClip, dspStart, dspEnd);
+        PlayScheduled(pair, dspStart, dspEnd);
         currentSectionEndDSP = dspEnd;
 
-        Debug.Log($"[AudioController] Combate(Direct) => '{pair.audioClip.name}', {beatsCombate} beats, {dspStart:F2}-{dspEnd:F2}");
-
-        if (midiManager != null && pair.midiFile != null)
-        {
-            midiManager.ParseAndGenerateQTEs(pair.midiFile, dspStart, dspEnd, false);
-        }
+        Debug.Log($"[AudioController] Ataque => '{pair.audioClip.name}', {beatsAtaque} beats, {dspStart:F2}-{dspEnd:F2}");
+        CallMIDIManager(pair, dspStart, dspEnd, false);
 
         nextSectionScheduled = false;
     }
 
-    // ----------------------------------------------------------------------
-    //                     ScheduleNextSection
-    // ----------------------------------------------------------------------
     private void ScheduleNextSection()
     {
         double dspNow = AudioSettings.dspTime;
@@ -192,16 +171,16 @@ public class AudioController : MonoBehaviour
         switch (currentState)
         {
             case MusicState.Intro:
-                GoToState(MusicState.Combate);
+                GoToState(MusicState.Ataque);
                 break;
-            case MusicState.Combate:
+            case MusicState.Ataque:
                 GoToState(MusicState.Defensa);
                 break;
             case MusicState.Defensa:
-                GoToState(MusicState.Combate);
+                GoToState(MusicState.Ataque);
                 break;
             case MusicState.Transicion:
-                Debug.LogWarning("[AudioController] Terminó Transición. Falta nextState?");
+                Debug.LogWarning("[AudioController] Terminó Transición sin nextState definido.");
                 break;
         }
 
@@ -212,34 +191,22 @@ public class AudioController : MonoBehaviour
     {
         Debug.Log($"[AudioController] GoToState => from {currentState} to {next}");
 
-        bool hasTrans = (transicionPairs != null && transicionPairs.Count > 0);
-
-        if (hasTrans)
+        // Si tenemos transicion
+        if (currentCancion.transicionPair != null && currentCancion.transicionPair.audioClip != null)
         {
-            AudioMidiPair tPair = GetRandomPair(transicionPairs);
-            if (tPair != null && tPair.audioClip != null)
-            {
-                double dspStart = currentSectionEndDSP;
-                double secPerBeat = 60.0 / bpm;
-                double transDur = beatsTransicion * secPerBeat;
-                double dspEnd = dspStart + transDur;
+            double dspStart = currentSectionEndDSP;
+            double secPerBeat = 60.0 / bpm;
+            double transDur = beatsTransicion * secPerBeat;
+            double dspEnd = dspStart + transDur;
 
-                currentState = MusicState.Transicion;
-                PlayScheduled(tPair.audioClip, dspStart, dspEnd);
-                Debug.Log($"[AudioController] Trans => '{tPair.audioClip.name}', {beatsTransicion} beats, {dspStart:F2}-{dspEnd:F2}");
+            currentState = MusicState.Transicion;
+            PlayScheduled(currentCancion.transicionPair, dspStart, dspEnd);
 
-                if (midiManager != null && tPair.midiFile != null)
-                {
-                    midiManager.ParseAndGenerateQTEs(tPair.midiFile, dspStart, dspEnd, false);
-                }
+            Debug.Log($"[AudioController] Trans => '{currentCancion.transicionPair.audioClip.name}', {beatsTransicion} beats, {dspStart:F2}-{dspEnd:F2}");
+            CallMIDIManager(currentCancion.transicionPair, dspStart, dspEnd, false);
 
-                StartCoroutine(WaitAndThenSection(next, dspEnd));
-            }
-            else
-            {
-                // no clip => directo
-                ScheduleDirect(next);
-            }
+            // luego la sección principal
+            StartCoroutine(WaitAndThenSection(next, dspEnd));
         }
         else
         {
@@ -261,45 +228,84 @@ public class AudioController : MonoBehaviour
         double dspStart = currentSectionEndDSP;
         double secPerBeat = 60.0 / bpm;
 
-        int beatsToUse = (next == MusicState.Combate) ? beatsCombate : beatsDefensa;
-        AudioMidiPair pair = (next == MusicState.Combate)
-            ? GetRandomPair(combatePairs)
-            : GetRandomPair(defensaPairs);
-
-        if (pair == null || pair.audioClip == null)
+        if (next == MusicState.Ataque)
         {
-            Debug.LogWarning($"[AudioController] No hay pares en {next}. Se detiene.");
-            return;
+            AudioMidiPair pair = GetNextAtaquePair();
+            if (pair == null)
+            {
+                Debug.LogWarning("[AudioController] No clips de Ataque => se detiene.");
+                return;
+            }
+
+            double segDurSec = beatsAtaque * secPerBeat;
+            double dspEnd = dspStart + segDurSec;
+
+            currentState = MusicState.Ataque;
+            PlayScheduled(pair, dspStart, dspEnd);
+
+            Debug.Log($"[AudioController] Ataque => '{pair.audioClip.name}', {beatsAtaque} beats, {dspStart:F2}-{dspEnd:F2}");
+            currentSectionEndDSP = dspEnd;
+            CallMIDIManager(pair, dspStart, dspEnd, false);
         }
-
-        double segDurSec = beatsToUse * secPerBeat;
-        double dspEnd = dspStart + segDurSec;
-
-        currentState = next;
-        PlayScheduled(pair.audioClip, dspStart, dspEnd);
-
-        Debug.Log($"[AudioController] {next} => '{pair.audioClip.name}', {beatsToUse} beats, {dspStart:F2}-{dspEnd:F2}");
-        currentSectionEndDSP = dspEnd;
-
-        // MIDI
-        if (midiManager != null && pair.midiFile != null)
+        else if (next == MusicState.Defensa)
         {
-            midiManager.ParseAndGenerateQTEs(pair.midiFile, dspStart, dspEnd, false);
+            AudioMidiPair pair = GetNextDefensaPair();
+            if (pair == null)
+            {
+                Debug.LogWarning("[AudioController] No clips de Defensa => se detiene.");
+                return;
+            }
+
+            double segDurSec = beatsDefensa * secPerBeat;
+            double dspEnd = dspStart + segDurSec;
+
+            currentState = MusicState.Defensa;
+            PlayScheduled(pair, dspStart, dspEnd);
+
+            Debug.Log($"[AudioController] Defensa => '{pair.audioClip.name}', {beatsDefensa} beats, {dspStart:F2}-{dspEnd:F2}");
+            currentSectionEndDSP = dspEnd;
+            CallMIDIManager(pair, dspStart, dspEnd, false);
         }
     }
 
     // ----------------------------------------------------------------------
     //                     Aux
     // ----------------------------------------------------------------------
-    private void PlayScheduled(AudioClip clip, double dspStart, double dspEnd)
+    private Cancion PickRandomCancion()
     {
-        if (clip == null)
+        int idx = Random.Range(0, canciones.Count);
+        return canciones[idx];
+    }
+
+    private AudioMidiPair GetNextAtaquePair()
+    {
+        if (currentCancion == null) return null;
+        if (currentCancion.ataquePairs == null || currentCancion.ataquePairs.Count == 0) return null;
+
+        AudioMidiPair p = currentCancion.ataquePairs[ataqueIndex];
+        ataqueIndex = (ataqueIndex + 1) % currentCancion.ataquePairs.Count;
+        return p;
+    }
+
+    private AudioMidiPair GetNextDefensaPair()
+    {
+        if (currentCancion == null) return null;
+        if (currentCancion.defensaPairs == null || currentCancion.defensaPairs.Count == 0) return null;
+
+        AudioMidiPair p = currentCancion.defensaPairs[defensaIndex];
+        defensaIndex = (defensaIndex + 1) % currentCancion.defensaPairs.Count;
+        return p;
+    }
+
+    private void PlayScheduled(AudioMidiPair pair, double dspStart, double dspEnd)
+    {
+        if (pair == null || pair.audioClip == null)
         {
-            Debug.LogWarning("[AudioController] clip nulo => no suena");
+            Debug.LogWarning("[AudioController] pair nulo => no suena");
             return;
         }
 
-        AudioSource nextSrc = (lastUsedSourceA) ? sourceB : sourceA;
+        AudioSource nextSrc = lastUsedSourceA ? sourceB : sourceA;
         lastUsedSourceA = !lastUsedSourceA;
 
         // limpiar la otra
@@ -308,19 +314,20 @@ public class AudioController : MonoBehaviour
         other.clip = null;
 
         nextSrc.Stop();
-        nextSrc.clip = clip;
+        nextSrc.clip = pair.audioClip;
         nextSrc.volume = volume;
 
         nextSrc.PlayScheduled(dspStart);
         nextSrc.SetScheduledEndTime(dspEnd);
 
-        Debug.Log($"[AudioController] PlayScheduled => '{clip.name}', from {dspStart:F2} to {dspEnd:F2} on {(nextSrc == sourceA ? "sourceA" : "sourceB")}");
+        Debug.Log($"[AudioController] PlayScheduled => '{pair.audioClip.name}', from {dspStart:F2} to {dspEnd:F2} on {(nextSrc == sourceA ? "sourceA" : "sourceB")}");
     }
 
-    private AudioMidiPair GetRandomPair(List<AudioMidiPair> list)
+    private void CallMIDIManager(AudioMidiPair pair, double dspStart, double dspEnd, bool isIntro)
     {
-        if (list == null || list.Count == 0) return null;
-        int idx = Random.Range(0, list.Count);
-        return list[idx];
+        if (midiManager != null && pair.midiFile != null)
+        {
+            midiManager.ParseAndGenerateQTEs(pair.midiFile, dspStart, dspEnd, isIntro);
+        }
     }
 }
