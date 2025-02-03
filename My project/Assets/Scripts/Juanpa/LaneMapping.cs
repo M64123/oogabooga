@@ -1,14 +1,28 @@
 using UnityEngine;
+using System.Linq;
+using System.Collections.Generic;
 
 [System.Serializable]
 public class LaneMapping
 {
-    [Tooltip("Identificador de la lane (0,1,2,...).")]
     public int laneID;
+    public GHNotePrefabMapping[] notePrefabs;
 
-    [Tooltip("Tecla para esta lane (ej: KeyCode.F).")]
-    public KeyCode laneKey;
+    public bool HasNote(int midiNote)
+    {
+        return notePrefabs.Any(x => x.midiNote == midiNote);
+    }
 
-    [Tooltip("Notas MIDI que irán por esta lane.")]
-    public int[] midiNotes;
+    public GHNotePrefabMapping FindPrefabForNote(int midiNote)
+    {
+        return notePrefabs.FirstOrDefault(x => x.midiNote == midiNote);
+    }
+}
+
+[System.Serializable]
+public class GHNotePrefabMapping
+{
+    public int midiNote;
+    public GameObject prefab;
+    public KeyCode key;
 }

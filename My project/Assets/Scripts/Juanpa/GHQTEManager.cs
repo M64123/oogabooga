@@ -1,15 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class GHQTEManager : MonoBehaviour
 {
-    [Header("Lane Rects (en orden de laneID)")]
-    public RectTransform[] laneRects; // laneRects[0] => lane 0, laneRects[1] => lane 1, etc.
-
-    [Header("Prefabs")]
-    public GameObject qteIndicatorPrefab; // un prefab con GHQTEIndicator
+    [Header("Lane Rects (index = laneID)")]
+    public RectTransform[] laneRects;
 
     [Header("Timing")]
     public float spawnLeadTime = 2f;
@@ -25,10 +20,10 @@ public class GHQTEManager : MonoBehaviour
 
         float dspNow = (float)AudioSettings.dspTime;
 
-        // spawnear QTE
+        // Spawnear
         for (int i = 0; i < upcomingQTEs.Count; i++)
         {
-            GHQTEData qte = upcomingQTEs[i];
+            var qte = upcomingQTEs[i];
             float spawnTime = qte.perfectTime - spawnLeadTime;
             if (dspNow >= spawnTime)
             {
@@ -44,7 +39,7 @@ public class GHQTEManager : MonoBehaviour
         managerActive = true;
         upcomingQTEs.Clear();
 
-        // Limpiar QTEIndicators activos
+        // limpiar QTEIndicators activos
         foreach (var ind in activeIndicators)
         {
             if (ind != null) Destroy(ind.gameObject);
@@ -64,7 +59,7 @@ public class GHQTEManager : MonoBehaviour
         }
         activeIndicators.Clear();
 
-        Debug.Log("[GHQTEManager] StopQTEManager => todo limpiado.");
+        Debug.Log("[GHQTEManager] StopQTEManager => limpiado");
     }
 
     public void AddQTEs(List<GHQTEData> newQTEs)
@@ -76,24 +71,29 @@ public class GHQTEManager : MonoBehaviour
 
     private void SpawnIndicator(GHQTEData qte)
     {
-        // LaneRect
         if (qte.laneID < 0 || qte.laneID >= laneRects.Length)
         {
-            Debug.LogWarning($"[GHQTEManager] QTE laneID={qte.laneID} fuera de rango => se ignora");
+            Debug.LogWarning($"[GHQTEManager] LaneID={qte.laneID} fuera de rango");
             return;
         }
         RectTransform laneRect = laneRects[qte.laneID];
         if (!laneRect)
         {
-            Debug.LogWarning($"[GHQTEManager] laneRects[{qte.laneID}] es nulo => no spawneamos");
+            Debug.LogWarning($"[GHQTEManager] laneRects[{qte.laneID}] es null");
             return;
         }
 
-        GameObject go = Instantiate(qteIndicatorPrefab, laneRect);
+        if (qte.prefab == null)
+        {
+            Debug.LogWarning("[GHQTEManager] QTE prefab nulo => no spawneamos");
+            return;
+        }
+
+        GameObject go = Instantiate(qte.prefab, laneRect);
         GHQTEIndicator indicator = go.GetComponent<GHQTEIndicator>();
         if (indicator == null)
         {
-            Debug.LogWarning("[GHQTEManager] Prefab sin GHQTEIndicator");
+            Debug.LogWarning("[GHQTEManager] Prefab sin GHQTEIndicator => destruyendo");
             Destroy(go);
             return;
         }
@@ -101,7 +101,7 @@ public class GHQTEManager : MonoBehaviour
         indicator.Initialize(qte, this, spawnLeadTime, perfectMargin);
         activeIndicators.Add(indicator);
 
-        Debug.Log($"[GHQTEManager] Spawn QTE => lane={qte.laneID}, perfectTime={qte.perfectTime:F2}, dspNow={(float)AudioSettings.dspTime:F2}");
+        Debug.Log($"[GHQTEManager] Spawn => lane={qte.laneID}, dspNow={AudioSettings.dspTime:F2}, perfTime={qte.perfectTime:F2}");
     }
 
     public void RemoveIndicator(GHQTEIndicator ind)

@@ -3,6 +3,8 @@ using UnityEngine;
 [System.Serializable]
 public class DinosaurDefinition
 {
+
+    public Sprite dinoSprite;
     public int dinoID;             // ID único del dinosaurio
     public GameObject dinoPrefab;  // Prefab asociado al dinosaurio
     public string dinoName;        // Nombre del dinosaurio
