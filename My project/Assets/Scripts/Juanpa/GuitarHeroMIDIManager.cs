@@ -1,28 +1,37 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.IO;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Interaction;
-using System.IO;
 
+/// <summary>
+/// Parse de MIDI (Melanchall) y genera QTEIndicators
+/// asociando cada nota a un LaneMapping.
+/// </summary>
 public class GuitarHeroMIDIManager : MonoBehaviour
 {
-    [Header("QTE Manager")]
-    public GHQTEManager qteManager;
-
-    [Header("Lane Mappings")]
-    public List<LaneMapping> laneMappings;
+    [Header("Lane Mappings (para cada lane)")]
+    [Tooltip("Cada LaneMapping tiene un containerRect para instanciar QTEs en la UI, " +
+             "y un array de (midiNote -> QTETypeDefinition).")]
+    public List<LaneMapping> laneMappings = new List<LaneMapping>();
 
     [Header("LeadTime (segundos)")]
     public float leadTime = 2f;
 
+    [Header("Margen de 'perfect'")]
+    public float perfectMargin = 0.1f;
+
     [Header("Omitir notas si spawnTime < dspNow?")]
     public bool skipLateNotes = true;
 
+    /// <summary>
+    /// Llamada principal: parsea el MidiAsset y spawnea QTEs en el rango dspStart...dspEnd
+    /// </summary>
     public void ParseAndGenerateQTEs(MidiAsset midiAsset, double dspStart, double dspEnd)
     {
         if (midiAsset == null)
         {
-            Debug.LogWarning("[GuitarHeroMIDIManager] midiAsset nulo => no QTE.");
+            Debug.LogWarning("[GuitarHeroMIDIManager] MidiAsset es nulo => no QTE.");
             return;
         }
 
@@ -31,7 +40,7 @@ public class GuitarHeroMIDIManager : MonoBehaviour
         byte[] data = midiAsset.MidiBytes;
         if (data == null || data.Length == 0)
         {
-            Debug.LogWarning("[GuitarHeroMIDIManager] MidiAsset vacío => 0 QTE");
+            Debug.LogWarning("[GuitarHeroMIDIManager] MidiAsset vacío => 0 QTE.");
             return;
         }
 
@@ -51,10 +60,11 @@ public class GuitarHeroMIDIManager : MonoBehaviour
 
         var tempoMap = midiFile.GetTempoMap();
         var notes = midiFile.GetNotes();
-        List<GHQTEData> qteList = new List<GHQTEData>();
 
         double dspNow = AudioSettings.dspTime;
+        int countSpawned = 0;
 
+        // Recorremos las notas del MIDI
         foreach (var note in notes)
         {
             var metricTime = note.TimeAs<MetricTimeSpan>(tempoMap);
@@ -62,45 +72,68 @@ public class GuitarHeroMIDIManager : MonoBehaviour
 
             double dspEvent = dspStart + noteSec;
             if (dspEvent < dspStart || dspEvent > dspEnd)
-                continue; // fuera de la sección
+                continue;
 
             double spawnTime = dspEvent - leadTime;
             if (skipLateNotes && spawnTime < dspNow)
-                continue; // no queremos spawnear QTE a medias
+                continue;
+
+            int midiNote = note.NoteNumber;
 
             // Buscar Lane
-            int midiNote = note.NoteNumber;
-            LaneMapping laneMap = FindLaneForNote(midiNote);
-            if (laneMap != null)
+            LaneMapping lane = FindLaneForNote(midiNote);
+            if (lane == null)
+                continue;
+
+            // Buscar QTETypeDefinition
+            GHQTETypeMapping typeMap = lane.FindQTEType(midiNote);
+            if (typeMap == null || typeMap.qteType == null)
+                continue;
+
+            KeyCode finalKey = (typeMap.overrideKey != KeyCode.None)
+                ? typeMap.overrideKey
+                : typeMap.qteType.defaultKey;
+
+            // Creamos GHQTEData
+            GHQTEData qteData = new GHQTEData
             {
-                // buscar prefabMap
-                GHNotePrefabMapping pm = laneMap.FindPrefabForNote(midiNote);
-                if (pm != null)
-                {
-                    GHQTEData qte = new GHQTEData
-                    {
-                        laneID = laneMap.laneID,
-                        note = midiNote,
-                        key = pm.key,
-                        prefab = pm.prefab,
-                        perfectTime = (float)dspEvent
-                    };
-                    qteList.Add(qte);
-                }
-            }
+                laneID = lane.laneID,
+                note = midiNote,
+                key = finalKey,
+                perfectTime = (float)dspEvent,
+                qteType = typeMap.qteType
+            };
+
+            // Instanciamos el prefab via GHQTEManager
+            SpawnIndicatorViaManager(lane, qteData);
+
+            countSpawned++;
         }
 
-        qteManager.StartQTEManager();
-        qteManager.AddQTEs(qteList);
+        Debug.Log($"[GuitarHeroMIDIManager] => Generados {countSpawned} QTEs.");
+    }
 
-        Debug.Log($"[GuitarHeroMIDIManager] => Generados {qteList.Count} QTEs.");
+    /// <summary>
+    /// Llama al GHQTEManager para instanciar el QTEIndicator.
+    /// </summary>
+    private void SpawnIndicatorViaManager(LaneMapping lane, GHQTEData data)
+    {
+        if (!lane.containerRect)
+        {
+            Debug.LogWarning("[GuitarHeroMIDIManager] Lane sin containerRect => no QTE");
+            return;
+        }
+
+        // GHQTEManager usa su método SpawnQTE(...)
+        GHQTEManager.Instance.SpawnQTE(data, lane.containerRect);
     }
 
     private LaneMapping FindLaneForNote(int midiNote)
     {
         foreach (var lane in laneMappings)
         {
-            if (lane.HasNote(midiNote)) return lane;
+            if (lane.ContainsNote(midiNote))
+                return lane;
         }
         return null;
     }

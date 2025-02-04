@@ -3,109 +3,61 @@ using System.Collections.Generic;
 
 public class GHQTEManager : MonoBehaviour
 {
-    [Header("Lane Rects (index = laneID)")]
-    public RectTransform[] laneRects;
+    public static GHQTEManager Instance { get; private set; }
 
-    [Header("Timing")]
-    public float spawnLeadTime = 2f;
+    [Header("LeadTime")]
+    public float leadTime = 2f;
+
+    [Header("Margen Perfect")]
     public float perfectMargin = 0.1f;
 
-    private bool managerActive = false;
-    private List<GHQTEData> upcomingQTEs = new List<GHQTEData>();
-    private List<GHQTEIndicator> activeIndicators = new List<GHQTEIndicator>();
-
-    private void Update()
+    private void Awake()
     {
-        if (!managerActive) return;
-
-        float dspNow = (float)AudioSettings.dspTime;
-
-        // Spawnear
-        for (int i = 0; i < upcomingQTEs.Count; i++)
+        if (Instance != null && Instance != this)
         {
-            var qte = upcomingQTEs[i];
-            float spawnTime = qte.perfectTime - spawnLeadTime;
-            if (dspNow >= spawnTime)
-            {
-                SpawnIndicator(qte);
-                upcomingQTEs.RemoveAt(i);
-                i--;
-            }
-        }
-    }
-
-    public void StartQTEManager()
-    {
-        managerActive = true;
-        upcomingQTEs.Clear();
-
-        // limpiar QTEIndicators activos
-        foreach (var ind in activeIndicators)
-        {
-            if (ind != null) Destroy(ind.gameObject);
-        }
-        activeIndicators.Clear();
-
-        Debug.Log("[GHQTEManager] StartQTEManager => Limpieza e inicia.");
-    }
-
-    public void StopQTEManager()
-    {
-        managerActive = false;
-        upcomingQTEs.Clear();
-        foreach (var ind in activeIndicators)
-        {
-            if (ind != null) Destroy(ind.gameObject);
-        }
-        activeIndicators.Clear();
-
-        Debug.Log("[GHQTEManager] StopQTEManager => limpiado");
-    }
-
-    public void AddQTEs(List<GHQTEData> newQTEs)
-    {
-        upcomingQTEs.AddRange(newQTEs);
-        upcomingQTEs.Sort((a, b) => a.perfectTime.CompareTo(b.perfectTime));
-        Debug.Log($"[GHQTEManager] Agregados {newQTEs.Count} QTEs a la cola.");
-    }
-
-    private void SpawnIndicator(GHQTEData qte)
-    {
-        if (qte.laneID < 0 || qte.laneID >= laneRects.Length)
-        {
-            Debug.LogWarning($"[GHQTEManager] LaneID={qte.laneID} fuera de rango");
+            Destroy(gameObject);
             return;
         }
-        RectTransform laneRect = laneRects[qte.laneID];
-        if (!laneRect)
+        Instance = this;
+    }
+
+    /// <summary>
+    /// Ejemplo de spawn QTE con GHQTEData
+    /// </summary>
+    public void SpawnQTE(GHQTEData qteData, RectTransform parentRect)
+    {
+        if (!qteData.qteType)
         {
-            Debug.LogWarning($"[GHQTEManager] laneRects[{qte.laneID}] es null");
+            Debug.LogWarning("[GHQTEManager] qteData.qteType es null => no spawn");
+            return;
+        }
+        if (!qteData.qteType.prefab)
+        {
+            Debug.LogWarning("[GHQTEManager] QTEType sin prefab => no spawn");
+            return;
+        }
+        if (!parentRect)
+        {
+            Debug.LogWarning("[GHQTEManager] parentRect es null => no spawn");
             return;
         }
 
-        if (qte.prefab == null)
-        {
-            Debug.LogWarning("[GHQTEManager] QTE prefab nulo => no spawneamos");
-            return;
-        }
-
-        GameObject go = Instantiate(qte.prefab, laneRect);
+        // Instanciamos el prefab
+        GameObject go = Instantiate(qteData.qteType.prefab, parentRect);
         GHQTEIndicator indicator = go.GetComponent<GHQTEIndicator>();
-        if (indicator == null)
+        if (!indicator)
         {
             Debug.LogWarning("[GHQTEManager] Prefab sin GHQTEIndicator => destruyendo");
             Destroy(go);
             return;
         }
 
-        indicator.Initialize(qte, this, spawnLeadTime, perfectMargin);
-        activeIndicators.Add(indicator);
-
-        Debug.Log($"[GHQTEManager] Spawn => lane={qte.laneID}, dspNow={AudioSettings.dspTime:F2}, perfTime={qte.perfectTime:F2}");
+        // Llamada con la firma: (GHQTEData, GHQTEManager, float, float)
+        indicator.Initialize(qteData, this, leadTime, perfectMargin);
     }
 
     public void RemoveIndicator(GHQTEIndicator ind)
     {
-        activeIndicators.Remove(ind);
+        Debug.Log($"[GHQTEManager] RemoveIndicator => {ind.gameObject.name}");
     }
 }

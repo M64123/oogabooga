@@ -2,83 +2,86 @@ using UnityEngine;
 
 public class GHQTEIndicator : MonoBehaviour
 {
-    private GHQTEData data;
+    // Hacemos 'data' público para leerlo en GHReceptor
+    public GHQTEData data;
+
     private GHQTEManager manager;
-    private float spawnLeadTime;
+    private float leadTime;
     private float perfectMargin;
     private float perfectTime;
+    private bool checkedInput = false;
 
     private RectTransform rect;
     private Vector2 startPos;
     private Vector2 endPos;
-    private bool hasChecked = false;
 
-    public void Initialize(GHQTEData qte, GHQTEManager mgr, float lead, float margin)
+    public void Initialize(GHQTEData qteData, GHQTEManager mgr, float lead, float margin)
     {
-        data = qte;
+        data = qteData;  // Asignamos
         manager = mgr;
-        spawnLeadTime = lead;
+        leadTime = lead;
         perfectMargin = margin;
-        perfectTime = qte.perfectTime;
+        perfectTime = qteData.perfectTime;
 
         rect = GetComponent<RectTransform>();
-        float laneHeight = rect.parent.GetComponent<RectTransform>().rect.height;
+        if (rect && rect.parent)
+        {
+            float h = rect.parent.GetComponent<RectTransform>().rect.height;
+            startPos = new Vector2(0f, h / 2f + 50f);
+            endPos = new Vector2(0f, -h / 2f - 50f);
+            rect.anchoredPosition = startPos;
+        }
 
-        // Suponiendo pivote(0.5, 0.5), definimos la parte superior e inferior
-        startPos = new Vector2(0f, laneHeight / 2f + 50f);
-        endPos = new Vector2(0f, -laneHeight / 2f - 50f);
-
-        rect.anchoredPosition = startPos;
-
-        Debug.Log($"[GHQTEIndicator] Init => lane={data.laneID}, note={data.note}, key={data.key}, perfectTime={perfectTime:F2}");
+        Debug.Log($"[GHQTEIndicator] Init => Lane={data.laneID}, note={data.note}, key={data.key}");
     }
 
     private void Update()
     {
         float dspNow = (float)AudioSettings.dspTime;
         float timeUntilPerfect = perfectTime - dspNow;
-        float t = 1f - Mathf.Clamp01(timeUntilPerfect / spawnLeadTime);
 
-        rect.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
+        float t = 1f - Mathf.Clamp01(timeUntilPerfect / leadTime);
+        if (rect)
+            rect.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
 
-        // check input ~ perfectTime
-        if (!hasChecked && dspNow >= perfectTime - perfectMargin)
+        // Check input si no usamos Receptor, etc. (puedes comentar esta parte si prefieres el Receptor)
+        if (!checkedInput && dspNow >= perfectTime - perfectMargin)
         {
             CheckInput(dspNow);
-            hasChecked = true;
+            checkedInput = true;
         }
 
-        // si dspNow > perfectTime + 1 => se autodestruye
+        // Borrar 1s luego
         if (dspNow > perfectTime + 1f)
         {
-            RemoveThis();
+            DestroyQTE();
         }
     }
 
+    // Si sigues queriendo la detección "por tiempo" aquí, la dejas
+    // Si no, se usará la de GHReceptor.
     private void CheckInput(float dspNow)
     {
-        bool success = false;
         if (Input.GetKeyDown(data.key))
         {
             float diff = Mathf.Abs(dspNow - perfectTime);
             if (diff <= perfectMargin)
-                success = true;
-        }
-
-        if (success)
-        {
-            Debug.Log($"[GHQTEIndicator] PERFECT => dspNow={dspNow:F2}, lane={data.laneID}, note={data.note}");
-            RemoveThis();
-        }
-        else
-        {
-            Debug.Log($"[GHQTEIndicator] No perfect => dspNow={dspNow:F2}, needed ~{perfectTime:F2}");
+            {
+                Debug.Log($"[GHQTEIndicator] PERFECT => Lane={data.laneID}, note={data.note}");
+                data.qteType?.onSuccess?.Invoke();
+                DestroyQTE();
+            }
+            else
+            {
+                Debug.Log($"[GHQTEIndicator] Fallo => dspNow={dspNow:F2}, needed ~{perfectTime:F2}");
+            }
         }
     }
 
-    private void RemoveThis()
+    // Llamado por GHReceptor
+    public void DestroyQTE()
     {
-        manager.RemoveIndicator(this);
+        // manager?.RemoveIndicator(this); // opcional
         Destroy(gameObject);
     }
 }

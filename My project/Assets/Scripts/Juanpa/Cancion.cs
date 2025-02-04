@@ -1,18 +1,28 @@
-using System.Collections.Generic;
+锘縰sing System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
 public class Cancion
 {
+    [Header("Nombre para identificar la canci贸n")]
     public string nombreCancion;
 
-    [Header("Clips de Intro y Transici髇 (opcionales)")]
-    public AudioMidiPair introPair;
-    public AudioMidiPair transicionPair;
+    [Header("Audio base que suena en loop toda la canci贸n")]
+    public AudioClip baseClip;
 
-    [Header("Clips de Ataque (en orden c韈lico)")]
-    public List<AudioMidiPair> ataquePairs = new List<AudioMidiPair>();
+    [Header("Intro (opcional)")]
+    [Tooltip("Activa/desactiva el uso de intro.")]
+    public bool useIntro;
+    public AudioMidiPair introPair;  // Se usa solo si useIntro == true
 
-    [Header("Clips de Defensa (en orden c韈lico)")]
-    public List<AudioMidiPair> defensaPairs = new List<AudioMidiPair>();
+    [Header("Transici贸n (opcional)")]
+    [Tooltip("Activa/desactiva la transici贸n entre secciones (Ataque鈫擠efensa).")]
+    public bool useTransicion;
+    public AudioMidiPair transicionPair; // Se usa solo si useTransicion == true
+
+    [Header("MIDIs para Ataque (en orden c铆clico)")]
+    public List<MidiAsset> ataqueMidis = new List<MidiAsset>();
+
+    [Header("MIDIs para Defensa (en orden c铆clico)")]
+    public List<MidiAsset> defensaMidis = new List<MidiAsset>();
 }
