@@ -56,6 +56,8 @@ public class DinoPoolSpawner : MonoBehaviour
             // Instanciar la imagen UI
             GameObject dinoImageInstance = Instantiate(dinoImagePrefab, poolParent);
             dinoImageInstance.transform.localPosition = spawnPosition; // Ajustar posición relativa en el UI
+            dinoImageInstance.GetComponent<RectTransform>().localScale = new Vector3(-1, 1, 1);
+
 
             // Asignar el sprite al componente Image
             Image imageComponent = dinoImageInstance.GetComponent<Image>();
