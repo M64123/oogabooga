@@ -256,19 +256,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28ecd48209528d948aebf8991c230348, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  qteManager: {fileID: 586119431}
   laneMappings:
   - laneID: 0
-    notePrefabs:
-    - midiNote: 40
-      prefab: {fileID: 613094377647790179, guid: 0f6f01b85af0f4b4f8a1f375affa49ed, type: 3}
-      key: 276
+    containerRect: {fileID: 1328508072}
+    noteMappings:
+    - midiNote: 0
+      qteType: {fileID: 0}
+      overrideKey: 0
   - laneID: 1
-    notePrefabs:
-    - midiNote: 36
-      prefab: {fileID: 613094377647790179, guid: c50a35dbe0db43b44b03b6a492c86f5a, type: 3}
-      key: 275
+    containerRect: {fileID: 688383984}
+    noteMappings:
+    - midiNote: 0
+      qteType: {fileID: 0}
+      overrideKey: 0
   leadTime: 2
+  perfectMargin: 0.1
   skipLateNotes: 1
 --- !u!4 &326169562
 Transform:
@@ -345,10 +347,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a5151a931f1de946bcd1532fef6ef96, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  laneRects:
-  - {fileID: 1328508072}
-  - {fileID: 688383984}
-  spawnLeadTime: 2
+  leadTime: 2
   perfectMargin: 0.1
 --- !u!4 &586119432
 Transform:
@@ -396,23 +395,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canciones:
   - nombreCancion: 
+    baseClip: {fileID: 8300000, guid: 70728a3395c8e6c42a9c9ba1ed7a078f, type: 3}
+    useIntro: 0
     introPair:
       audioClip: {fileID: 8300000, guid: 7295b92f6e07c7c4b86f2f4fe13d6feb, type: 3}
       midiFile: {fileID: 0}
+    useTransicion: 0
     transicionPair:
       audioClip: {fileID: 8300000, guid: 7295b92f6e07c7c4b86f2f4fe13d6feb, type: 3}
       midiFile: {fileID: 0}
-    ataquePairs:
-    - audioClip: {fileID: 8300000, guid: 7e44f43ff80b16443ba19bb769fe3975, type: 3}
-      midiFile: {fileID: 1547871857335585408, guid: b393172d477757f4a8c6a8428b4a004b, type: 3}
-    defensaPairs:
-    - audioClip: {fileID: 8300000, guid: d047ec1e8e574504dbfc672f892d5b4a, type: 3}
-      midiFile: {fileID: 0}
+    ataqueMidis:
+    - {fileID: 1547871857335585408, guid: b393172d477757f4a8c6a8428b4a004b, type: 3}
+    defensaMidis:
+    - {fileID: 1547871857335585408, guid: 4852f75212f70a740ae590773b676d19, type: 3}
   bpm: 120
-  beatsIntro: 8
-  beatsTransicion: 4
-  beatsAtaque: 16
-  beatsDefensa: 16
+  beatsIntro: 0
+  beatsTransicion: 0
+  beatsAtaque: 20
+  beatsDefensa: 20
+  beatsAlignment: 5
   volume: 1
   midiManager: {fileID: 326169561}
   onSongStart:
@@ -955,6 +956,8 @@ GameObject:
   - component: {fileID: 1909952767}
   - component: {fileID: 1909952769}
   - component: {fileID: 1909952768}
+  - component: {fileID: 1909952771}
+  - component: {fileID: 1909952770}
   m_Layer: 5
   m_Name: HitMarker
   m_TagString: Untagged
@@ -978,7 +981,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -200}
+  m_AnchoredPosition: {x: 0, y: -199}
   m_SizeDelta: {x: 200, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1909952768
@@ -1019,6 +1022,64 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1909952766}
   m_CullTransparentMesh: 1
+--- !u!114 &1909952770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1909952766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b240736581731c642b1438db54a9005c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  laneIDs: 0000000001000000
+--- !u!61 &1909952771
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1909952766}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1}
+  m_EdgeRadius: 0
 --- !u!1001 &8812116695709946603
 PrefabInstance:
   m_ObjectHideFlags: 0

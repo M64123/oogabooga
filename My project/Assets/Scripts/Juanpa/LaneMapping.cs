@@ -1,28 +1,46 @@
 using UnityEngine;
-using System.Linq;
 using System.Collections.Generic;
 
 [System.Serializable]
 public class LaneMapping
 {
+    [Header("ID de la lane (solo informativo)")]
     public int laneID;
-    public GHNotePrefabMapping[] notePrefabs;
 
-    public bool HasNote(int midiNote)
+    [Header("RectTransform donde se instancian los QTE")]
+    public RectTransform containerRect;
+
+    [Header("(midiNote -> QTETypeDefinition)")]
+    public List<GHQTETypeMapping> noteMappings = new List<GHQTETypeMapping>();
+
+    public bool ContainsNote(int midiNote)
     {
-        return notePrefabs.Any(x => x.midiNote == midiNote);
+        foreach (var m in noteMappings)
+        {
+            if (m.midiNote == midiNote)
+                return true;
+        }
+        return false;
     }
 
-    public GHNotePrefabMapping FindPrefabForNote(int midiNote)
+    public GHQTETypeMapping FindQTEType(int midiNote)
     {
-        return notePrefabs.FirstOrDefault(x => x.midiNote == midiNote);
+        foreach (var m in noteMappings)
+        {
+            if (m.midiNote == midiNote)
+                return m;
+        }
+        return null;
     }
 }
 
+/// <summary>
+/// GHQTETypeMapping => asocia un midiNote con un QTETypeDefinition + overrideKey opcional
+/// </summary>
 [System.Serializable]
-public class GHNotePrefabMapping
+public class GHQTETypeMapping
 {
     public int midiNote;
-    public GameObject prefab;
-    public KeyCode key;
+    public QTETypeDefinition qteType;
+    public KeyCode overrideKey = KeyCode.None;
 }
