@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GHQTEIndicator : MonoBehaviour
 {
-    // Hacemos 'data' público para leerlo en GHReceptor
+    // Datos del QTE. Se asignan en Initialize.
     public GHQTEData data;
 
     private GHQTEManager manager;
@@ -15,20 +15,34 @@ public class GHQTEIndicator : MonoBehaviour
     private Vector2 startPos;
     private Vector2 endPos;
 
+    /// <summary>
+    /// Llamado justo después de instanciar el prefab.
+    /// Recibe GHQTEData y parámetros para el movimiento y la detección.
+    /// </summary>
     public void Initialize(GHQTEData qteData, GHQTEManager mgr, float lead, float margin)
     {
-        data = qteData;  // Asignamos
+        if (qteData == null)
+        {
+            Debug.LogError("[GHQTEIndicator] Initialize => qteData es null. Destruyendo QTE.");
+            Destroy(gameObject);
+            return;
+        }
+
+        data = qteData;
         manager = mgr;
         leadTime = lead;
         perfectMargin = margin;
-        perfectTime = qteData.perfectTime;
+        perfectTime = data.perfectTime;
 
         rect = GetComponent<RectTransform>();
         if (rect && rect.parent)
         {
             float h = rect.parent.GetComponent<RectTransform>().rect.height;
+
+            // Determinamos posición inicial y final (arriba -> abajo)
             startPos = new Vector2(0f, h / 2f + 50f);
             endPos = new Vector2(0f, -h / 2f - 50f);
+
             rect.anchoredPosition = startPos;
         }
 
@@ -37,31 +51,36 @@ public class GHQTEIndicator : MonoBehaviour
 
     private void Update()
     {
+        if (data == null) return; // defensivo
+
         float dspNow = (float)AudioSettings.dspTime;
         float timeUntilPerfect = perfectTime - dspNow;
 
+        // Calculamos t para el movimiento vertical
         float t = 1f - Mathf.Clamp01(timeUntilPerfect / leadTime);
         if (rect)
             rect.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
 
-        // Check input si no usamos Receptor, etc. (puedes comentar esta parte si prefieres el Receptor)
+        // Opción: detección interna de input
         if (!checkedInput && dspNow >= perfectTime - perfectMargin)
         {
             CheckInput(dspNow);
             checkedInput = true;
         }
 
-        // Borrar 1s luego
+        // Destruimos 1s después del perfectTime
         if (dspNow > perfectTime + 1f)
         {
             DestroyQTE();
         }
     }
 
-    // Si sigues queriendo la detección "por tiempo" aquí, la dejas
-    // Si no, se usará la de GHReceptor.
+    /// <summary>
+    /// Chequea el input de forma interna, si no se usa Receptor.
+    /// </summary>
     private void CheckInput(float dspNow)
     {
+        // "data.key" => la tecla asignada al QTE.
         if (Input.GetKeyDown(data.key))
         {
             float diff = Mathf.Abs(dspNow - perfectTime);
@@ -73,15 +92,18 @@ public class GHQTEIndicator : MonoBehaviour
             }
             else
             {
-                Debug.Log($"[GHQTEIndicator] Fallo => dspNow={dspNow:F2}, needed ~{perfectTime:F2}");
+                Debug.Log($"[GHQTEIndicator] MISS => dspNow={dspNow:F2}, needed ~{perfectTime:F2}");
             }
         }
     }
 
-    // Llamado por GHReceptor
+    /// <summary>
+    /// Llamado tanto interna como externamente (por un GHReceptor),
+    /// para destruir la nota.
+    /// </summary>
     public void DestroyQTE()
     {
-        // manager?.RemoveIndicator(this); // opcional
+        // manager?.RemoveIndicator(this); // Opcional si GHQTEManager lleva combos
         Destroy(gameObject);
     }
 }

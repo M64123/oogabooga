@@ -70,6 +70,6 @@ public class SlotManager : MonoBehaviour
         }
 
         // Cargar la escena de combate
-        SceneManager.LoadScene("CombateGuitarHero");
+        SceneManager.LoadScene("Propuesta Juanpa");
     }
 }

@@ -19,12 +19,12 @@ public class CombatManagerV2 : MonoBehaviour
                 // Instanciar el dinosaurio en la escena de combate
                 GameObject dinoInstance = Instantiate(dinoPrefab, spawnPoint.position, Quaternion.identity);
 
-                // **FLIPEAR EL DINOSAURIO EN LA ESCENA DE COMBATE**
-                Vector3 flippedScale = dinoInstance.transform.localScale;
-                flippedScale.x = -Mathf.Abs(flippedScale.x); // Asegura que X sea negativa
-                dinoInstance.transform.localScale = flippedScale;
+                // **Reducir el tamaño a 2/3 de su tamaño original**
+                Vector3 reducedScale = dinoInstance.transform.localScale * (2f / 3f);
+                reducedScale.x = -Mathf.Abs(reducedScale.x); // Asegurar que siga flipeado
+                dinoInstance.transform.localScale = reducedScale;
 
-                Debug.Log($"Dino {firstDinoID} instanciado en combate con FLIP en X.");
+                Debug.Log($"Dino {firstDinoID} instanciado en combate con tamaño reducido y FLIP en X.");
             }
             else
             {
