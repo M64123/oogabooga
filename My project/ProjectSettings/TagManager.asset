@@ -11,8 +11,6 @@ TagManager:
   - ally
   - enemy
   - Enemy
-  - Slot
-  - DragParent
   layers:
   - Default
   - TransparentFX
