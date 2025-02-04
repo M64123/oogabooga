@@ -216,8 +216,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1328508072}
   - {fileID: 688383984}
+  - {fileID: 1394647769}
   - {fileID: 1909952767}
   - {fileID: 1772525394}
   m_Father: {fileID: 0}
@@ -258,19 +258,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   laneMappings:
   - laneID: 0
-    containerRect: {fileID: 1328508072}
+    containerRect: {fileID: 1394647769}
     noteMappings:
-    - midiNote: 0
-      qteType: {fileID: 0}
-      overrideKey: 0
+    - midiNote: 40
+      qteType: {fileID: 11400000, guid: cc3a2b8c26fa67a4ca95d1b3d0efef81, type: 2}
+      overrideKey: 32
+    - midiNote: 45
+      qteType: {fileID: 11400000, guid: cc3a2b8c26fa67a4ca95d1b3d0efef81, type: 2}
+      overrideKey: 32
   - laneID: 1
     containerRect: {fileID: 688383984}
     noteMappings:
-    - midiNote: 0
-      qteType: {fileID: 0}
-      overrideKey: 0
+    - midiNote: 36
+      qteType: {fileID: 11400000, guid: 853d3d211d9f6724ea392dc8ad1fe535, type: 2}
+      overrideKey: 13
+    - midiNote: 41
+      qteType: {fileID: 11400000, guid: 853d3d211d9f6724ea392dc8ad1fe535, type: 2}
+      overrideKey: 13
   leadTime: 2
-  perfectMargin: 0.1
+  perfectMargin: 1
   skipLateNotes: 1
 --- !u!4 &326169562
 Transform:
@@ -413,7 +419,7 @@ MonoBehaviour:
   beatsTransicion: 0
   beatsAtaque: 20
   beatsDefensa: 20
-  beatsAlignment: 5
+  beatsAlignment: 6
   volume: 1
   midiManager: {fileID: 326169561}
   onSongStart:
@@ -468,8 +474,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 50, y: 0}
-  m_SizeDelta: {x: -1100, y: 0}
+  m_AnchoredPosition: {x: 61, y: 0}
+  m_SizeDelta: {x: -1774.7903, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &688383985
 MonoBehaviour:
@@ -656,81 +662,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1328508071
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1328508072}
-  - component: {fileID: 1328508074}
-  - component: {fileID: 1328508073}
-  m_Layer: 5
-  m_Name: TaikoBar
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1328508072
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1328508071}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 305839131}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -50, y: 0}
-  m_SizeDelta: {x: -1100, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1328508073
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1328508071}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1328508074
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1328508071}
-  m_CullTransparentMesh: 1
 --- !u!1 &1347731598
 GameObject:
   m_ObjectHideFlags: 0
@@ -799,6 +730,81 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1394647768
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1394647769}
+  - component: {fileID: 1394647771}
+  - component: {fileID: 1394647770}
+  m_Layer: 5
+  m_Name: TaikoBar (2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1394647769
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1394647768}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 305839131}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -88, y: 0}
+  m_SizeDelta: {x: -1774.7903, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1394647770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1394647768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1394647771
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1394647768}
+  m_CullTransparentMesh: 1
 --- !u!1 &1663351462
 GameObject:
   m_ObjectHideFlags: 0
@@ -830,7 +836,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   qteSinglePrefab: {fileID: 5731161360162568145, guid: ef8e807fabb05d9489516f5c2685ee99, type: 3}
   qteDualPrefab: {fileID: 3706431039766217878, guid: a1e6f47a93ef6f14ba02b758f6e5993e, type: 3}
-  qteBarTransform: {fileID: 1328508072}
+  qteBarTransform: {fileID: 0}
   spawnLeadTime: 2
   perfectMargin: 0.1
 --- !u!4 &1663351464
@@ -982,7 +988,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -199}
-  m_SizeDelta: {x: 200, y: 5}
+  m_SizeDelta: {x: 462.9, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1909952768
 MonoBehaviour:
@@ -1092,6 +1098,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: qte Prefab
       objectReference: {fileID: 0}
+    - target: {fileID: 613094377647790179, guid: 0f6f01b85af0f4b4f8a1f375affa49ed, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4391034116655569148, guid: 0f6f01b85af0f4b4f8a1f375affa49ed, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -1158,7 +1168,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4391034116655569148, guid: 0f6f01b85af0f4b4f8a1f375affa49ed, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 400
+      value: 721
       objectReference: {fileID: 0}
     - target: {fileID: 4391034116655569148, guid: 0f6f01b85af0f4b4f8a1f375affa49ed, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
