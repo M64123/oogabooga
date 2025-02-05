@@ -122,134 +122,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &278893419
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 278893421}
-  - component: {fileID: 278893420}
-  m_Layer: 0
-  m_Name: AudioSource (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!82 &278893420
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 278893419}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
---- !u!4 &278893421
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 278893419}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -13.705496, y: 5.4171934, z: -14.008847}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &520614987
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,9 +543,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3565d13919eb9e44e9d8feb234b586ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bpm: 120
-  beatsPorCompas: 4
-  "compasesPorSecci\xF3n": 16
   audioSource: {fileID: 1159628463}
   lanes:
   - {fileID: 1931841389}
@@ -683,14 +552,10 @@ MonoBehaviour:
   songDelayInSeconds: 10.94
   marginOfError: 0.32
   inputDelayInMilliseconds: 0
+  fileLocation: 
   noteTime: 1
   noteSpawnY: 11.25
   noteTapY: -5.01
-  tracks:
-  - audioClip: {fileID: 8300000, guid: af2ed1c49e2b30647bf4589903edc92f, type: 3}
-    midiFileName: ataque.mid
-  - audioClip: {fileID: 8300000, guid: 071843d5ecaf60a438640197fecbe1e7, type: 3}
-    midiFileName: Defensa.mid
 --- !u!4 &860546331
 Transform:
   m_ObjectHideFlags: 0
@@ -735,9 +600,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e78016b08d828634d98d84c5a67f7c7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreText: {fileID: 0}
   hitSFX: {fileID: 1266795594}
   missSFX: {fileID: 1222242398}
+  scoreText: {fileID: 0}
 --- !u!4 &1073861795
 Transform:
   m_ObjectHideFlags: 0
@@ -764,7 +629,7 @@ GameObject:
   - component: {fileID: 1159628464}
   - component: {fileID: 1159628463}
   m_Layer: 0
-  m_Name: AudioSource
+  m_Name: "Canci\xF3n"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -784,11 +649,11 @@ AudioSource:
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
-  Loop: 0
+  Loop: 1
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 128
+  Priority: 120
   DopplerLevel: 1
   MinDistance: 1
   MaxDistance: 500
@@ -856,7 +721,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 1.095
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -875,7 +740,7 @@ Transform:
   m_GameObject: {fileID: 1159628462}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -13.705496, y: 5.4171934, z: -14.008847}
+  m_LocalPosition: {x: 0.11, y: 0.17, z: -14.008847}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1551,7 +1416,6 @@ SceneRoots:
   - {fileID: 859437044}
   - {fileID: 860546331}
   - {fileID: 1159628464}
-  - {fileID: 278893421}
   - {fileID: 1931841390}
   - {fileID: 1463100377}
   - {fileID: 1197700925}

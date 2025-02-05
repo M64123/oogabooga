@@ -1,52 +1,31 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 public class ScoreManager : MonoBehaviour
 {
     public static ScoreManager Instance;
-
-    public TextMeshProUGUI scoreText; // Asigna un TextMeshPro para mostrar la puntuación
-    public AudioSource hitSFX; // Sonido para aciertos
-    public AudioSource missSFX; // Sonido para fallos
-
-    private int score = 0;
-
-    private void Awake()
+    public AudioSource hitSFX;
+    public AudioSource missSFX;
+    public TMPro.TextMeshPro scoreText;
+    static int comboScore;
+    void Start()
     {
         Instance = this;
+        comboScore = 0;
     }
-
     public static void Hit()
     {
-        if (Instance != null)
-        {
-            Instance.score += 100; // Incrementa la puntuación
-            Instance.UpdateScoreText();
-            if (Instance.hitSFX != null)
-            {
-                Instance.hitSFX.Play(); // Reproduce el sonido de acierto
-            }
-        }
+        comboScore += 1;
+        Instance.hitSFX.Play();
     }
-
     public static void Miss()
     {
-        if (Instance != null)
-        {
-            Instance.score -= 50; // Reduce la puntuación (opcional)
-            Instance.UpdateScoreText();
-            if (Instance.missSFX != null)
-            {
-                Instance.missSFX.Play(); // Reproduce el sonido de fallo
-            }
-        }
+        comboScore = 0;
+        Instance.missSFX.Play();
     }
-
-    private void UpdateScoreText()
+    private void Update()
     {
-        if (scoreText != null)
-        {
-            scoreText.text = $"Score: {score}";
-        }
+        scoreText.text = comboScore.ToString();
     }
 }

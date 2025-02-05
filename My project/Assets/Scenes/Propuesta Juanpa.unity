@@ -565,6 +565,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3565d13919eb9e44e9d8feb234b586ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bpm: 120
+  beatsPorCompas: 4
+  "compasesPorSecci\xF3n": 8
   audioSource: {fileID: 1159628463}
   lanes:
   - {fileID: 1931841389}
@@ -575,9 +578,7 @@ MonoBehaviour:
   noteTime: 1
   noteSpawnY: 4.93
   noteTapY: -5.01
-  fileLocation: Caca_de_vaca.mid
-  combateMidiFile: Caca_de_vaca.mid
-  defensaMidiFile: Caca_de_vaca.mid
+  tracks: []
 --- !u!4 &860546331
 Transform:
   m_ObjectHideFlags: 0
@@ -622,9 +623,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e78016b08d828634d98d84c5a67f7c7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scoreText: {fileID: 0}
   hitSFX: {fileID: 1266795594}
   missSFX: {fileID: 1222242398}
-  scoreText: {fileID: 0}
 --- !u!4 &1073861795
 Transform:
   m_ObjectHideFlags: 0
@@ -1305,7 +1306,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 897bfd65257ec974a9e342d3b6ef1407, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  noteRestriction: 9
+  noteRestriction: 7
   input: 32
   notePrefab: {fileID: 1461118768672084059, guid: bcd6f5f7da1ac974189c6e66d9896399, type: 3}
   timeStamps: []
