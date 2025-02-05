@@ -122,6 +122,53 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &508540485
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 508540487}
+  - component: {fileID: 508540486}
+  m_Layer: 0
+  m_Name: MeasureManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &508540486
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 508540485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad15e477c65aeab47bdd6d3e5407e8ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BPM: 120
+  beatsPerMeasure: 2
+  measuresToToggle: 10
+--- !u!4 &508540487
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 508540485}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.2904214, y: 6.0035563, z: 10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &520614987
 GameObject:
   m_ObjectHideFlags: 0
@@ -374,7 +421,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -5.8, y: 3.92}
+  m_AnchoredPosition: {x: -10.63, y: 13.02}
   m_SizeDelta: {x: 6.0099, y: 3.2909}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &648258944
@@ -722,11 +769,11 @@ MonoBehaviour:
   - {fileID: 1197700924}
   - {fileID: 732185117}
   songDelayInSeconds: 0
-  marginOfError: 0.4
+  marginOfError: 0.3
   inputDelayInMilliseconds: 0
   fileLocation: midi.mid
   noteTime: 1
-  noteSpawnY: 11.25
+  noteSpawnY: 16.07
   noteTapY: -4.8976
 --- !u!4 &860546331
 Transform:
@@ -1440,8 +1487,8 @@ Transform:
   m_GameObject: {fileID: 1739625960}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -6.5369, z: 0}
-  m_LocalScale: {x: 2, y: 14.073541, z: 1}
+  m_LocalPosition: {x: 0, y: 6.9996, z: 0}
+  m_LocalScale: {x: 2, y: 18.232273, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1931841390}
@@ -1583,8 +1630,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1746149326}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.2904214, y: 6.0035563, z: -17.422956}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1665,8 +1712,8 @@ Transform:
   m_GameObject: {fileID: 1958218865}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -6.5369, z: 0}
-  m_LocalScale: {x: 2, y: 14.07354, z: 1}
+  m_LocalPosition: {x: 0, y: 6.9596, z: 0}
+  m_LocalScale: {x: 2, y: 18.232271, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1463100377}
@@ -1844,3 +1891,4 @@ SceneRoots:
   - {fileID: 1222242399}
   - {fileID: 1722593004}
   - {fileID: 554229170}
+  - {fileID: 508540487}
