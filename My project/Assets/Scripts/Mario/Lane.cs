@@ -20,6 +20,7 @@ public class Lane : MonoBehaviour
     {
 
     }
+
     public void SetTimeStamps(Melanchall.DryWetMidi.Interaction.Note[] array)
     {
         foreach (var note in array)
@@ -27,10 +28,16 @@ public class Lane : MonoBehaviour
             if (note.NoteName == noteRestriction)
             {
                 var metricTimeSpan = TimeConverter.ConvertTo<MetricTimeSpan>(note.Time, SongManager.midiFile.GetTempoMap());
-                timeStamps.Add((double)metricTimeSpan.Minutes * 60f + metricTimeSpan.Seconds + (double)metricTimeSpan.Milliseconds / 1000f);
+                double newTimeStamp = (double)metricTimeSpan.Minutes * 60f + metricTimeSpan.Seconds + (double)metricTimeSpan.Milliseconds / 1000f;
+
+                if (!timeStamps.Contains(newTimeStamp)) // Evitar duplicados
+                {
+                    timeStamps.Add(newTimeStamp);
+                }
             }
         }
     }
+
     // Update is called once per frame
     void Update()
     {
@@ -58,26 +65,33 @@ public class Lane : MonoBehaviour
                     Hit();
                     print($"Hit on {inputIndex} note");
                     Destroy(notes[inputIndex].gameObject);
-                    inputIndex++;
+                    inputIndex++; //  Avanza el índice SOLO si fue un acierto
                 }
                 else
                 {
                     print($"Hit inaccurate on {inputIndex} note with {Math.Abs(audioTime - timeStamp)} delay");
                 }
             }
-            if (timeStamp + marginOfError <= audioTime)
+            else if (timeStamp + marginOfError <= audioTime) //  Solo cuenta como fallo si NO hubo acierto antes
             {
                 Miss();
                 print($"Missed {inputIndex} note");
                 inputIndex++;
             }
         }
-
     }
+
+    public void ResetSpawnIndex()
+    {
+        spawnIndex = 0;
+        inputIndex = 0; //  Reiniciar también el índice de input
+    }
+
     private void Hit()
     {
         ScoreManager.Hit();
     }
+
     private void Miss()
     {
         ScoreManager.Miss();
