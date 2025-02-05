@@ -13,7 +13,7 @@ public class SongManager : MonoBehaviour
     public AudioSource audioSource;
     public Lane[] lanes;
     public float songDelayInSeconds;
-    public double marginOfError; // in seconds
+    public double marginOfError; // en segundos
 
     public int inputDelayInMilliseconds;
     public string fileLocation;
@@ -23,12 +23,12 @@ public class SongManager : MonoBehaviour
     public float noteDespawnY => noteTapY - (noteSpawnY - noteTapY);
 
     public static MidiFile midiFile;
-    private float songDuration; // Duración de la canción en segundos
+    private float songDuration; // duración de la canción en segundos
 
     private void Start()
     {
         Instance = this;
-        audioSource.loop = false; //  Desactiva el loop automático del audio (lo controlamos manualmente)
+        audioSource.loop = false; // Controlamos el loop manualmente
 
         if (Application.streamingAssetsPath.StartsWith("http://") || Application.streamingAssetsPath.StartsWith("https://"))
         {
@@ -79,15 +79,15 @@ public class SongManager : MonoBehaviour
             lane.SetTimeStamps(array);
         }
 
-        songDuration = audioSource.clip.length; //  Guarda la duración de la canción
+        songDuration = audioSource.clip.length; // Guarda la duración de la canción
         Invoke(nameof(StartSong), songDelayInSeconds);
     }
 
     public void StartSong()
     {
-        audioSource.loop = false; //  Desactivar el loop automático del AudioSource
+        audioSource.loop = false;
         audioSource.Play();
-        Invoke(nameof(LoopSongAndMidi), audioSource.clip.length); //  Programar reinicio cuando termine
+        Invoke(nameof(LoopSongAndMidi), audioSource.clip.length); // Programar loop al finalizar la canción
     }
 
     private void LoopSongAndMidi()
@@ -95,15 +95,16 @@ public class SongManager : MonoBehaviour
         Debug.Log("[SongManager] Reiniciando la canción y el MIDI...");
 
         audioSource.Stop();
-        audioSource.Play();
 
-        GetDataFromMidi(); //  Recargar el MIDI y generar nuevas notas
-
+        // Para cada lane reiniciamos el sistema de spawn de notas del loop actual.
+        // De esta forma, las notas pendientes de loops anteriores (que no se borran) quedan en escena,
+        // mientras que se crean nuevas notas para el nuevo loop.
         foreach (var lane in lanes)
         {
-            lane.ResetSpawnIndex(); //  Ahora también reinicia `inputIndex`
+            lane.StartNewLoop();
         }
 
+        audioSource.Play();
         Invoke(nameof(LoopSongAndMidi), audioSource.clip.length);
     }
 

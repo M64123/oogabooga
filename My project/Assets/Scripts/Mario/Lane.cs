@@ -1,4 +1,4 @@
-using Melanchall.DryWetMidi.Interaction;
+﻿using Melanchall.DryWetMidi.Interaction;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,28 +9,32 @@ public class Lane : MonoBehaviour
     public Melanchall.DryWetMidi.MusicTheory.NoteName noteRestriction;
     public KeyCode input;
     public GameObject notePrefab;
-    List<Note> notes = new List<Note>();
+
+    // Lista que contiene las notas generadas en el loop actual.
+    private List<Note> currentNotes = new List<Note>();
+
+    // Los timeStamps se obtienen del MIDI y se reutilizan en cada loop.
     public List<double> timeStamps = new List<double>();
 
-    int spawnIndex = 0;
-    int inputIndex = 0;
+    private int spawnIndex = 0;
+    private int inputIndex = 0;
 
-    // Start is called before the first frame update
     void Start()
     {
-
+        // Se puede inicializar aquí si se requiere.
     }
 
     public void SetTimeStamps(Melanchall.DryWetMidi.Interaction.Note[] array)
     {
+        // Se limpia la lista para evitar duplicados entre loops
+        timeStamps.Clear();
         foreach (var note in array)
         {
             if (note.NoteName == noteRestriction)
             {
                 var metricTimeSpan = TimeConverter.ConvertTo<MetricTimeSpan>(note.Time, SongManager.midiFile.GetTempoMap());
-                double newTimeStamp = (double)metricTimeSpan.Minutes * 60f + metricTimeSpan.Seconds + (double)metricTimeSpan.Milliseconds / 1000f;
-
-                if (!timeStamps.Contains(newTimeStamp)) // Evitar duplicados
+                double newTimeStamp = metricTimeSpan.Minutes * 60 + metricTimeSpan.Seconds + metricTimeSpan.Milliseconds / 1000.0;
+                if (!timeStamps.Contains(newTimeStamp))
                 {
                     timeStamps.Add(newTimeStamp);
                 }
@@ -38,53 +42,65 @@ public class Lane : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
+        // Spawneo de nuevas notas para el loop actual.
         if (spawnIndex < timeStamps.Count)
         {
             if (SongManager.GetAudioSourceTime() >= timeStamps[spawnIndex] - SongManager.Instance.noteTime)
             {
-                var note = Instantiate(notePrefab, transform);
-                notes.Add(note.GetComponent<Note>());
-                note.GetComponent<Note>().assignedTime = (float)timeStamps[spawnIndex];
+                var noteObj = Instantiate(notePrefab, transform);
+                var noteComp = noteObj.GetComponent<Note>();
+                noteComp.assignedTime = (float)timeStamps[spawnIndex];
+                currentNotes.Add(noteComp);
                 spawnIndex++;
             }
         }
 
+        // Detección de input para las notas del loop actual.
         if (inputIndex < timeStamps.Count)
         {
-            double timeStamp = timeStamps[inputIndex];
+            double timestamp = timeStamps[inputIndex];
             double marginOfError = SongManager.Instance.marginOfError;
             double audioTime = SongManager.GetAudioSourceTime() - (SongManager.Instance.inputDelayInMilliseconds / 1000.0);
 
             if (Input.GetKeyDown(input))
             {
-                if (Math.Abs(audioTime - timeStamp) < marginOfError)
+                if (Math.Abs(audioTime - timestamp) < marginOfError)
                 {
                     Hit();
-                    print($"Hit on {inputIndex} note");
-                    Destroy(notes[inputIndex].gameObject);
-                    inputIndex++; //  Avanza el �ndice SOLO si fue un acierto
+                    Debug.Log($"Hit on {inputIndex} note");
+                    if (inputIndex < currentNotes.Count && currentNotes[inputIndex] != null)
+                    {
+                        Destroy(currentNotes[inputIndex].gameObject);
+                    }
+                    inputIndex++; // Se avanza solo si se acierta.
                 }
                 else
                 {
-                    print($"Hit inaccurate on {inputIndex} note with {Math.Abs(audioTime - timeStamp)} delay");
+                    Debug.Log($"Hit inaccurate on {inputIndex} note with {Math.Abs(audioTime - timestamp)} delay");
                 }
             }
-            else if (timeStamp + marginOfError <= audioTime) //  Solo cuenta como fallo si NO hubo acierto antes
+            else if (timestamp + marginOfError <= audioTime)
             {
                 Miss();
-                print($"Missed {inputIndex} note");
+                Debug.Log($"Missed {inputIndex} note");
                 inputIndex++;
             }
         }
     }
 
-    public void ResetSpawnIndex()
+    /// <summary>
+    /// Al comenzar un nuevo loop, se reinician los índices y la lista de notas del loop actual,
+    /// de modo que se puedan instanciar nuevas notas para la nueva ejecución de la pista.
+    /// Las notas generadas en loops anteriores quedan en escena (para que no desaparezcan de golpe)
+    /// pero no se tienen en cuenta para la detección de input.
+    /// </summary>
+    public void StartNewLoop()
     {
         spawnIndex = 0;
-        inputIndex = 0; //  Reiniciar tambi�n el �ndice de input
+        inputIndex = 0;
+        currentNotes = new List<Note>();
     }
 
     private void Hit()
