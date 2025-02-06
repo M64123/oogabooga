@@ -19,6 +19,9 @@ public class MeasureManager : MonoBehaviour
     // Estados booleanos: al inicio ataque es true y defensa false
     private bool ataque = true;
     private bool defensa = false;
+    public GameObject moneda;
+    public SpriteRenderer monedaAtaque;
+    public SpriteRenderer defensaAtaque;
 
     void Start()
     {
@@ -43,16 +46,19 @@ public class MeasureManager : MonoBehaviour
             // Cada 'measuresToToggle' compases se alterna el estado de los booleanos
             if (measureCount % measuresToToggle == 0)
             {
+                SpriteRenderer referencia= moneda.GetComponent<SpriteRenderer>();
                 // Si actualmente 'ataque' es true, se cambia a false y se activa 'defensa'
                 if (ataque)
                 {
                     ataque = false;
                     defensa = true;
+                    referencia.sprite= monedaAtaque.sprite;
                 }
                 else
                 {
                     ataque = true;
                     defensa = false;
+                    referencia.sprite = defensaAtaque.sprite;
                 }
                 Debug.Log("Compás " + measureCount + ": ataque " + ataque + ", defensa " + defensa);
             }
