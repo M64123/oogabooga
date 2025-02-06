@@ -323,15 +323,21 @@ public class EggBehaviour : MonoBehaviour
 
         int eggLevel = Mathf.Clamp(successfulQTEs, 0, 3);
 
+        // Se obtiene el dino
         GetRandomDino(eggLevel, out obtainedDinoSprite, out obtainedDinoInfo, out obtainedDinoRarity, out obtainedDinoID);
-
         obtainedDinoName = GetRandomTribalName();
 
+        // Agregamos o actualizamos en el GameManager
         GameManager.Instance.AddDinosaur(obtainedDinoID, obtainedDinoName, obtainedDinoRarity);
+
+        // Si el dino no estaba desbloqueado, lo guardamos en el JSON.
+        if (!SaveManager.Instance.IsDinoUnlocked(obtainedDinoID))
+        {
+            SaveManager.Instance.UnlockDino(obtainedDinoID);
+        }
 
         LaunchCube();
     }
-
     void GetRandomDino(int eggLevel, out Sprite dinoSprite, out string dinoInfo, out Rarity rarity, out string dinoID)
     {
         dinoSprite = null;
