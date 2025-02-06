@@ -24,7 +24,7 @@ public class SongManager : MonoBehaviour
 
     public static MidiFile midiFile;
     private float songDuration; // duración de la canción en segundos
-
+    public float midiOutputDelay = 0.0f; // Retraso en segundos para la salida del MIDI
     private void Start()
     {
         Instance = this;

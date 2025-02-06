@@ -47,7 +47,8 @@ public class Lane : MonoBehaviour
         // Spawneo de nuevas notas para el loop actual.
         if (spawnIndex < timeStamps.Count)
         {
-            if (SongManager.GetAudioSourceTime() >= timeStamps[spawnIndex] - SongManager.Instance.noteTime)
+            // Se suma midiOutputDelay para retrasar la aparición de la nota.
+            if (SongManager.GetAudioSourceTime() >= timeStamps[spawnIndex] + SongManager.Instance.midiOutputDelay - SongManager.Instance.noteTime)
             {
                 var noteObj = Instantiate(notePrefab, transform);
                 var noteComp = noteObj.GetComponent<Note>();
