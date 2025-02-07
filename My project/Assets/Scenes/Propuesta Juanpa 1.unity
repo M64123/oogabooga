@@ -775,7 +775,7 @@ MonoBehaviour:
   noteTime: 1
   noteSpawnY: 16.07
   noteTapY: -5
-  midiOutputDelay: 0.01
+  midiOutputDelay: 0.3
 --- !u!4 &860546331
 Transform:
   m_ObjectHideFlags: 0

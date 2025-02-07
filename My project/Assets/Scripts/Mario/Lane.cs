@@ -47,17 +47,18 @@ public class Lane : MonoBehaviour
         // Spawneo de nuevas notas para el loop actual.
         if (spawnIndex < timeStamps.Count)
         {
-            // Se suma midiOutputDelay para retrasar la aparición de la nota.
             if (SongManager.GetAudioSourceTime() >= timeStamps[spawnIndex] + SongManager.Instance.midiOutputDelay - SongManager.Instance.noteTime)
             {
                 var noteObj = Instantiate(notePrefab, transform);
                 var noteComp = noteObj.GetComponent<Note>();
-                noteComp.assignedTime = (float)timeStamps[spawnIndex];
+                // Sumar midiOutputDelay al timestamp para que el input detection se alinee
+                noteComp.assignedTime = (float)(timeStamps[spawnIndex] + SongManager.Instance.midiOutputDelay);
                 currentNotes.Add(noteComp);
                 spawnIndex++;
             }
         }
 
+        // Detección de input para las notas del loop actual.
         // Detección de input para las notas del loop actual.
         if (inputIndex < timeStamps.Count)
         {
@@ -65,9 +66,12 @@ public class Lane : MonoBehaviour
             double marginOfError = SongManager.Instance.marginOfError;
             double audioTime = SongManager.GetAudioSourceTime() - (SongManager.Instance.inputDelayInMilliseconds / 1000.0);
 
+            // Calculamos el timestamp ajustado, sumando el retraso, para que coincida con el spawn.
+            double adjustedTimestamp = timestamp + SongManager.Instance.midiOutputDelay;
+
             if (Input.GetKeyDown(input))
             {
-                if (Math.Abs(audioTime - timestamp) < marginOfError)
+                if (Math.Abs(audioTime - adjustedTimestamp) < marginOfError)
                 {
                     Hit();
                     Debug.Log($"Hit on {inputIndex} note");
@@ -79,10 +83,11 @@ public class Lane : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log($"Hit inaccurate on {inputIndex} note with {Math.Abs(audioTime - timestamp)} delay");
+                    Debug.Log($"Hit inaccurate on {inputIndex} note with {Math.Abs(audioTime - adjustedTimestamp)} delay");
                 }
             }
-            else if (timestamp + marginOfError <= audioTime)
+            // Usamos el adjustedTimestamp también en la comprobación de fallo (miss)
+            else if (adjustedTimestamp + marginOfError <= audioTime)
             {
                 Miss();
                 Debug.Log($"Missed {inputIndex} note");
