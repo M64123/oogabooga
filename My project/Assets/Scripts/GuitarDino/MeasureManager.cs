@@ -17,6 +17,7 @@ public class MeasureManager : MonoBehaviour
     private bool defensa = false;
     // Propiedad pública para consultar el estado actual de ataque
     public bool IsAtaque { get { return ataque; } }
+    public bool IsDefensa { get { return defensa; } }
 
     void Awake()
     {
