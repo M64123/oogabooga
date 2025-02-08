@@ -25,6 +25,7 @@ public class Lane : MonoBehaviour
     public bool isDamageLane = false;
     // Nuevo booleano para que el enemigo ataque al dinosaurio del jugador.
     public bool enemyAttack = false;
+    public bool abilityAttack = false;
 
     public void SetTimeStamps(Melanchall.DryWetMidi.Interaction.Note[] array)
     {
@@ -147,6 +148,37 @@ public class Lane : MonoBehaviour
                 Debug.LogWarning("No se encontró ningún objeto con el tag 'Enemigo' en la escena.");
             }
         }
+        else if (abilityAttack && MeasureManager.Instance.IsAtaque)
+        {
+            SlotManager slotManager = FindObjectOfType<SlotManager>();
+            if (slotManager != null)
+            {
+                // Si hay un dino en el segundo slot, se activa la habilidad del dino del segundo slot.
+                if (slotManager.slots.Length >= 2 && slotManager.slots[1].item != null)
+                {
+                    Dinosaurio secondDino = slotManager.slots[1].item.GetComponent<Dinosaurio>();
+                    if (secondDino != null && secondDino.habilities != null && secondDino.habilities.Length > 0)
+                    {
+                        Debug.Log("Activando la habilidad del dino en el segundo slot.");
+                        secondDino.habilities[0].ActivateAbility(slotManager.slots);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("El dino en el segundo slot no tiene habilidades asignadas. Se realizará el ataque básico.");
+                        RealizarAtaqueBasico(slotManager);
+                    }
+                }
+                else
+                {
+                    // Si no hay dino en el segundo slot, se ejecuta el ataque básico con el dino del primer slot.
+                    RealizarAtaqueBasico(slotManager);
+                }
+            }
+            else
+            {
+                Debug.LogWarning("No se encontró un SlotManager en la escena para activar la habilidad.");
+            }
+        }
     }
 
     private void Miss()
@@ -190,6 +222,36 @@ public class Lane : MonoBehaviour
             else
             {
                 Debug.LogWarning("No se encontró el enemigo o el dinosaurio del jugador para ejecutar el ataque por fallo.");
+            }
+        }
+    }
+    private void RealizarAtaqueBasico(SlotManager slotManager)
+    {
+        if (slotManager.slots.Length >= 1 && slotManager.slots[0].item != null)
+        {
+            Dinosaurio firstDino = slotManager.slots[0].item.GetComponent<Dinosaurio>();
+            if (firstDino != null)
+            {
+                GameObject enemyGO = GameObject.FindGameObjectWithTag("Enemigo");
+                if (enemyGO != null)
+                {
+                    EnemyDinosaur enemyDino = enemyGO.GetComponent<EnemyDinosaur>();
+                    if (enemyDino != null)
+                    {
+                        int damage = firstDino.DamageValue;
+                        Debug.Log("No hay dino en el segundo slot; se ejecuta ataque básico con " + damage + " de daño.");
+                        Animator playerAnim = firstDino.GetComponent<Animator>();
+                        if (playerAnim != null)
+                        {
+                            playerAnim.SetTrigger("Attack");
+                        }
+                        enemyDino.ReceiveDamage(damage);
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("No se encontró el objeto con tag 'Enemigo'.");
+                }
             }
         }
     }

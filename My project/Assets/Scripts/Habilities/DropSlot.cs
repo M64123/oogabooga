@@ -1,5 +1,5 @@
-using UnityEngine.EventSystems;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class DropSlot : MonoBehaviour, IDropHandler
 {
@@ -8,24 +8,25 @@ public class DropSlot : MonoBehaviour, IDropHandler
 
     void Start()
     {
-        // Se puede asignar el índice dinámicamente si se maneja desde otro script
+        // Opcional: se puede asignar el índice dinámicamente si se maneja desde otro script.
     }
 
     public void OnDrop(PointerEventData eventData)
     {
+        // Si el slot está vacío, asigna el objeto que se está arrastrando.
         if (!item)
         {
             item = DragHandler.itemDragging;
             item.transform.SetParent(transform);
             item.transform.position = transform.position;
 
-            // Notificar la posición del objeto
             Debug.Log($"Objeto colocado en la posición: {slotIndex}");
         }
     }
 
     void Update()
     {
+        // Si el objeto ya no está en este slot, se limpia la referencia.
         if (item != null && item.transform.parent != transform)
         {
             item = null;

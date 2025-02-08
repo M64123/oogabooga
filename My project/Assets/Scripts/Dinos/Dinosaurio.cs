@@ -1,10 +1,12 @@
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 public class Dinosaurio : CombatCharacter
 {
     [Header("Referencias a Scriptable Objects")]
     public DinoStats statsBase; // ScriptableObject que contiene las estadísticas base
     public DinoClass claseDino; // ScriptableObject o clase que contiene modificadores y habilidades
+    public DinoAbility[] habilities;
 
     [Header("ID Único del Dinosaurio")]
     public string idUnico;
@@ -14,6 +16,8 @@ public class Dinosaurio : CombatCharacter
     private int ataqueFinal;
     private int defensaFinal;
     private float velocidadFinal;
+    public int shield { get; private set; }
+    public int temporaryBonusDamage { get; private set; }
 
     // Variables de salud que usará el HUD
     public int MaxHealth { get; private set; }
@@ -52,6 +56,25 @@ public class Dinosaurio : CombatCharacter
         if (CurrentHealth < 0)
             CurrentHealth = 0;
         Debug.Log("Dinosaurio recibió " + damage + " de daño. Salud actual: " + CurrentHealth);
+    }
+    public void AddShield(int amount)
+    {
+        shield += amount;
+        Debug.Log($"Se añadió un escudo de {amount}. Escudo actual: {shield}");
+    }
+
+    public void AddTemporaryBonusDamage(int bonus)
+    {
+        temporaryBonusDamage = bonus;
+        Debug.Log($"Se potencia el ataque del dino con un bono de {bonus} para el próximo ataque.");
+    }
+
+    public void ReceiveHeal(int amount)
+    {
+        CurrentHealth += amount;
+        if (CurrentHealth > MaxHealth)
+            CurrentHealth = MaxHealth;
+        Debug.Log($"El dino ha sido curado en {amount}. Salud actual: {CurrentHealth}");
     }
 
     // Propiedad para obtener el daño que hace el dinosaurio (por ejemplo, basada en ataqueFinal)

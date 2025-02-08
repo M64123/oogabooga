@@ -1523,6 +1523,7 @@ MonoBehaviour:
   timeStamps: []
   isDamageLane: 0
   enemyAttack: 1
+  abilityAttack: 0
 --- !u!4 &1173570737
 Transform:
   m_ObjectHideFlags: 0
@@ -1987,8 +1988,9 @@ MonoBehaviour:
   input: 99
   notePrefab: {fileID: 6835559491212607928, guid: 107f52549e626654786f9eae8cf77832, type: 3}
   timeStamps: []
-  isDamageLane: 1
+  isDamageLane: 0
   enemyAttack: 0
+  abilityAttack: 1
 --- !u!4 &1463100377
 Transform:
   m_ObjectHideFlags: 0
@@ -2438,6 +2440,7 @@ MonoBehaviour:
   timeStamps: []
   isDamageLane: 0
   enemyAttack: 1
+  abilityAttack: 0
 --- !u!4 &1650659589
 Transform:
   m_ObjectHideFlags: 0
@@ -2938,7 +2941,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c69697c693be2848b4862facbfeae8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerHealthSlider: {fileID: 1628442030}
+  healthSlider: {fileID: 1628442030}
 --- !u!1 &1931841388
 GameObject:
   m_ObjectHideFlags: 0
@@ -2974,6 +2977,7 @@ MonoBehaviour:
   timeStamps: []
   isDamageLane: 1
   enemyAttack: 0
+  abilityAttack: 0
 --- !u!4 &1931841390
 Transform:
   m_ObjectHideFlags: 0

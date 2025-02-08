@@ -7,10 +7,20 @@ public class RangerAbility : DinoAbility
 
     public override void ActivateAbility(DropSlot[] slots)
     {
+        // Se activa si hay un dino en el segundo slot (quien posee la habilidad)
         if (slots.Length >= 2 && slots[1].item != null)
         {
-            Debug.Log($"Ranger hace {damage} de daño al Dino en el segundo slot.");
-            // Lógica para aplicar daño al dinosaurio en el segundo slot.
+            // Buscamos al enemigo por tag
+            GameObject enemyGO = GameObject.FindGameObjectWithTag("Enemigo");
+            if (enemyGO != null)
+            {
+                EnemyDinosaur enemy = enemyGO.GetComponent<EnemyDinosaur>();
+                if (enemy != null)
+                {
+                    enemy.ReceiveDamage(damage);
+                    Debug.Log($"Ranger hace {damage} de daño al enemigo.");
+                }
+            }
         }
     }
 }

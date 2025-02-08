@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilityName: 
   description: 
-  damage: 0
+  damage: 100

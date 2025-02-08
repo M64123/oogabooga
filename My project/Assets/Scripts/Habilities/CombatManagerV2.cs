@@ -1,40 +1,24 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 public class CombatManagerV2 : MonoBehaviour
 {
-    public Transform spawnPoint; // Lugar donde aparecerá el primer dinosaurio en combate
+    // Transform donde se instanciará el dino activo en combate.
+    public Transform spawnPoint;
 
     private void Start()
     {
-        // Obtener el ID del dinosaurio en primera posición
-        string firstDinoID = PlayerPrefs.GetString("FirstDinoID", "");
-
-        if (!string.IsNullOrEmpty(firstDinoID))
+        // Verifica que exista un TeamManager persistente.
+        if (TeamManager.Instance != null)
         {
-            GameObject dinoPrefab = GameManager.Instance.GetDinoPrefabByID(firstDinoID);
+            // Asigna el spawn point al TeamManager para que lo use al instanciar.
+            TeamManager.Instance.spawnPoint = spawnPoint;
 
-            if (dinoPrefab != null)
-            {
-                // Instanciar el dinosaurio en la escena de combate
-                GameObject dinoInstance = Instantiate(dinoPrefab, spawnPoint.position, Quaternion.identity);
-
-                // **Reducir el tamaño a 2/3 de su tamaño original**
-                Vector3 reducedScale = dinoInstance.transform.localScale * (2f / 3f);
-                reducedScale.x = -Mathf.Abs(reducedScale.x); // Asegurar que siga flipeado
-                dinoInstance.transform.localScale = reducedScale;
-
-                Debug.Log($"Dino {firstDinoID} instanciado en combate con tamaño reducido y FLIP en X.");
-            }
-            else
-            {
-                Debug.LogError($"No se encontró prefab para el dinoID {firstDinoID}.");
-            }
+            // Llama al método que se encarga de instanciar el dino en primera posición.
+            TeamManager.Instance.SpawnFrontDino();
         }
         else
         {
-            Debug.LogWarning("No hay dinosaurio asignado para la primera posición en combate.");
+            Debug.LogWarning("CombatManagerV2: TeamManager no está presente en la escena.");
         }
     }
-
 }
