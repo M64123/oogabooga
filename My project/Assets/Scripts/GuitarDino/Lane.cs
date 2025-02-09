@@ -116,11 +116,11 @@ public class Lane : MonoBehaviour
     {
         ScoreManager.Hit();
 
-        // El ataque del jugador solo se ejecuta si está en fase de ataque.
+        // Si se activa el ataque básico del dino del primer slot.
         if (isDamageLane && MeasureManager.Instance.IsAtaque)
         {
-            // Lógica: el dinosaurio del jugador ataca al enemigo.
-            Dinosaurio playerDino = FindObjectOfType<Dinosaurio>();
+            // Usamos el dino activo del TeamManager (que fue instanciado en combate).
+            Dinosaurio playerDino = TeamManager.Instance.activeDino;
             GameObject enemyGO = GameObject.FindGameObjectWithTag("Enemigo");
             if (enemyGO != null)
             {
@@ -129,8 +129,6 @@ public class Lane : MonoBehaviour
                 {
                     int damage = playerDino.DamageValue;
                     Debug.Log("El jugador ataca al enemigo y aplica " + damage + " de daño.");
-
-                    // Activar la animación de ataque en el dinosaurio del jugador.
                     Animator playerAnim = playerDino.GetComponent<Animator>();
                     if (playerAnim != null)
                     {
@@ -140,7 +138,7 @@ public class Lane : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("No se encontró el dinosaurio del jugador o el componente EnemyDinosaur en el enemigo.");
+                    Debug.LogWarning("No se encontró el dino activo o el componente EnemyDinosaur en el enemigo.");
                 }
             }
             else
@@ -148,35 +146,39 @@ public class Lane : MonoBehaviour
                 Debug.LogWarning("No se encontró ningún objeto con el tag 'Enemigo' en la escena.");
             }
         }
+        // Si se activa la habilidad del dino del segundo slot.
         else if (abilityAttack && MeasureManager.Instance.IsAtaque)
         {
-            SlotManager slotManager = FindObjectOfType<SlotManager>();
-            if (slotManager != null)
+            if (TeamManager.Instance != null && TeamManager.Instance.teamIDs.Count >= 2)
             {
-                // Si hay un dino en el segundo slot, se activa la habilidad del dino del segundo slot.
-                if (slotManager.slots.Length >= 2 && slotManager.slots[1].item != null)
+                // Obtenemos el ID del dino que se asignó al segundo slot.
+                string secondDinoID = TeamManager.Instance.teamIDs[1];
+                GameObject secondDinoPrefab = GameManager.Instance.GetDinoPrefabByID(secondDinoID);
+                if (secondDinoPrefab != null)
                 {
-                    Dinosaurio secondDino = slotManager.slots[1].item.GetComponent<Dinosaurio>();
+                    Dinosaurio secondDino = secondDinoPrefab.GetComponent<Dinosaurio>();
                     if (secondDino != null && secondDino.habilities != null && secondDino.habilities.Length > 0)
                     {
                         Debug.Log("Activando la habilidad del dino en el segundo slot.");
-                        secondDino.habilities[0].ActivateAbility(slotManager.slots);
+                        // Como en combate no contamos con los DropSlots, pasamos null o una referencia vacía.
+                        secondDino.habilities[0].ActivateAbility(null);
                     }
                     else
                     {
                         Debug.LogWarning("El dino en el segundo slot no tiene habilidades asignadas. Se realizará el ataque básico.");
-                        RealizarAtaqueBasico(slotManager);
+                        RealizarAtaqueBasico();
                     }
                 }
                 else
                 {
-                    // Si no hay dino en el segundo slot, se ejecuta el ataque básico con el dino del primer slot.
-                    RealizarAtaqueBasico(slotManager);
+                    Debug.LogWarning("No se encontró prefab para el dino en el segundo slot. Se realizará el ataque básico.");
+                    RealizarAtaqueBasico();
                 }
             }
             else
             {
-                Debug.LogWarning("No se encontró un SlotManager en la escena para activar la habilidad.");
+                Debug.LogWarning("No hay suficientes dinos en el equipo para activar la habilidad secundaria.");
+                RealizarAtaqueBasico();
             }
         }
     }
@@ -225,34 +227,35 @@ public class Lane : MonoBehaviour
             }
         }
     }
-    private void RealizarAtaqueBasico(SlotManager slotManager)
+    private void RealizarAtaqueBasico()
     {
-        if (slotManager.slots.Length >= 1 && slotManager.slots[0].item != null)
+        Dinosaurio firstDino = TeamManager.Instance.activeDino;
+        if (firstDino != null)
         {
-            Dinosaurio firstDino = slotManager.slots[0].item.GetComponent<Dinosaurio>();
-            if (firstDino != null)
+            GameObject enemyGO = GameObject.FindGameObjectWithTag("Enemigo");
+            if (enemyGO != null)
             {
-                GameObject enemyGO = GameObject.FindGameObjectWithTag("Enemigo");
-                if (enemyGO != null)
+                EnemyDinosaur enemyDino = enemyGO.GetComponent<EnemyDinosaur>();
+                if (enemyDino != null)
                 {
-                    EnemyDinosaur enemyDino = enemyGO.GetComponent<EnemyDinosaur>();
-                    if (enemyDino != null)
+                    int damage = firstDino.DamageValue;
+                    Debug.Log("Realizando ataque básico con " + damage + " de daño.");
+                    Animator playerAnim = firstDino.GetComponent<Animator>();
+                    if (playerAnim != null)
                     {
-                        int damage = firstDino.DamageValue;
-                        Debug.Log("No hay dino en el segundo slot; se ejecuta ataque básico con " + damage + " de daño.");
-                        Animator playerAnim = firstDino.GetComponent<Animator>();
-                        if (playerAnim != null)
-                        {
-                            playerAnim.SetTrigger("Attack");
-                        }
-                        enemyDino.ReceiveDamage(damage);
+                        playerAnim.SetTrigger("Attack");
                     }
-                }
-                else
-                {
-                    Debug.LogWarning("No se encontró el objeto con tag 'Enemigo'.");
+                    enemyDino.ReceiveDamage(damage);
                 }
             }
+            else
+            {
+                Debug.LogWarning("No se encontró el objeto con tag 'Enemigo'.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("RealizarAtaqueBasico: No hay dino activo en el TeamManager.");
         }
     }
 }
