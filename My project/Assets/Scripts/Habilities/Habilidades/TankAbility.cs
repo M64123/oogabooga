@@ -7,15 +7,25 @@ public class TankAbility : DinoAbility
 
     public override void ActivateAbility(DropSlot[] slots)
     {
-        // Se activa si hay un dino en el segundo slot (que posee la habilidad Tank)
-        if (slots.Length >= 1 && slots[0].item != null)
+        // Comprobamos que en el equipo haya al menos dos dinos (lo que indica que existe un dino en el segundo slot).
+        if (TeamManager.Instance != null && TeamManager.Instance.teamIDs.Count >= 2)
         {
-            Dinosaurio dino = slots[0].item.GetComponent<Dinosaurio>();
-            if (dino != null)
+            // Suponemos que la habilidad Tank se activa para potenciar al dino activo (el del primer slot)
+            // utilizando el bonus almacenado en este asset.
+            if (TeamManager.Instance.activeDino != null)
             {
-                dino.AddTemporaryBonusDamage(bonusDamage);
-                Debug.Log($"Tank potencia el daño del Dino en el primer slot en {bonusDamage}.");
+                Dinosaurio frontDino = TeamManager.Instance.activeDino;
+                frontDino.AddTemporaryBonusDamage(bonusDamage);
+                Debug.Log($"TankAbility (TeamManager): Potencia el ataque del dino activo en el primer slot en {bonusDamage}.");
             }
+            else
+            {
+                Debug.LogWarning("TankAbility: No hay dino activo en el TeamManager para potenciar.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("TankAbility: No hay suficientes dinos en el equipo para activar la habilidad.");
         }
     }
 }

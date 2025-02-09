@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI;
 
 public class Dinosaurio : CombatCharacter
 {
@@ -57,6 +56,7 @@ public class Dinosaurio : CombatCharacter
             CurrentHealth = 0;
         Debug.Log("Dinosaurio recibió " + damage + " de daño. Salud actual: " + CurrentHealth);
     }
+
     public void AddShield(int amount)
     {
         shield += amount;
@@ -69,6 +69,11 @@ public class Dinosaurio : CombatCharacter
         Debug.Log($"Se potencia el ataque del dino con un bono de {bonus} para el próximo ataque.");
     }
 
+    public void ResetTemporaryBonusDamage()
+    {
+        temporaryBonusDamage = 0;
+    }
+
     public void ReceiveHeal(int amount)
     {
         CurrentHealth += amount;
@@ -77,9 +82,9 @@ public class Dinosaurio : CombatCharacter
         Debug.Log($"El dino ha sido curado en {amount}. Salud actual: {CurrentHealth}");
     }
 
-    // Propiedad para obtener el daño que hace el dinosaurio (por ejemplo, basada en ataqueFinal)
+    // Propiedad para obtener el daño que hace el dinosaurio, sumando el bonus temporal.
     public int DamageValue
     {
-        get { return ataqueFinal; }
+        get { return ataqueFinal + temporaryBonusDamage; }
     }
 }

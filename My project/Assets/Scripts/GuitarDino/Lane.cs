@@ -246,6 +246,8 @@ public class Lane : MonoBehaviour
                         playerAnim.SetTrigger("Attack");
                     }
                     enemyDino.ReceiveDamage(damage);
+                    // Después de aplicar el daño, reiniciamos el bonus.
+                    firstDino.ResetTemporaryBonusDamage();
                 }
             }
             else

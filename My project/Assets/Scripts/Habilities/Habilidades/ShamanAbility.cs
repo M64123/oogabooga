@@ -7,15 +7,16 @@ public class ShamanAbility : DinoAbility
 
     public override void ActivateAbility(DropSlot[] slots)
     {
-        // Se activa si hay un dino en el segundo slot (que posee la habilidad Shaman)
-        if (slots.Length >= 1 && slots[0].item != null)
+        // En combate, usamos el dino activo almacenado en el TeamManager.
+        if (TeamManager.Instance != null && TeamManager.Instance.activeDino != null)
         {
-            Dinosaurio dino = slots[0].item.GetComponent<Dinosaurio>();
-            if (dino != null)
-            {
-                dino.ReceiveHeal(healAmount);
-                Debug.Log($"Shaman cura al Dino en el primer slot en {healAmount} de vida.");
-            }
+            Dinosaurio frontDino = TeamManager.Instance.activeDino;
+            frontDino.ReceiveHeal(healAmount);
+            Debug.Log($"ShamanAbility (TeamManager): Cura al Dino activo en el primer slot en {healAmount} de vida.");
+        }
+        else
+        {
+            Debug.LogWarning("ShamanAbility: No hay un dino activo en el TeamManager para curar.");
         }
     }
 }
