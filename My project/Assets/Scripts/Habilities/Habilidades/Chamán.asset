@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fd7331c27c6fdf4f8d407ea059e9aa5, type: 3}
   m_Name: "Cham\xE1n"
   m_EditorClassIdentifier: 
-  abilityName: 
-  description: 
-  healAmount: 0
+  abilityName: Cura
+  description: ASa
+  healAmount: 1000

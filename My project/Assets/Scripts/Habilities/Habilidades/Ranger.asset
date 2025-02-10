@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 183a9dd2cfc8f56459f7c7478ad506d8, type: 3}
   m_Name: Ranger
   m_EditorClassIdentifier: 
-  abilityName: 
-  description: 
-  damage: 100
+  abilityName: Ranger
+  description: CACa
+  damage: 1000

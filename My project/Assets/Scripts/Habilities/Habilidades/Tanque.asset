@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   abilityName: Tanque
   description: 
-  bonusDamage: 0
+  bonusDamage: 10000
