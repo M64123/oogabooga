@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb9e32572ecf9cd44b6db08cb1977e66, type: 3}
   m_Name: Tanque
   m_EditorClassIdentifier: 
-  abilityName: Tanque
+  abilityName: "B\xE1rbaro"
   description: 
   bonusDamage: 10000
