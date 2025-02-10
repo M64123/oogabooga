@@ -1,21 +1,24 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class AlbumSlot : MonoBehaviour
 {
-    public string dinoID; // ID asignado a este slot
-    public Image dinoImage;
-    public Text dinoNameText;
-    public Text dinoStatsText;
+    // ID del dino asignado a este slot (debe coincidir con el que se guarda en el JSON)
+    public string dinoID;
 
-    // Método para mostrar los datos del dino (esto puede adaptarse a tu lógica)
+    // Referencias a los elementos UI que mostrarán la imagen y el nombre
+    public Image dinoImage;
+    public TMP_Text dinoNameText;
+
+    // Método para mostrar el slot (por ejemplo, asignar datos extra si se requiere)
     public void ShowDino()
     {
         gameObject.SetActive(true);
-        // Aquí podrías asignar la imagen, nombre y estadísticas obtenidas del GameManager o una base de datos.
+        // Aquí puedes asignar la imagen o el nombre si lo obtienes de otra fuente.
     }
 
-    // Método para ocultar o dejar en blanco el slot.
+    // Método para ocultar el slot (o mostrar un placeholder)
     public void HideDino()
     {
         gameObject.SetActive(false);
