@@ -131,7 +131,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tooltipPrefab: {fileID: 3224242958465407422, guid: 55c7645e7b700f440bab89195996a1ec, type: 3}
-  delay: 1
+  delay: 0.5
   offset: {x: 400, y: 0}
 --- !u!65 &9143904071771210962
 BoxCollider:
