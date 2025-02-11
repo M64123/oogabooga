@@ -3,40 +3,33 @@ using UnityEngine;
 
 public class AlbumManager : MonoBehaviour
 {
-    // Prefab del slot que tiene el script AlbumSlot
-    public GameObject albumSlotPrefab;
-    // Parent donde se instanciarán los slots (por ejemplo, un objeto con Grid Layout Group)
-    public Transform slotsParent;
+    // Lista de slots asignados manualmente en el Inspector (menu desplegable y ampliable)
+    public List<AlbumSlot> albumSlots;
 
     void Start()
     {
-        // Obtenemos la lista completa de IDs desde el GameManager
-        List<string> allDinoIDs = GameManager.Instance.dinoIDs;
-        // Obtenemos el diccionario de dinos desbloqueados (los que el jugador ya obtuvo)
-        Dictionary<string, GameManager.DinoData> unlockedDinos = GameManager.Instance.GetAllPlayerDinos();
+        // Al iniciar el álbum, se actualizan los slots según los datos guardados
+        UpdateAlbumSlots();
+    }
 
-        // Por cada ID disponible, creamos un slot
-        foreach (string dinoID in allDinoIDs)
+    // Actualiza cada slot comprobando si su dinoID se encuentra en el JSON (SaveManager)
+    public void UpdateAlbumSlots()
+    {
+        // Obtenemos la lista de IDs desbloqueados (guardados en el JSON) a través del SaveManager
+        List<string> unlockedIDs = SaveManager.Instance.GetUnlockedDinoIDs();
+
+        // Recorremos la lista de slots asignados manualmente
+        foreach (AlbumSlot slot in albumSlots)
         {
-            GameObject slotGO = Instantiate(albumSlotPrefab, slotsParent);
-            AlbumSlot slot = slotGO.GetComponent<AlbumSlot>();
-            slot.dinoID = dinoID;
-
-            if (unlockedDinos.ContainsKey(dinoID))
+            if (unlockedIDs.Contains(slot.dinoID))
             {
-                // Si el dino está desbloqueado, se muestra el slot
+                // Si el ID está guardado, se muestra el slot
                 slot.ShowDino();
-                // Asignamos, por ejemplo, el nombre del dino (puedes ampliarlo según lo necesites)
-                slot.dinoNameText.text = unlockedDinos[dinoID].dinoName;
-                // Si cuentas con la imagen (sprite) del dino, asigna también: slot.dinoImage.sprite = ...;
             }
             else
             {
-                // Si el dino no está desbloqueado, ocultamos el slot (o se podría mostrar un placeholder)
+                // Si no está guardado, se oculta o se muestra con placeholder
                 slot.HideDino();
-                // Opcional: si prefieres mostrar el slot con un “???”, en lugar de desactivarlo, haz:
-                // slot.gameObject.SetActive(true);
-                // slot.dinoNameText.text = "???";
             }
         }
     }

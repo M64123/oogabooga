@@ -1156,7 +1156,6 @@ GameObject:
   m_Component:
   - component: {fileID: 480088169}
   - component: {fileID: 480088170}
-  - component: {fileID: 480088171}
   m_Layer: 0
   m_Name: Album Manager
   m_TagString: Untagged
@@ -1200,22 +1199,6 @@ MonoBehaviour:
   - {fileID: 150870610}
   - {fileID: 1099109764}
   - {fileID: 104753575}
---- !u!114 &480088171
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 480088168}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3651f36d589c73f4085828dda4cd0e3f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  dinoDatabase: {fileID: 11400000, guid: 6b18537f6ad84c94f886cfd53a39647e, type: 2}
-  slotImages: []
-  buttonPrevPage: {fileID: 0}
-  buttonNextPage: {fileID: 0}
 --- !u!1 &644786577
 GameObject:
   m_ObjectHideFlags: 0
