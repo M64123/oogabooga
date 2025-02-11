@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Tanque
   m_EditorClassIdentifier: 
   abilityName: "B\xE1rbaro"
-  description: 
-  bonusDamage: 10000
+  description: "S\xED este Dinosaurio est\xE1 en segunda posici\xF3n aumenta el siguiente
+    ataque b\xE1sico"
+  bonusDamage: 5

@@ -194,6 +194,8 @@ MonoBehaviour:
   spawnPointHability: {fileID: 0}
   statsBase: {fileID: 11400000, guid: e9fb587158b175843a7f76d2e260f6b5, type: 2}
   claseDino: {fileID: 11400000, guid: ce3d2defff9ddd34da98c8fee795e01b, type: 2}
+  habilities:
+  - {fileID: 11400000, guid: ff7c7a9c364ab9b4b9f6bebd45eb967a, type: 2}
   idUnico: 
 --- !u!114 &5969139403704788252
 MonoBehaviour:
