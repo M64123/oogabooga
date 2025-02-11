@@ -4,23 +4,24 @@ using TMPro;
 
 public class AlbumSlot : MonoBehaviour
 {
-    // ID del dino asignado a este slot (debe coincidir con el que se guarda en el JSON)
+    // ID del dino asignado a este slot (se asigna automáticamente desde el GameManager)
     public string dinoID;
 
-    // Referencias a los elementos UI que mostrarán la imagen y el nombre
+    // Elementos UI para mostrar la imagen y el nombre (usando Text Mesh Pro para el texto)
     public Image dinoImage;
     public TMP_Text dinoNameText;
 
-    // Método para mostrar el slot (por ejemplo, asignar datos extra si se requiere)
+    // Se invoca cuando el dino está desbloqueado
     public void ShowDino()
     {
         gameObject.SetActive(true);
-        // Aquí puedes asignar la imagen o el nombre si lo obtienes de otra fuente.
+        // Aquí podrías asignar la imagen (si cuentas con la fuente de sprite) y demás datos.
     }
 
-    // Método para ocultar el slot (o mostrar un placeholder)
+    // Se invoca cuando el dino aún no está desbloqueado
     public void HideDino()
     {
         gameObject.SetActive(false);
+        // Alternativamente, en lugar de desactivar el slot, podrías asignar un placeholder.
     }
 }

@@ -282,7 +282,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dinoID: 16
   dinoImage: {fileID: 433105499}
-  dinoNameText: {fileID: 0}
+  dinoNameText: {fileID: 1674799271}
 --- !u!1 &141803375
 GameObject:
   m_ObjectHideFlags: 0
@@ -466,7 +466,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dinoID: 14
   dinoImage: {fileID: 1359493880}
-  dinoNameText: {fileID: 0}
+  dinoNameText: {fileID: 978630308}
 --- !u!1 &244751004
 GameObject:
   m_ObjectHideFlags: 0
@@ -747,7 +747,7 @@ GameObject:
   - component: {fileID: 394284110}
   - component: {fileID: 394284109}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: STATS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1024,7 +1024,7 @@ GameObject:
   - component: {fileID: 462145096}
   - component: {fileID: 462145095}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: STATS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1156,6 +1156,7 @@ GameObject:
   m_Component:
   - component: {fileID: 480088169}
   - component: {fileID: 480088170}
+  - component: {fileID: 480088171}
   m_Layer: 0
   m_Name: Album Manager
   m_TagString: Untagged
@@ -1199,6 +1200,22 @@ MonoBehaviour:
   - {fileID: 150870610}
   - {fileID: 1099109764}
   - {fileID: 104753575}
+--- !u!114 &480088171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 480088168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3651f36d589c73f4085828dda4cd0e3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dinoDatabase: {fileID: 11400000, guid: 6b18537f6ad84c94f886cfd53a39647e, type: 2}
+  slotImages: []
+  buttonPrevPage: {fileID: 0}
+  buttonNextPage: {fileID: 0}
 --- !u!1 &644786577
 GameObject:
   m_ObjectHideFlags: 0
@@ -1479,7 +1496,7 @@ GameObject:
   - component: {fileID: 797694938}
   - component: {fileID: 797694937}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: STATS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1913,7 +1930,7 @@ GameObject:
   - component: {fileID: 978630309}
   - component: {fileID: 978630308}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: STATS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2084,7 +2101,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dinoID: 9
   dinoImage: {fileID: 1881884105}
-  dinoNameText: {fileID: 0}
+  dinoNameText: {fileID: 2081022118}
 --- !u!1 &1089814166
 GameObject:
   m_ObjectHideFlags: 0
@@ -2209,7 +2226,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dinoID: 15
   dinoImage: {fileID: 881144312}
-  dinoNameText: {fileID: 0}
+  dinoNameText: {fileID: 2119217033}
 --- !u!1 &1140112197
 GameObject:
   m_ObjectHideFlags: 0
@@ -2527,7 +2544,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dinoID: 13
   dinoImage: {fileID: 916584482}
-  dinoNameText: {fileID: 0}
+  dinoNameText: {fileID: 394284109}
 --- !u!1 &1359493878
 GameObject:
   m_ObjectHideFlags: 0
@@ -2652,7 +2669,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dinoID: 12
   dinoImage: {fileID: 824846011}
-  dinoNameText: {fileID: 0}
+  dinoNameText: {fileID: 1526904769}
 --- !u!1 &1526904767
 GameObject:
   m_ObjectHideFlags: 0
@@ -2665,7 +2682,7 @@ GameObject:
   - component: {fileID: 1526904770}
   - component: {fileID: 1526904769}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: STATS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2891,7 +2908,7 @@ GameObject:
   - component: {fileID: 1674799272}
   - component: {fileID: 1674799271}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: STATS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3062,7 +3079,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dinoID: 10
   dinoImage: {fileID: 821030871}
-  dinoNameText: {fileID: 0}
+  dinoNameText: {fileID: 797694937}
 --- !u!1 &1733704058
 GameObject:
   m_ObjectHideFlags: 0
@@ -3246,7 +3263,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dinoID: 11
   dinoImage: {fileID: 1860790811}
-  dinoNameText: {fileID: 0}
+  dinoNameText: {fileID: 462145095}
 --- !u!1 &1860790809
 GameObject:
   m_ObjectHideFlags: 0
@@ -3503,7 +3520,7 @@ GameObject:
   - component: {fileID: 2081022119}
   - component: {fileID: 2081022118}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: STATS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3637,7 +3654,7 @@ GameObject:
   - component: {fileID: 2119217034}
   - component: {fileID: 2119217033}
   m_Layer: 0
-  m_Name: Text (TMP)
+  m_Name: STATS
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
