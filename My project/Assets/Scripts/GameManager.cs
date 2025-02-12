@@ -18,7 +18,7 @@ public class GameManager : MonoBehaviour
         public string dinoName;
         public Rarity rarity;
         public int level = 1;
-        public bool isAlive = true;
+        public bool isAlive = false;
         // Puedes agregar otros campos que necesites.
     }
 
@@ -146,6 +146,8 @@ public class GameManager : MonoBehaviour
 
     public GameObject GetDinoPrefabByID(string dID)
     {
+        // Implementación existente para retornar el prefab a partir del ID.
+        // ...
         for (int i = 0; i < dinoIDs.Count; i++)
         {
             if (dinoIDs[i] == dID)
@@ -157,26 +159,20 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
+
     // Este método se usa para marcar a un dino como muerto y eliminarlo de la lista de vivos.
     public void MarkDinoAsDead(string dinoID)
     {
-        if (playerDinoDictionary.ContainsKey(dinoID))
+        foreach (var dino in playerDinoList)
         {
-            var d = playerDinoDictionary[dinoID];
-            d.isAlive = false;
-            UpdateDinoInList(dinoID, d);
-            Debug.Log($"Dino {dinoID} marcado como muerto.");
-
-            // Remover el DinoData de playerDinoList
-            if (playerDinoList.Contains(d))
+            if (dino.dinoID == dinoID)
             {
-                playerDinoList.Remove(d);
-                Debug.Log($"Dino {dinoID} removido de playerDinoList.");
+                dino.isAlive = true;
+                Debug.Log($"GameManager: Dino {dinoID} marcado como muerto.");
+                return;
             }
         }
-        else
-        {
-            Debug.LogError($"No se encontró el dino {dinoID} para marcarlo como muerto.");
-        }
+        Debug.LogError($"GameManager: No se encontró DinoData con ID {dinoID} para marcarlo como muerto.");
     }
+
 }

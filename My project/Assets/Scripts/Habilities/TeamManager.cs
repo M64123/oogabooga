@@ -5,13 +5,16 @@ public class TeamManager : MonoBehaviour
 {
     public static TeamManager Instance { get; private set; }
 
-    // Lista de IDs (o datos esenciales) de los dinos en el equipo, en orden.
+    // Lista de IDs de los dinos en el equipo (ordenados).
     public List<string> teamIDs = new List<string>();
 
-    // El dinosaurio activo en combate (instanciado).
+    // Lista de referencias a los dinos instanciados.
+    public List<Dinosaurio> teamDinos = new List<Dinosaurio>();
+
+    // El dino activo en combate.
     public Dinosaurio activeDino;
 
-    // Spawn point para instanciar al dino activo.
+    // Spawn point para instanciar el dino activo.
     public Transform spawnPoint;
 
     private void Awake()
@@ -27,19 +30,12 @@ public class TeamManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Asigna el equipo (lista de IDs) obtenido de la escena de selección.
-    /// </summary>
-    /// <param name="ids">Lista de IDs de dinos</param>
     public void SetTeam(List<string> ids)
     {
         teamIDs = new List<string>(ids);
         Debug.Log("TeamManager: Se han guardado " + teamIDs.Count + " dinos (IDs) en el equipo.");
     }
 
-    /// <summary>
-    /// Devuelve el ID del dino que está en la primera posición.
-    /// </summary>
     public string GetFrontDinoID()
     {
         if (teamIDs.Count > 0)
@@ -47,10 +43,6 @@ public class TeamManager : MonoBehaviour
         return "";
     }
 
-    /// <summary>
-    /// Instancia el dino del frente usando el primer ID de la lista.
-    /// Se espera que el GameManager tenga un método GetDinoPrefabByID que retorne el prefab correspondiente.
-    /// </summary>
     public void SpawnFrontDino()
     {
         if (teamIDs.Count > 0)
@@ -59,18 +51,19 @@ public class TeamManager : MonoBehaviour
             GameObject dinoPrefab = GameManager.Instance.GetDinoPrefabByID(frontID);
             if (dinoPrefab != null)
             {
-                // Instanciar el dino en la posición y rotación definidas en spawnPoint.
                 GameObject instance = Instantiate(dinoPrefab, spawnPoint.position, spawnPoint.rotation);
-
-                // Ajustar la escala a 2/3 del tamaño original y voltear en X.
                 Vector3 newScale = instance.transform.localScale * (2f / 3f);
-                newScale.x = -Mathf.Abs(newScale.x);  // Asegura que se voltee en X.
+                newScale.x = -Mathf.Abs(newScale.x);
                 instance.transform.localScale = newScale;
 
-                activeDino = instance.GetComponent<Dinosaurio>();
-                if (activeDino != null)
+                Dinosaurio dino = instance.GetComponent<Dinosaurio>();
+                if (dino != null)
                 {
-                    Debug.Log("TeamManager: Dino instanciado: " + activeDino.name);
+                    activeDino = dino;
+                    // Asigna el ID de jugador (el original) a la instancia.
+                    activeDino.playerDinoID = frontID;
+                    teamDinos.Add(dino);
+                    Debug.Log("TeamManager: Dino instanciado: " + dino.name + " (playerDinoID: " + frontID + ")");
                 }
                 else
                 {
@@ -85,32 +78,51 @@ public class TeamManager : MonoBehaviour
         else
         {
             Debug.Log("TeamManager: No quedan dinos en el equipo. Fin del combate.");
-            // Aquí podrías activar la pantalla de derrota o similar.
         }
     }
 
-    /// <summary>
-    /// Se invoca cuando el dino activo muere para removerlo y avanzar al siguiente.
-    /// </summary>
+    public void RemoveDino(Dinosaurio dino)
+    {
+        if (dino != null)
+        {
+            if (teamDinos.Contains(dino))
+            {
+                teamDinos.Remove(dino);
+                Debug.Log("TeamManager: Se removió el dino: " + dino.name);
+            }
+            if (teamIDs.Count > 0 && teamIDs[0] == dino.playerDinoID)
+            {
+                teamIDs.RemoveAt(0);
+            }
+        }
+    }
+
     public void OnActiveDinoDeath()
     {
         if (activeDino != null && activeDino.CurrentHealth <= 0)
         {
             Debug.Log("TeamManager: El dino " + activeDino.name + " ha muerto.");
-            // Remover el primer ID de la lista.
-            if (teamIDs.Count > 0)
-                teamIDs.RemoveAt(0);
-            // Destruir el objeto del dino muerto.
+            // Usa el ID del dino en el frente (teamIDs[0]) para actualizar el estado.
+            if (DeathManager.Instance != null)
+            {
+                DeathManager.Instance.AddDeadDinoByID(teamIDs[0]);
+            }
+            else
+            {
+                Debug.LogWarning("TeamManager: No se encontró DeathManager.");
+            }
+            // Actualiza el GameManager para marcar el dino como muerto.
+            GameManager.Instance.MarkDinoAsDead(teamIDs[0]);
+
+            RemoveDino(activeDino);
             Destroy(activeDino.gameObject);
             activeDino = null;
-            // Instanciar el siguiente dino.
             SpawnFrontDino();
         }
     }
 
     private void Update()
     {
-        // Comprueba continuamente el estado del dino activo.
         if (activeDino != null && activeDino.CurrentHealth <= 0)
         {
             OnActiveDinoDeath();

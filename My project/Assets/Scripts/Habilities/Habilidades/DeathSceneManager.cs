@@ -6,12 +6,12 @@ public class DeathSceneManager : MonoBehaviour
 {
     [Header("Configuración de la visualización")]
     [Tooltip("Contenedor en el Canvas donde se mostrarán las representaciones de los dinos muertos.")]
-    public Transform deathContainer;
+    public Transform deathContainer; // Por ejemplo, un Panel con Vertical Layout Group
 
     [Tooltip("Prefab para mostrar cada dino muerto (debe tener DeadDinoDisplay).")]
     public GameObject deadDinoDisplayPrefab;
 
-    [Tooltip("Espaciado vertical entre representaciones (si no usas Layout Group).")]
+    [Tooltip("Espaciado vertical entre representaciones (si no se usa Layout Group).")]
     public float verticalSpacing = 150f;
 
     private void Start()
@@ -22,10 +22,11 @@ public class DeathSceneManager : MonoBehaviour
             return;
         }
 
-        List<DinoData> deadDataList = DeathManager.Instance.deadDinosData;
+        // Usamos el mismo tipo que en GameManager: GameManager.DinoData.
+        List<GameManager.DinoData> deadDataList = DeathManager.Instance.deadDinosData;
         Debug.Log("DeathSceneManager: Número de dinos muertos: " + deadDataList.Count);
 
-        // Limpia el contenedor.
+        // Limpia el contenedor (por si ya tiene hijos previos)
         foreach (Transform child in deathContainer)
         {
             Destroy(child.gameObject);
@@ -34,10 +35,11 @@ public class DeathSceneManager : MonoBehaviour
         // Instanciar una representación para cada dino muerto.
         for (int i = 0; i < deadDataList.Count; i++)
         {
-            DinoData data = deadDataList[i];
+            GameManager.DinoData data = deadDataList[i];
             if (data != null)
             {
                 GameObject displayInstance = Instantiate(deadDinoDisplayPrefab, deathContainer);
+                // Si el contenedor no tiene un Layout Group, posiciona manualmente:
                 RectTransform rt = displayInstance.GetComponent<RectTransform>();
                 if (rt != null)
                 {

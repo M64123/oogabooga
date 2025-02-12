@@ -52,19 +52,15 @@ public class Dinosaurio : CombatCharacter
         CurrentHealth -= damage;
         if (CurrentHealth < 0)
             CurrentHealth = 0;
-        Debug.Log("Dinosaurio " + name + " recibió " + damage + " de daño. Salud actual: " + CurrentHealth);
+        Debug.Log("Dinosaurio recibió " + damage + " de daño. Salud actual: " + CurrentHealth);
+
         if (CurrentHealth == 0 && !muerto)
         {
-            muerto = true;
-            Debug.Log("Dinosaurio " + name + " ha muerto.");
-            if (DeathManager.Instance != null)
-            {
-                DeathManager.Instance.AddDeadDino(this);
-            }
-            else
-            {
-                Debug.LogWarning("No se encontró DeathManager para agregar el dino muerto.");
-            }
+            muerto = true; // Marca el dino como muerto en su instancia.
+                           // Usar playerDinoID (que se asigna al instanciar en TeamManager) para marcarlo como muerto.
+            GameManager.Instance.MarkDinoAsDead(playerDinoID);
+            // Llama al DeathManager para agregar este dino (usando el ID)
+            DeathManager.Instance.AddDeadDinoByID(playerDinoID);
         }
     }
 

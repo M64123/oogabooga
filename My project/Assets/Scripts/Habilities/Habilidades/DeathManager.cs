@@ -5,15 +5,15 @@ public class DeathManager : MonoBehaviour
 {
     public static DeathManager Instance { get; private set; }
 
-    // Lista de DinoData de los dinos muertos.
-    public List<DinoData> deadDinosData = new List<DinoData>();
+    // Lista de datos de dinos muertos.
+    public List<GameManager.DinoData> deadDinosData = new List<GameManager.DinoData>();
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            DontDestroyOnLoad(gameObject); // Persistente entre escenas.
         }
         else
         {
@@ -22,39 +22,21 @@ public class DeathManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Agrega a deadDinosData el DinoData correspondiente al dino muerto, usando el ID que ya estaba en playerDinoList.
-    /// Luego, llama a GameManager para marcarlo como muerto (lo elimina de playerDinoList).
+    /// Busca en la lista de dinos del GameManager el DinoData con el ID dado y lo agrega a la lista de muertos.
     /// </summary>
-    public void AddDeadDino(Dinosaurio dino)
+    public void AddDeadDinoByID(string dinoID)
     {
-        if (dino != null)
+        foreach (var dinoData in GameManager.Instance.playerDinoList)
         {
-            // Usamos el playerDinoID, que debe haberse asignado en la instancia (TeamManager).
-            string originalID = dino.playerDinoID;
-            DinoData data = new DinoData();
-            data.dinoID = originalID;
-            // Opcional: podrías asignar también dinoName, rarity, level, etc.
-            SpriteRenderer sr = dino.GetComponent<SpriteRenderer>();
-            if (sr != null)
+            if (dinoData.dinoID == dinoID)
             {
-                data.dinoSprite = sr.sprite;
-            }
-            else
-            {
-                Debug.LogWarning("DeathManager: No se encontró SpriteRenderer en " + dino.name);
-            }
-
-            deadDinosData.Add(data);
-            Debug.Log("DeathManager: Se ha agregado el dino " + dino.name + " a la lista de muertos con ID: " + data.dinoID);
-
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.MarkDinoAsDead(originalID);
-            }
-            else
-            {
-                Debug.LogWarning("DeathManager: No se encontró GameManager para remover el dino muerto.");
+                // Según tu lógica, se marca como muerto (isAlive = true significa muerto).
+                dinoData.isAlive = true;
+                deadDinosData.Add(dinoData);
+                Debug.Log($"DeathManager: Se ha agregado el DinoData con ID {dinoID} a la lista de muertos.");
+                return;
             }
         }
+        Debug.LogWarning($"DeathManager: No se encontró DinoData para el ID {dinoID}.");
     }
 }
