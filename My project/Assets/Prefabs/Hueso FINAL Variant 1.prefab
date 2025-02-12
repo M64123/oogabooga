@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hueso FINAL Variant 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6888555640592353183, guid: 58776666ce950bc40bd1cd7cf22fe590, type: 3}
+      propertyPath: m_SortingOrder
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
