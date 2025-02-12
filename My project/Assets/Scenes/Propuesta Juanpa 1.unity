@@ -1049,6 +1049,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &907650012
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 907650014}
+  - component: {fileID: 907650013}
+  m_Layer: 0
+  m_Name: GameObject (3)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &907650013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907650012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3ecc124c30adc647bc7ea0ebd39673f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tableroSceneName: Tablero
+  checkInterval: 1
+--- !u!4 &907650014
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907650012}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.7994152, y: 0.7694045, z: 23.467468}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &939970507
 GameObject:
   m_ObjectHideFlags: 0
@@ -1261,7 +1307,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93414ddbe0da2cf4a832f008177274eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  deadDinos: []
+  deadDinosData: []
 --- !u!4 &1049317973
 Transform:
   m_ObjectHideFlags: 0
@@ -3601,3 +3647,4 @@ SceneRoots:
   - {fileID: 26029121}
   - {fileID: 3676266}
   - {fileID: 1049317973}
+  - {fileID: 907650014}

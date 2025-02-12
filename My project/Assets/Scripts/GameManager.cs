@@ -196,5 +196,21 @@ public class GameManager : MonoBehaviour
             Debug.LogError($"GameManager: No se encontró un dino en playerDinoList con ID {dinoID} marcado como muerto para revivir.");
         }
     }
+    public void ResetGameData()
+    {
+        // Limpia el estado del mapa
+        savedMapData.Clear();
+        currentPlayerNodeID = "";
 
+        // Limpia la lista de dinos vivos (GameObjects)
+        playerDinosaurs.Clear();
+
+        // Limpia la lista de datos de dinosaurios del jugador
+        playerDinoList.Clear();
+
+        // Limpia el diccionario de dinosaurios
+        playerDinoDictionary.Clear();
+
+        Debug.Log("GameManager: Datos reiniciados.");
+    }
 }

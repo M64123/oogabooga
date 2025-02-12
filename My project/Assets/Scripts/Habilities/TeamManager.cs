@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class TeamManager : MonoBehaviour
 {
@@ -60,7 +61,7 @@ public class TeamManager : MonoBehaviour
                 if (dino != null)
                 {
                     activeDino = dino;
-                    // Asigna el ID de jugador (el original) a la instancia.
+                    // Asigna el ID del dino original (de la lista) a la instancia.
                     activeDino.playerDinoID = frontID;
                     teamDinos.Add(dino);
                     Debug.Log("TeamManager: Dino instanciado: " + dino.name + " (playerDinoID: " + frontID + ")");
@@ -77,7 +78,10 @@ public class TeamManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("TeamManager: No quedan dinos en el equipo. Fin del combate.");
+            Debug.Log("TeamManager: No quedan dinos en el equipo. Reiniciando la escena del Tablero desde cero.");
+            // Reinicia la escena y, antes, resetea los datos del GameManager.
+            GameManager.Instance.ResetGameData();
+            SceneManager.LoadScene("Tablero", LoadSceneMode.Single);
         }
     }
 
@@ -102,7 +106,7 @@ public class TeamManager : MonoBehaviour
         if (activeDino != null && activeDino.CurrentHealth <= 0)
         {
             Debug.Log("TeamManager: El dino " + activeDino.name + " ha muerto.");
-            // Usa el ID del dino en el frente (teamIDs[0]) para actualizar el estado.
+            // Usa el ID del dino en el frente para actualizar el estado en DeathManager y GameManager.
             if (DeathManager.Instance != null)
             {
                 DeathManager.Instance.AddDeadDinoByID(teamIDs[0]);
@@ -111,12 +115,12 @@ public class TeamManager : MonoBehaviour
             {
                 Debug.LogWarning("TeamManager: No se encontró DeathManager.");
             }
-            // Actualiza el GameManager para marcar el dino como muerto.
             GameManager.Instance.MarkDinoAsDead(teamIDs[0]);
 
             RemoveDino(activeDino);
             Destroy(activeDino.gameObject);
             activeDino = null;
+            // Intenta instanciar el siguiente dino.
             SpawnFrontDino();
         }
     }
