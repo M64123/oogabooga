@@ -3,14 +3,16 @@ using UnityEngine;
 public class Dinosaurio : CombatCharacter
 {
     [Header("Referencias a Scriptable Objects")]
-    public DinoStats statsBase; // ScriptableObject que contiene las estadísticas base
-    public DinoClass claseDino; // ScriptableObject o clase que contiene modificadores y habilidades
+    public DinoStats statsBase; // ScriptableObject con las estadísticas base
+    public DinoClass claseDino; // Modificadores y habilidades
     public DinoAbility[] habilities;
 
-    [Header("ID Único del Dinosaurio")]
+    [Header("ID")]
+    // ID único generado al instanciar (para otros fines)
     public string idUnico;
+    // Este campo se asignará con el ID proveniente de la lista original (playerDinoList)
+    public string playerDinoID;
 
-    // Estadísticas finales calculadas (puedes incluir otras según tus necesidades)
     private int vidaFinal;
     private int ataqueFinal;
     private int defensaFinal;
@@ -18,17 +20,18 @@ public class Dinosaurio : CombatCharacter
     public int shield { get; private set; }
     public int temporaryBonusDamage { get; private set; }
 
-    // Variables de salud que usará el HUD
     public int MaxHealth { get; private set; }
     public int CurrentHealth { get; private set; }
+
+    public bool muerto { get; private set; } = false;
 
     void Awake()
     {
         GenerarIDUnico();
         CalcularStatsFinales();
-        // Inicializamos la salud usando el valor del ScriptableObject.
         MaxHealth = statsBase.vidaBase;
         CurrentHealth = MaxHealth;
+        muerto = false;
     }
 
     void GenerarIDUnico()
@@ -38,23 +41,31 @@ public class Dinosaurio : CombatCharacter
 
     void CalcularStatsFinales()
     {
-        // Se calcula la vida, ataque, etc. a partir de los datos del ScriptableObject y la clase
         vidaFinal = statsBase.vidaBase;
         ataqueFinal = Mathf.RoundToInt(statsBase.ataqueBase * claseDino.multiplicadorAtaque);
         defensaFinal = Mathf.RoundToInt(statsBase.defensaBase * claseDino.multiplicadorDefensa);
         velocidadFinal = statsBase.velocidadBase * claseDino.multiplicadorVelocidad;
     }
 
-    /// <summary>
-    /// Aplica daño al dinosaurio y actualiza la salud actual.
-    /// </summary>
-    /// <param name="damage">Daño a aplicar</param>
     public void ReceiveDamage(int damage)
     {
         CurrentHealth -= damage;
         if (CurrentHealth < 0)
             CurrentHealth = 0;
-        Debug.Log("Dinosaurio recibió " + damage + " de daño. Salud actual: " + CurrentHealth);
+        Debug.Log("Dinosaurio " + name + " recibió " + damage + " de daño. Salud actual: " + CurrentHealth);
+        if (CurrentHealth == 0 && !muerto)
+        {
+            muerto = true;
+            Debug.Log("Dinosaurio " + name + " ha muerto.");
+            if (DeathManager.Instance != null)
+            {
+                DeathManager.Instance.AddDeadDino(this);
+            }
+            else
+            {
+                Debug.LogWarning("No se encontró DeathManager para agregar el dino muerto.");
+            }
+        }
     }
 
     public void AddShield(int amount)
@@ -82,7 +93,7 @@ public class Dinosaurio : CombatCharacter
         Debug.Log($"El dino ha sido curado en {amount}. Salud actual: {CurrentHealth}");
     }
 
-    // Propiedad para obtener el daño que hace el dinosaurio, sumando el bonus temporal.
+    // La propiedad DamageValue suma el ataque base y el bonus.
     public int DamageValue
     {
         get { return ataqueFinal + temporaryBonusDamage; }

@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
         public Rarity rarity;
         public int level = 1;
         public bool isAlive = true;
+        // Puedes agregar otros campos que necesites.
     }
 
     private Dictionary<string, DinoData> playerDinoDictionary = new Dictionary<string, DinoData>();
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
         set { savedMapData = value; }
     }
 
+    // Lista de dinos vivos (datos) del jugador.
     public List<DinoData> playerDinoList = new List<DinoData>();
 
     void Awake()
@@ -155,6 +157,7 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
+    // Este método se usa para marcar a un dino como muerto y eliminarlo de la lista de vivos.
     public void MarkDinoAsDead(string dinoID)
     {
         if (playerDinoDictionary.ContainsKey(dinoID))
@@ -163,6 +166,13 @@ public class GameManager : MonoBehaviour
             d.isAlive = false;
             UpdateDinoInList(dinoID, d);
             Debug.Log($"Dino {dinoID} marcado como muerto.");
+
+            // Remover el DinoData de playerDinoList
+            if (playerDinoList.Contains(d))
+            {
+                playerDinoList.Remove(d);
+                Debug.Log($"Dino {dinoID} removido de playerDinoList.");
+            }
         }
         else
         {

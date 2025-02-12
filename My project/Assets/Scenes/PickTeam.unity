@@ -440,6 +440,14 @@ PrefabInstance:
       value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1458745442579115369, guid: a65adab1202e5db428b8ab0c43834377, type: 3}
+      propertyPath: playerDinoList.Array.data[8].dinoID
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 1458745442579115369, guid: a65adab1202e5db428b8ab0c43834377, type: 3}
+      propertyPath: playerDinoList.Array.data[0].isAlive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1458745442579115369, guid: a65adab1202e5db428b8ab0c43834377, type: 3}
       propertyPath: playerDinoList.Array.data[0].dinoName
       value: 
       objectReference: {fileID: 0}
