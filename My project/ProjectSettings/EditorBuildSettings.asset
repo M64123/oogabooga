@@ -36,6 +36,9 @@ EditorBuildSettings:
     path: Assets/Scripts/Habilities/CombateGuitarHero.unity
     guid: aa46104afa1e3884a8c049d3e64edbe5
   - enabled: 1
+    path: Assets/Scenes/PickTeam.unity
+    guid: 82b6c7530837aef449bd9e6531223de4
+  - enabled: 1
     path: Assets/Scenes/Map/DinoShowcase.unity
     guid: 75b07b07bd36ad6429d208a2d188938f
   - enabled: 1

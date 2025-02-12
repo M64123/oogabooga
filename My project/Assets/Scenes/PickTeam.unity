@@ -214,7 +214,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Combate
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1305,6 +1305,7 @@ GameObject:
   - component: {fileID: 1627020592}
   - component: {fileID: 1627020591}
   - component: {fileID: 1627020590}
+  - component: {fileID: 1627020594}
   m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
@@ -1426,6 +1427,27 @@ RectTransform:
   m_AnchoredPosition: {x: 593, y: -180}
   m_SizeDelta: {x: 377.5042, y: 178.1464}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!95 &1627020594
+Animator:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1627020589}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 113df67b61341f044b8def1755d7c40a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1737696687
 GameObject:
   m_ObjectHideFlags: 0
