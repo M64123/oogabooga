@@ -127,7 +127,7 @@ public class EggBehaviour : MonoBehaviour
             Debug.LogWarning("qteCanvasGroup no asignado en EggBehaviour.");
         }
 
-        // Esperamos a que la camara haga 3 zoom in. La lógica de zoom está en CamaraControllerGacha.
+        // Esperamos a que la cámara haga 3 zoom in. La lógica de zoom está en CamaraControllerGacha.
         // Cuando la cámara termine, llamará a AllowQTEStart().
     }
 
@@ -328,16 +328,31 @@ public class EggBehaviour : MonoBehaviour
         obtainedDinoName = GetRandomTribalName();
 
         // Agregamos o actualizamos en el GameManager
-        GameManager.Instance.AddDinosaur(obtainedDinoID, obtainedDinoName, obtainedDinoRarity);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.AddDinosaur(obtainedDinoID, obtainedDinoName, obtainedDinoRarity);
+        }
+        else
+        {
+            Debug.LogError("GameManager.Instance es nulo en HatchEgg.");
+        }
 
         // Si el dino no estaba desbloqueado, lo guardamos en el JSON.
-        if (!SaveManager.Instance.IsDinoUnlocked(obtainedDinoID))
+        if (SaveManager.Instance != null)
         {
-            SaveManager.Instance.UnlockDino(obtainedDinoID);
+            if (!SaveManager.Instance.IsDinoUnlocked(obtainedDinoID))
+            {
+                SaveManager.Instance.UnlockDino(obtainedDinoID);
+            }
+        }
+        else
+        {
+            Debug.LogError("SaveManager.Instance es nulo en HatchEgg.");
         }
 
         LaunchCube();
     }
+
     void GetRandomDino(int eggLevel, out Sprite dinoSprite, out string dinoInfo, out Rarity rarity, out string dinoID)
     {
         dinoSprite = null;

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6987042134202999264}
   - component: {fileID: 2009692559892787362}
   - component: {fileID: 1380491234223639186}
-  - component: {fileID: 3883216683457986832}
+  - component: {fileID: -6042430072891890935}
   m_Layer: 5
   m_Name: QTEIndicatorRight
   m_TagString: Untagged
@@ -76,7 +76,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3883216683457986832
+--- !u!114 &-6042430072891890935
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -85,6 +85,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 3706431039766217878}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c17639badcfb9f44a3b9b0b548f2900, type: 3}
+  m_Script: {fileID: 11500000, guid: 74edb5f15294ceb4087d890b2a4f24c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
