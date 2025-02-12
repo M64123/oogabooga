@@ -174,5 +174,27 @@ public class GameManager : MonoBehaviour
         }
         Debug.LogError($"GameManager: No se encontró DinoData con ID {dinoID} para marcarlo como muerto.");
     }
+    public void ReviveDino(string dinoID)
+    {
+        bool found = false;
+        // Recorremos toda la lista de playerDinoList
+        for (int i = 0; i < playerDinoList.Count; i++)
+        {
+            // Si encontramos un DinoData con ese ID y que está marcado como muerto (isAlive == true)
+            if (playerDinoList[i].dinoID == dinoID && playerDinoList[i].isAlive)
+            {
+                playerDinoList[i].isAlive = false; // Marcarlo como vivo (revivido)
+                UpdateDinoInList(dinoID, playerDinoList[i]); // Actualizar la lista si es necesario
+                Debug.Log($"GameManager: Dino {dinoID} revivido.");
+                found = true;
+                // Si solo se debe revivir la primera coincidencia, se puede salir del ciclo.
+                break;
+            }
+        }
+        if (!found)
+        {
+            Debug.LogError($"GameManager: No se encontró un dino en playerDinoList con ID {dinoID} marcado como muerto para revivir.");
+        }
+    }
 
 }
