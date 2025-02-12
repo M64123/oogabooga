@@ -3,21 +3,26 @@ using UnityEngine.UI;
 
 public class AlbumHUDController : MonoBehaviour
 {
-    // Panel que contiene el álbum; este debe cubrir toda la pantalla
+    [Header("Album Panel Settings")]
+    // Panel que cubre toda la pantalla (se asigna en el Inspector)
     public GameObject albumPanel;
-    // CanvasGroup opcional para gestionar la interactividad (bloquea raycasts)
+    // CanvasGroup opcional para controlar la interactividad y bloquear raycasts
     public CanvasGroup albumCanvasGroup;
 
     void Start()
     {
-        // Inicia oculto
+        // Iniciamos el álbum oculto
         HideAlbum();
     }
 
-    // Muestra el álbum de forma modal
+    // Función pública sin parámetros para mostrar el álbum
     public void ShowAlbum()
     {
-        albumPanel.SetActive(true);
+        Debug.Log("ShowAlbum() called.");
+        if (albumPanel != null)
+        {
+            albumPanel.SetActive(true);
+        }
         if (albumCanvasGroup != null)
         {
             albumCanvasGroup.interactable = true;
@@ -25,10 +30,14 @@ public class AlbumHUDController : MonoBehaviour
         }
     }
 
-    // Oculta el álbum y permite la interacción con el resto de la escena
+    // Función pública sin parámetros para ocultar el álbum
     public void HideAlbum()
     {
-        albumPanel.SetActive(false);
+        Debug.Log("HideAlbum() called.");
+        if (albumPanel != null)
+        {
+            albumPanel.SetActive(false);
+        }
         if (albumCanvasGroup != null)
         {
             albumCanvasGroup.interactable = false;
