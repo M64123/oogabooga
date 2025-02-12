@@ -148,7 +148,7 @@ Transform:
   m_GameObject: {fileID: 2152827}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 20, y: -450, z: 0}
+  m_LocalPosition: {x: 20, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -169,7 +169,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f610d3f12488034f88abf4191bee942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dinoID: 12
+  dinoID: 9
   dinoImage: {fileID: 1406422245}
   dinoNameText: {fileID: 912111791}
 --- !u!1 &4797392
@@ -3121,7 +3121,7 @@ Transform:
   m_GameObject: {fileID: 1078004025}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 20, y: 0, z: 0}
+  m_LocalPosition: {x: 20, y: -450, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3142,7 +3142,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f610d3f12488034f88abf4191bee942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dinoID: 9
+  dinoID: 12
   dinoImage: {fileID: 1584072294}
   dinoNameText: {fileID: 707549558}
 --- !u!1 &1135651557
