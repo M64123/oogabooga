@@ -118,7 +118,7 @@ public class GameManager : MonoBehaviour
                 dinoName = dinoName,
                 rarity = rarity,
                 level = 1,
-                isAlive = true
+                isAlive = false
             };
             playerDinoDictionary.Add(dinoID, dinoData);
             playerDinoList.Add(dinoData);

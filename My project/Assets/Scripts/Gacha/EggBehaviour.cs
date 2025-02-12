@@ -333,7 +333,7 @@ public class EggBehaviour : MonoBehaviour
         // Si el dino no estaba desbloqueado, lo guardamos en el JSON.
         if (!SaveManager.Instance.IsDinoUnlocked(obtainedDinoID))
         {
-            SaveManager.Instance.UnlockDino(obtainedDinoID);
+          SaveManager.Instance.UnlockDino(obtainedDinoID);
         }
 
         LaunchCube();
