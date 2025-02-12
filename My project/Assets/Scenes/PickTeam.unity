@@ -448,6 +448,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1458745442579115369, guid: a65adab1202e5db428b8ab0c43834377, type: 3}
+      propertyPath: playerDinoList.Array.data[1].isAlive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1458745442579115369, guid: a65adab1202e5db428b8ab0c43834377, type: 3}
       propertyPath: playerDinoList.Array.data[0].dinoName
       value: 
       objectReference: {fileID: 0}
@@ -1710,6 +1714,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   teamIDs: []
+  teamDinos: []
   activeDino: {fileID: 0}
   spawnPoint: {fileID: 0}
 --- !u!4 &2031179596
