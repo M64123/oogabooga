@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.AssetImporters;
 using UnityEngine;
@@ -24,3 +25,4 @@ public class MidiScriptedImporter : ScriptedImporter
         ctx.SetMainObject(midiAsset);
     }
 }
+#endif
