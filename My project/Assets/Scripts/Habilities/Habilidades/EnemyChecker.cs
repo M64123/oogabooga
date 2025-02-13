@@ -9,7 +9,7 @@ public class EnemyChecker : MonoBehaviour
     [Tooltip("Intervalo (en segundos) para chequear la existencia de enemigos.")]
     public float checkInterval = 1f;
 
-    private float timer;
+    private float timer = 0f;
 
     void Update()
     {
@@ -21,14 +21,15 @@ public class EnemyChecker : MonoBehaviour
         }
     }
 
-    private void CheckEnemies()
+    void CheckEnemies()
     {
-        // Busca todos los objetos con el tag "Enemigo".
         GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemigo");
         if (enemies.Length == 0)
         {
-            Debug.Log("No quedan enemigos en la escena. Reiniciando la escena del Tablero...");
-            SceneManager.LoadScene(tableroSceneName);
+            Debug.Log("EnemyChecker: No enemies left. Resetting Tablero scene from scratch.");
+            // Reinicia los datos del GameManager antes de reiniciar la escena.
+            GameManager.Instance.ResetGameData();
+            SceneManager.LoadScene(tableroSceneName, LoadSceneMode.Single);
         }
     }
 }

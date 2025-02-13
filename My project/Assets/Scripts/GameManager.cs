@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,8 +19,10 @@ public class GameManager : MonoBehaviour
         public string dinoName;
         public Rarity rarity;
         public int level = 1;
+        // Según tu convención: false = vivo, true = muerto.
         public bool isAlive = false;
         // Puedes agregar otros campos que necesites.
+        public Sprite dinoSprite;
     }
 
     private Dictionary<string, DinoData> playerDinoDictionary = new Dictionary<string, DinoData>();
@@ -118,7 +121,7 @@ public class GameManager : MonoBehaviour
                 dinoName = dinoName,
                 rarity = rarity,
                 level = 1,
-                isAlive = false
+                isAlive = false // Comienza vivo.
             };
             playerDinoDictionary.Add(dinoID, dinoData);
             playerDinoList.Add(dinoData);
@@ -146,8 +149,6 @@ public class GameManager : MonoBehaviour
 
     public GameObject GetDinoPrefabByID(string dID)
     {
-        // Implementación existente para retornar el prefab a partir del ID.
-        // ...
         for (int i = 0; i < dinoIDs.Count; i++)
         {
             if (dinoIDs[i] == dID)
@@ -159,8 +160,7 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
-
-    // Este método se usa para marcar a un dino como muerto y eliminarlo de la lista de vivos.
+    // Marca a un dino como muerto (isAlive = true) en la lista playerDinoList.
     public void MarkDinoAsDead(string dinoID)
     {
         foreach (var dino in playerDinoList)
@@ -174,20 +174,19 @@ public class GameManager : MonoBehaviour
         }
         Debug.LogError($"GameManager: No se encontró DinoData con ID {dinoID} para marcarlo como muerto.");
     }
+
+    // Recorre la lista playerDinoList y si encuentra un dino con ese ID y con isAlive true (muerto), lo revierte a vivo (isAlive = false).
     public void ReviveDino(string dinoID)
     {
         bool found = false;
-        // Recorremos toda la lista de playerDinoList
         for (int i = 0; i < playerDinoList.Count; i++)
         {
-            // Si encontramos un DinoData con ese ID y que está marcado como muerto (isAlive == true)
             if (playerDinoList[i].dinoID == dinoID && playerDinoList[i].isAlive)
             {
-                playerDinoList[i].isAlive = false; // Marcarlo como vivo (revivido)
-                UpdateDinoInList(dinoID, playerDinoList[i]); // Actualizar la lista si es necesario
+                playerDinoList[i].isAlive = false; // Ahora lo marca como vivo.
+                UpdateDinoInList(dinoID, playerDinoList[i]);
                 Debug.Log($"GameManager: Dino {dinoID} revivido.");
                 found = true;
-                // Si solo se debe revivir la primera coincidencia, se puede salir del ciclo.
                 break;
             }
         }
@@ -196,21 +195,15 @@ public class GameManager : MonoBehaviour
             Debug.LogError($"GameManager: No se encontró un dino en playerDinoList con ID {dinoID} marcado como muerto para revivir.");
         }
     }
+
+    // Reinicia los datos del GameManager.
     public void ResetGameData()
     {
-        // Limpia el estado del mapa
         savedMapData.Clear();
         currentPlayerNodeID = "";
-
-        // Limpia la lista de dinos vivos (GameObjects)
         playerDinosaurs.Clear();
-
-        // Limpia la lista de datos de dinosaurios del jugador
         playerDinoList.Clear();
-
-        // Limpia el diccionario de dinosaurios
         playerDinoDictionary.Clear();
-
         Debug.Log("GameManager: Datos reiniciados.");
     }
 }
