@@ -3487,7 +3487,7 @@ MonoBehaviour:
   coinSide: 
   resultText: {fileID: 0}
   caraSceneName: Gacha
-  cruzSceneName: New Scene
+  cruzSceneName: PickTeam
 --- !u!4 &2133938687 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e71c10cce23d0874b8fc621e8a856aec, type: 3}

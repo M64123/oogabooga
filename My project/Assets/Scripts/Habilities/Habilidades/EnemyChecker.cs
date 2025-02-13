@@ -28,8 +28,8 @@ public class EnemyChecker : MonoBehaviour
         {
             Debug.Log("EnemyChecker: No enemies left. Resetting Tablero scene from scratch.");
             // Reinicia los datos del GameManager antes de reiniciar la escena.
-            GameManager.Instance.ResetGameData();
-            SceneManager.LoadScene(tableroSceneName, LoadSceneMode.Single);
+           
+            SceneManager.LoadScene(tableroSceneName);
         }
     }
 }
