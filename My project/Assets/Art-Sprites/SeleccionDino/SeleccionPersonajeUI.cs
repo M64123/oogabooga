@@ -42,7 +42,7 @@ public class CambioSpriteUI : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     {
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            SceneManager.LoadScene("PickTeam");
+            SceneManager.LoadScene("Tablero");
         }
     }
     // Cuando el cursor entra en el área del elemento UI
