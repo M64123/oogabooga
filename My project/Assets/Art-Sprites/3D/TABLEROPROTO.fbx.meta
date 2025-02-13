@@ -1,14 +1,9 @@
 fileFormatVersion: 2
-guid: 6bd06d172d26a804a90e74183ff5b1e0
+guid: 40ed6d16496bf884fa79d55a2331699f
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: textureTABLERO
-    second: {fileID: 2100000, guid: 2205683b310339c4cac756f0a6ff7ae0, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
