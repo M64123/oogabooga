@@ -218,6 +218,14 @@ RectTransform:
   m_Children:
   - {fileID: 480088169}
   - {fileID: 1089814167}
+  - {fileID: 1054590790}
+  - {fileID: 1724352124}
+  - {fileID: 1794605347}
+  - {fileID: 1434070043}
+  - {fileID: 1324697663}
+  - {fileID: 150870609}
+  - {fileID: 1099109763}
+  - {fileID: 104753574}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -258,7 +266,7 @@ Transform:
   - {fileID: 433105498}
   - {fileID: 1733704059}
   - {fileID: 1674799270}
-  m_Father: {fileID: 1089814167}
+  m_Father: {fileID: 12501497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &104753575
 MonoBehaviour:
@@ -442,7 +450,7 @@ Transform:
   - {fileID: 1359493879}
   - {fileID: 1285531667}
   - {fileID: 978630307}
-  m_Father: {fileID: 1089814167}
+  m_Father: {fileID: 12501497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &150870610
 MonoBehaviour:
@@ -2053,14 +2061,14 @@ Transform:
   m_GameObject: {fileID: 1054590789}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 20, y: -450, z: 0}
+  m_LocalPosition: {x: 20, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1881884104}
   - {fileID: 1140112198}
   - {fileID: 2081022117}
-  m_Father: {fileID: 1089814167}
+  m_Father: {fileID: 12501497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1054590791
 MonoBehaviour:
@@ -2074,7 +2082,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f610d3f12488034f88abf4191bee942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dinoID: 12
+  dinoID: 9
   dinoImage: {fileID: 1881884105}
   dinoNameText: {fileID: 2081022118}
 --- !u!1 &1089814166
@@ -2106,15 +2114,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1054590790}
-  - {fileID: 1724352124}
-  - {fileID: 1794605347}
-  - {fileID: 1434070043}
-  - {fileID: 1324697663}
-  - {fileID: 150870609}
-  - {fileID: 1099109763}
-  - {fileID: 104753574}
+  m_Children: []
   m_Father: {fileID: 12501497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2193,7 +2193,7 @@ Transform:
   - {fileID: 881144311}
   - {fileID: 681301215}
   - {fileID: 2119217032}
-  m_Father: {fileID: 1089814167}
+  m_Father: {fileID: 12501497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1099109764
 MonoBehaviour:
@@ -2511,7 +2511,7 @@ Transform:
   - {fileID: 916584481}
   - {fileID: 644786578}
   - {fileID: 394284108}
-  m_Father: {fileID: 1089814167}
+  m_Father: {fileID: 12501497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1324697664
 MonoBehaviour:
@@ -2629,14 +2629,14 @@ Transform:
   m_GameObject: {fileID: 1434070042}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 20, y: 0, z: 0}
+  m_LocalPosition: {x: 20, y: -450, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 824846010}
   - {fileID: 141803376}
   - {fileID: 1526904768}
-  m_Father: {fileID: 1089814167}
+  m_Father: {fileID: 12501497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1434070044
 MonoBehaviour:
@@ -2650,7 +2650,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f610d3f12488034f88abf4191bee942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dinoID: 9
+  dinoID: 12
   dinoImage: {fileID: 824846011}
   dinoNameText: {fileID: 1526904769}
 --- !u!1 &1526904767
@@ -3046,7 +3046,7 @@ Transform:
   - {fileID: 821030870}
   - {fileID: 359921345}
   - {fileID: 797694936}
-  m_Father: {fileID: 1089814167}
+  m_Father: {fileID: 12501497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1724352125
 MonoBehaviour:
@@ -3230,7 +3230,7 @@ Transform:
   - {fileID: 1860790810}
   - {fileID: 244751005}
   - {fileID: 462145094}
-  m_Father: {fileID: 1089814167}
+  m_Father: {fileID: 12501497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1794605348
 MonoBehaviour:
