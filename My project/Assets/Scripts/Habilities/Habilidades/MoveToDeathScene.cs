@@ -24,4 +24,8 @@ public class MoveToDeathScene : MonoBehaviour
     {
         SceneManager.LoadScene("PickTeam");
     }
+    public void movetotablero()
+    {
+        SceneManager.LoadScene("Tablero");
+    }
 }

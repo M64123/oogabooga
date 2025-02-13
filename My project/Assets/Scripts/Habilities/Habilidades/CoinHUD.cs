@@ -24,7 +24,7 @@ public class CoinHUD : MonoBehaviour
     {
         if (coinText != null && CoinManager.Instance != null)
         {
-            coinText.text = "Monedas: " + CoinManager.Instance.coinCount.ToString();
+            coinText.text =  CoinManager.Instance.coinCount.ToString();
         }
     }
 }
