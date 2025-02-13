@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 37460506914700660}
   - component: {fileID: 2322494966550271298}
-  - component: {fileID: -2565596169549868275}
   - component: {fileID: -4235877554037648575}
   - component: {fileID: 610449561592764294}
   - component: {fileID: 3417801327668947385}
@@ -90,22 +89,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &-2565596169549868275
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4422074602571310983}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f88e6bdea775f648bc26479bf97e9f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  snapThreshold: 2
-  combatGrid: {fileID: 0}
-  returnSpeed: 5
-  maxParabolaHeight: 2
 --- !u!54 &-4235877554037648575
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -197,6 +180,7 @@ MonoBehaviour:
   habilities:
   - {fileID: 11400000, guid: 818752f6c20c2d24a93dcbf0d2eeb374, type: 2}
   idUnico: 
+  playerDinoID: 
 --- !u!114 &-1225754260126981455
 MonoBehaviour:
   m_ObjectHideFlags: 0

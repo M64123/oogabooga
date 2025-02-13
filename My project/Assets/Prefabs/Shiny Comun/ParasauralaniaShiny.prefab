@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3867432495402402232}
   - component: {fileID: -4167717761886985730}
   - component: {fileID: 5637995563342940349}
-  - component: {fileID: 253357306410189436}
   - component: {fileID: 6894226324336855570}
   - component: {fileID: 3765183899028483480}
   - component: {fileID: -3449992127325382970}
@@ -134,22 +133,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &253357306410189436
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1806238593215662730}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f88e6bdea775f648bc26479bf97e9f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  snapThreshold: 2
-  combatGrid: {fileID: 0}
-  returnSpeed: 5
-  maxParabolaHeight: 2
 --- !u!65 &6894226324336855570
 BoxCollider:
   m_ObjectHideFlags: 0

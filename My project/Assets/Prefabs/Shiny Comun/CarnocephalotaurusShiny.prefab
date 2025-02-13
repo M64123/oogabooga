@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6542293464000593315}
   - component: {fileID: 2524011584007015627}
   - component: {fileID: 260436686899546465}
-  - component: {fileID: 5081963000241175690}
   - component: {fileID: 3960684610897691029}
   - component: {fileID: 3678594434847997217}
   - component: {fileID: -315407231095382619}
@@ -134,22 +133,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 818752f6c20c2d24a93dcbf0d2eeb374, type: 2}
   idUnico: 
   playerDinoID: 
---- !u!114 &5081963000241175690
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8775538485749382264}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2f88e6bdea775f648bc26479bf97e9f7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  snapThreshold: 2
-  combatGrid: {fileID: 0}
-  returnSpeed: 5
-  maxParabolaHeight: 2
 --- !u!65 &3960684610897691029
 BoxCollider:
   m_ObjectHideFlags: 0
